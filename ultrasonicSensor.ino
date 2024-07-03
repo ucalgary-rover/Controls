@@ -61,5 +61,6 @@ void loop() {
         Serial.println(" cm");
       }
     } 
-  } 
+  } else {
+    Serial.print("ERR: No Serial Data able to be read") 
 }
