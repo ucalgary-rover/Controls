@@ -1,4 +1,5 @@
-#Code by Sajan Manivannan
+//Coded by Sajan Manivannan
+
 #include <SoftwareSerial.h>
 // note that the 4664 ultrasonic sensor datasheet has TX and RX holes mixed up
 int RX = 10;
@@ -61,7 +62,9 @@ void loop() {
         distCheck(objDist/100); // calls the function that checks which safety response should be carried out. should be in meters so divde by 100
       }
     } 
-  } 
+  } else {
+    Serial.print("ERR: No Serial Data able to be read")
+  }
 }
 
 void distCheck(float senseDistance){
