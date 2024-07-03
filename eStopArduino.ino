@@ -73,7 +73,8 @@ void loop() {
         distCheck(objDist/100); // calls the function that checks which safety response should be carried out. should be in meters so divde by 100
       }
     } 
-  } 
+  } else {
+    Serial.print("ERR: No Serial Data able to be read") 
 }
 
 float safeDistCalc(float currentVelocity){
