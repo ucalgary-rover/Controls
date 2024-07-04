@@ -107,7 +107,18 @@ except PhidgetException as ex:
 	print(f"ROVER: Successfully quit program.\n\nGoodbye!\n")
 
 async def receive_commands(websocket, path):
+	#idk why it wants me to redefine ts again
+	smoothing = 0.005
+
+	i = 0
+	index=0
+	jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'drive']
+	jointLenght = len(jointMovement)
+	pos = 0.35
+	neg = -0.35
+	
 	async for message in websocket:
+		#gets kinda annoying so comment out when code is finalized
 		print("ROVER: Received:", message)
 		parts = message.split(":")
 		command = parts[0]
