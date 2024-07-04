@@ -3,7 +3,7 @@ import websockets
 import pygame
 
 # WebSocket server address
-uri = "ws://192.168.1.22:12345" ###############################################
+uri = "ws://192.168.1.22:12345" ############################################### ws://roverNUC_ip:some random port
 
 # Initialize Pygame and joystick
 pygame.init()
@@ -12,12 +12,12 @@ pygame.joystick.init()
 joystick_count = pygame.joystick.get_count()
 print("Number of joysticks: ", joystick_count)
 joystick0 = pygame.joystick.Joystick(0)
-joystick1 = pygame.joystick.Joystick(1)
+#joystick1 = pygame.joystick.Joystick(1)
 joystick0.init()
-joystick1.init()
+#joystick1.init()
 
 print("BASE: Initialized joystick ", joystick0.get_name())
-print("BASE: Initialized joystick ", joystick1.get_name())
+#print("BASE: Initialized joystick ", joystick1.get_name())
 
 async def send_commands():
     async with websockets.connect(uri) as websocket:
