@@ -274,6 +274,14 @@ async def receive_commands(websocket, path):
 
 print("ROVER: I'm done")
 
+async def main():
+	server = await websockets.serve(receive_commands, "0.0.0.0", 12345, ping_interval=None, ping_timeout=None)
+	print("ROVER: WebSocket server started")
+	await server.wait_closed()
+
+asyncio.get_event_loop().run_until_complete(main())
+'''
 start_server = websockets.serve(receive_commands, "0.0.0.0", 12345)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
+'''
