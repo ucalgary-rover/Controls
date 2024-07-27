@@ -117,7 +117,7 @@ async def receive_commands(websocket, path):
 		print("ROVER: Received:", message)
 		parts = message.split(":")
 		command = parts[0]
-		movingJoint = parts[-1]
+		movingJoint = int(parts[-1])
 		
 		if command == "button_down":
 			button = int(parts[1])
