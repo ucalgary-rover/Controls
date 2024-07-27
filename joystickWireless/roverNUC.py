@@ -27,10 +27,7 @@ bristleMotor =  DCMotor()
 
 smoothing = 0.005
 
-i = 0
-index=0
 jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'drive']
-jointLenght = len(jointMovement)
 pos = 0.35
 neg = -0.35
 
@@ -107,13 +104,11 @@ except PhidgetException as ex:
 	print(f"ROVER: Successfully quit program.\n\nGoodbye!\n")
 
 async def receive_commands(websocket, path):
-	#idk why it wants me to redefine ts again
+	#idk why it wants me to re-define ts again
 	smoothing = 0.005
 
-	i = 0
-	index=0
+	# Keep Drive as last value in list
 	jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'drive']
-	jointLenght = len(jointMovement)
 	pos = 0.35
 	neg = -0.35
 	
@@ -122,6 +117,7 @@ async def receive_commands(websocket, path):
 		print("ROVER: Received:", message)
 		parts = message.split(":")
 		command = parts[0]
+		movingJoint = parts[-1]
 		
 		if command == "button_down":
 			button = int(parts[1])
@@ -144,25 +140,6 @@ async def receive_commands(websocket, path):
 					print("ROVER: speed is less than 20% Duty Cycle, speed up!")
 					pos = 0.2
 					neg = -0.2
-                
-			elif button == 6:
-				# Select drive mode
-				i = 6
-				print(jointMovement[i])
-
-			elif button == 8:
-				# Previous mode
-				if i == 0:
-					i = jointLenght - 1
-					jointMovement[jointLenght-1]
-				else:
-					i-=1
-					print(jointMovement[i])
-
-			elif button == 9:
-				# Next mode
-				i = (i + 1)%jointLenght
-				print(jointMovement[i])
 
 		elif command == "button_up":
 			button = int(parts[1])
@@ -174,7 +151,7 @@ async def receive_commands(websocket, path):
 			axis = int(parts[1])
 			value = float(parts[2])
 			print("ROVER: Axis Motion:", axis, value)
-			if jointMovement[i] == 'shoulder':
+			if jointMovement[movingJoint] == 'shoulder':
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Shoulder goes up")
@@ -186,7 +163,7 @@ async def receive_commands(websocket, path):
 						print("ROVER: Shoulder stays in motion")
 						shoulder_off()
 
-			elif jointMovement[i] == 'elbow':
+			elif jointMovement[movingJoint] == 'elbow':
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Elbow goes up")
@@ -198,7 +175,7 @@ async def receive_commands(websocket, path):
 						print("ROVER: Elbow stays in motion")
 						elbow_off() 
 
-			elif jointMovement[i] == 'base':
+			elif jointMovement[movingJoint] == 'base':
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Base goes up")
@@ -210,7 +187,7 @@ async def receive_commands(websocket, path):
 						print("ROVER: Base stays in motion")
 						base_off() 
 
-			elif jointMovement[i] == 'wrist main':
+			elif jointMovement[movingJoint] == 'wrist main':
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Wrist goes up")
@@ -222,7 +199,7 @@ async def receive_commands(websocket, path):
 						print("ROVER: Wrist stays in motion")
 						wrist_off() 
 
-			elif jointMovement[i] == 'wrist12':
+			elif jointMovement[movingJoint] == 'wrist12':
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Wrist 1 and 2 goes up")
@@ -233,7 +210,7 @@ async def receive_commands(websocket, path):
 					else:
 						print("ROVER: Wrist 1 and 2 stays in motion")
 						wrist12_off() 
-			elif jointMovement[i] == 'claw':
+			elif jointMovement[movingJoint] == 'claw':
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: claw opens")
@@ -245,7 +222,7 @@ async def receive_commands(websocket, path):
 						print("ROVER: claw stays in motion")
 						claw_off()
 			
-			elif jointMovement[i] == 'drive':
+			elif jointMovement[movingJoint] == 'drive':
 				if axis == 0:  # X-axis (left-right)
 					if value < -0.3:
 						print("ROVER: Drive left")
