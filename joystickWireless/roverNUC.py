@@ -115,7 +115,7 @@ async def receive_commands(websocket, path):
 	async for message in websocket:
 		#gets kinda annoying so comment out when code is finalized
 		print("ROVER: Received:", message)
-		parts = message.split(":")
+		parts = message.split("::")
 		command = parts[0]
 		movingJoint = int(parts[-1])
 		
@@ -140,6 +140,8 @@ async def receive_commands(websocket, path):
 					print("ROVER: speed is less than 20% Duty Cycle, speed up!")
 					pos = 0.2
 					neg = -0.2
+			else:
+				print("button not used")
 
 		elif command == "button_up":
 			button = int(parts[1])
