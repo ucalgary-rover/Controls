@@ -43,11 +43,6 @@ async def send_commands():
 
 		            #button on the joystick is pressed down
 					if event.type == pygame.JOYBUTTONDOWN:
-						#what gets sent to the rover nuc
-						command = f"button_down:{event.button}"
-						await websocket.send(command)
-						print("BASE: Button Pressed:", event.button)
-
 						if event.button == 2:
 							print("BASE: off")
 
@@ -69,6 +64,12 @@ async def send_commands():
 							# Next mode
 							i = (i + 1)%jointLength
 							print(jointMovement[i])
+						
+						#what gets sent to the rover nuc
+						command = f"button_down:{event.button}::{movingJoint}"
+						await websocket.send(command)
+						print("BASE: Button Pressed:", event.button, movingJoint)
+							
 					print(event.__dict__)
 					# check if its the drive controler or the arm contoler
 					if event.__dict__.get("instance_id") != None:
@@ -92,10 +93,10 @@ async def send_commands():
 							await websocket.send(command)
 							if event.button == 2:
 								print("BASE: off")
-								exit()
+								#exit()
 
-						if event.type == pygame.JOYAXISMOTION:
-							command = f"axis_motion:{event.axis}:{event.value}:{movingJoint}"
+						if event.type == pygame.JOYAXISMOTION and event.axis != None and event.value != None:
+							command = f"axis_motion:{event.axis}:{event.value}::{movingJoint}"
 							await websocket.send(command)
 							print("BASE: Axis Motion:", event.axis, event.value, movingJoint)
 
