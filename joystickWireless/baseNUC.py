@@ -11,7 +11,7 @@ i = 0
 jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'drive']
 # the -1 makes it so that the shuffle excludes the drive mode, which will be 
 # explicitly set when the input comes from controler 0
-jointLenght = len(jointMovement) - 1
+jointLength = len(jointMovement) - 1
 
 # Initialize Pygame and joystick
 pygame.init()
@@ -58,19 +58,19 @@ async def send_commands():
 						elif event.button == 8 and event.instance_id == 1:
 							print("BASE: Previous Joint Movement mode")
 							# Next mode
-							i = (i - 1)%jointLenght
+							i = (i - 1)%jointLength
 							print(jointMovement[i])
 
 						elif event.button == 9 and event.instance_id == 1:
 							print("BASE: Next Joint Movement mode")
 							# Next mode
-							i = (i + 1)%jointLenght
+							i = (i + 1)%jointLength
 							print(jointMovement[i])
 					
 					# check if its the drive controler or the arm contoler
 					if event.instance_id == 0:
 						# drive controler:
-						movingJoint = jointLenght
+						movingJoint = jointLength
 						  
 					elif event.instance_id == 1: 
 						# arm controler
