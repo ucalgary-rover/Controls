@@ -140,6 +140,10 @@ async def receive_commands(websocket, path):
 					print("ROVER: speed is less than 20% Duty Cycle, speed up!")
 					pos = 0.2
 					neg = -0.2
+			
+			#run science tool bristles commented for now until ready to test
+			#elif button == 0:
+			#	run_science_tools()
 			else:
 				print("button not used")
 
