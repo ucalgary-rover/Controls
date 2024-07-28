@@ -9,6 +9,8 @@ uri = "ws://192.168.1.22:12345" ############################################### 
 i = 0
 # Keep Drive as last value in list
 jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'drive']
+#commented for science tool, add back when ready
+#jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'sciright', 'scimid', 'scileft', 'drive']
 # the -1 makes it so that the shuffle excludes the drive mode, which will be 
 # explicitly set when the input comes from controler 0
 jointLength = len(jointMovement) - 1
