@@ -28,6 +28,8 @@ bristleMotor =  DCMotor()
 smoothing = 0.005
 
 jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'drive']
+#commented to test science tool once ready for testing
+#jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'sciright', 'scimid', 'scileft', 'drive']
 pos = 0.35
 neg = -0.35
 
