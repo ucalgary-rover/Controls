@@ -27,9 +27,7 @@ bristleMotor =  DCMotor()
 
 smoothing = 0.005
 
-jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'drive']
-#commented to test science tool once ready for testing
-#jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'sciright', 'scimid', 'scileft', 'drive']
+jointMovement = ['base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
 pos = 0.35
 neg = -0.35
 
@@ -90,13 +88,13 @@ try:
 	#init_motor(bristleMotor, 10)
 	
 	print("ROVER: calling all library")
-	#shoulder_init()
-	#elbow_init()
-	#base_init()
-	#wrist_init() 
-	#initialize_motors()
-	#wrist1_init()
-	#wrist2_init()
+	shoulder_init()
+	elbow_init()
+	base_init()
+	wrist_init() 
+	# initialize_motors()
+	wrist1_init()
+	wrist2_init()
 	driver_init()
 
 except PhidgetException as ex:
@@ -110,20 +108,20 @@ async def receive_commands(websocket, path):
 	smoothing = 0.005
 
 	# Keep Drive as last value in list
-	jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'drive']
+	jointMovement = [ 'base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
 	pos = 0.35
 	neg = -0.35
 	
 	async for message in websocket:
 		#gets kinda annoying so comment out when code is finalized
 		print("ROVER: Received:", message)
-		parts = message.split("::")
+		parts = message.split(":")
 		command = parts[0]
 		movingJoint = int(parts[-1])
 		
 		if command == "button_down":
 			button = int(parts[1])
-			if button == 3:
+			if button == 5:
 				# Increase driver speed
 				print("ROVER: Increasing speed")
 				pos = pos + 0.1
@@ -132,6 +130,7 @@ async def receive_commands(websocket, path):
 					print("ROVER: Speed is more than 100% duty cycle, slow down!")
 					pos = 1
 					neg = -1
+				print(f"pos : {pos}\nneg : {neg}")
 
 			elif button == 4:
 				# Decrease driver speed
@@ -142,10 +141,7 @@ async def receive_commands(websocket, path):
 					print("ROVER: speed is less than 20% Duty Cycle, speed up!")
 					pos = 0.2
 					neg = -0.2
-			
-			#run science tool bristles commented for now until ready to test
-			#elif button == 0:
-			#	run_science_tools()
+				print(f"pos : {pos}\nneg : {neg}")
 			else:
 				print("button not used")
 
@@ -161,10 +157,10 @@ async def receive_commands(websocket, path):
 			print("ROVER: Axis Motion:", axis, value)
 			if jointMovement[movingJoint] == 'shoulder':
 				if axis == 3: # Y-axis
-					if value < -0.3:
+					if value > 0.3:
 						print("ROVER: Shoulder goes up")
 						shoulder_up()	
-					elif value > 0.3:
+					elif value < -0.3:
 						print("ROVER: Shoulder goes down")
 						shoulder_down()
 					else:
@@ -218,6 +214,16 @@ async def receive_commands(websocket, path):
 					else:
 						print("ROVER: Wrist 1 and 2 stays in motion")
 						wrist12_off() 
+				if axis == 2: # Y-axis
+					if value < -0.3:
+						print("ROVER: Wrist 1 and 2 goes left")
+						wrist12_left() 	
+					elif value > 0.3:
+						print("ROVER: Wrist 1 and 2 goes right")
+						wrist12_right() 
+					else:
+						print("ROVER: Wrist 1 and 2 stays in motion")
+						wrist12_off()
 			elif jointMovement[movingJoint] == 'claw':
 				if axis == 3: # Y-axis
 					if value < -0.3:
@@ -270,3 +276,4 @@ start_server = websockets.serve(receive_commands, "0.0.0.0", 12345)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
 '''
+
