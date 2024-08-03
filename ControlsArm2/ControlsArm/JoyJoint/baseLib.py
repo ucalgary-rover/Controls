@@ -12,7 +12,6 @@ base_init - initalizes base
 base_open - opens base
 base_close - closes base
 base_off - base stays in motion 
-
 '''
 
 VHubSerial_motors = 697103
