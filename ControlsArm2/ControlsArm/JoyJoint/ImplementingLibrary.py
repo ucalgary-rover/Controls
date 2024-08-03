@@ -113,6 +113,47 @@ while True:
 				
 			elif event.button == 2:
 				print("off")
+			
+			elif event.button == 3:
+				if i == 0:
+					print("Increase speed for shoulders")
+					shoulderInfo[5] +=1
+				elif i == 1:
+					print("Increase speed for elbow")
+					elbowInfo[5] +=1
+				elif i == 2:
+					print("Increase speed for base")
+					baseInfo[5] +=1
+				elif i == 3:
+					print("Increase speed for wrist")
+					wristInfo[5] +=1
+				elif i == 4:
+					print("Increase speed for wrist 1 and 2")
+					wristInfo1[5] +=1
+					wristInfo2[5] +=1
+				#elif i == 5:
+					#print("Increase speed for claw")
+					#clawInfo[5] +=1
+			elif event.button == 4:
+				if i == 0:
+					print("Decrease speed for shoulders")
+					shoulderInfo[5] -=1
+				elif i == 1:
+					print("Decrease speed for elbow")
+					elbowInfo[5] -=1
+				elif i == 2:
+					print("Decrease speed for base")
+					baseInfo[5] -=1
+				elif i == 3:
+					print("Decrease speed for wrist")
+					wristInfo[5] -=1
+				elif i == 4:
+					print("Decrease speed for wrist 1 and 2")
+					wristInfo1[5] -=1
+					wristInfo2[5] -=1
+				#elif i == 5:
+					#print("Decrease speed for claw")
+					#clawInfo[5] -=1
 				#exit()
 			#elif event.button == 5:
 				#claw_open()
