@@ -8,9 +8,7 @@ uri = "ws://192.168.1.22:12345" ############################################### 
 # init variables
 i = 0
 # Keep Drive as last value in list
-jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'drive']
-#commented for science tool, add back when ready
-#jointMovement = ['shoulder', 'elbow', 'base', 'wrist main', 'wrist12', 'claw', 'sciright', 'scimid', 'scileft', 'drive']
+jointMovement = ['base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
 # the -1 makes it so that the shuffle excludes the drive mode, which will be 
 # explicitly set when the input comes from controler 0
 jointLength = len(jointMovement) - 1
@@ -25,6 +23,7 @@ joystick0 = pygame.joystick.Joystick(0)
 joystick1 = pygame.joystick.Joystick(1)
 joystick0.init()
 joystick1.init()
+movingJoint = 0
 
 
 
@@ -36,6 +35,7 @@ async def send_commands():
 		try:
 			while True:
 				global i
+				global movingJoint
 				#event processing step.
 				for event in pygame.event.get():
 		            #to exit
@@ -48,7 +48,7 @@ async def send_commands():
 						if event.button == 2:
 							print("BASE: off")
 
-						elif event.button == 3:
+						elif event.button == 5:
 							print("BASE: Increase driver speed")
 
 						elif event.button == 4:
@@ -76,13 +76,11 @@ async def send_commands():
 					# check if its the drive controler or the arm contoler
 					if event.__dict__.get("instance_id") != None:
 						if event.__dict__["instance_id"] == 0:
-							print("after if 0")
 							# drive co.ntroler:
 							movingJoint = jointLength
 						  
 						elif event.__dict__["instance_id"]  == 1: 
 							# arm controler
-							print("after if 1")
 							movingJoint = i
 						
 						else:
@@ -93,22 +91,28 @@ async def send_commands():
 						if event.type == pygame.JOYBUTTONUP:
 							command = f"button_up:{event.button}::{movingJoint}"
 							await websocket.send(command)
-							if event.button == 2:
-								print("BASE: off")
+							#if event.button == 2:
+								#print("BASE: off")
 								#exit()
 
 						if event.type == pygame.JOYAXISMOTION and event.axis != None and event.value != None:
-							command = f"axis_motion:{event.axis}:{event.value}::{movingJoint}"
+							command = f"axis_motion:{event.axis}:{event.value}:{movingJoint}"
 							await websocket.send(command)
 							print("BASE: Axis Motion:", event.axis, event.value, movingJoint)
 
-						if event.type == pygame.JOYHATMOTION:
-							command = f"hat_motion:{event.hat}:{event.value}:{movingJoint}"
-							await websocket.send(command)
-							print("BASE: Hat Motion:", event.hat, event.value, movingJoint)
+						#if event.type == pygame.JOYHATMOTION:
+						#	command = f"hat_motion:{event.hat}:{event.value}:{movingJoint}"
+						#	await websocket.send(command)
+						#	print("BASE: Hat Motion:", event.hat, event.value, movingJoint)
 		                
-		except (websockets.ConnectionClosedError, websockets.InvalidURI, websockets.InvalidHandshake) as e:
-			print(f"exception error: {e}")
+		except ( websockets.InvalidHandshake) as e:
+			print(f"InvalidHandshake exception error: {e}")
+			await asyncio.sleep(5)
+		except (websockets.InvalidURI) as e:
+			print(f"InvalidURI exception error: {e}")
+			await asyncio.sleep(5)
+		except (websockets.ConnectionClosedError) as e:
+			print(f"ConnectionClosedError exception error: {e}")
 			await asyncio.sleep(5)
 		except Exception as e:
 			print(f"unexpected error: {e}")
