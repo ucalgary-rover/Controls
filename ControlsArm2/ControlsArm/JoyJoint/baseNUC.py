@@ -1,6 +1,7 @@
 import asyncio
 import websockets
 import pygame
+import json
 
 # WebSocket server address
 uri = "ws://192.168.1.22:12345" ############################################### ws://roverNUC_ip:some random port
@@ -78,8 +79,9 @@ async def send_commands():
 							print(jointMovement[i])
 						
 						#what gets sent to the rover nuc
-						command = f"button_down:{event.button}::{movingJoint}"
-						await websocket.send(command)
+						# command[0] = 0 is for button down
+						command = [0,event.button,movingJoint]
+						await websocket.send(json.dumps(command))
 						print("BASE: Button Pressed:", event.button, movingJoint)
 							
 					print(event.__dict__)
@@ -99,8 +101,9 @@ async def send_commands():
 						print(jointMovement[movingJoint])
 						# button on the joystick is pressed up
 						if event.type == pygame.JOYBUTTONUP:
-							command = f"button_up:{event.button}::{movingJoint}"
-							await websocket.send(command)
+							# command[0] = 1 is for button up
+							command = [1,event.button,0,movingJoint]
+							await websocket.send(json.dumps(command))
 							#if event.button == 2:
 								#print("BASE: off")
 								#exit()
@@ -109,8 +112,10 @@ async def send_commands():
 							if (movingJoint == lastMovingJoint) and (event.axis == lastAxis) and ((event.value > 0.3 and lastValue > 0.3) or (event.value < -0.3 and lastValue < -0.3) or ((0.3 > event.value > -0.3) and (0.3 > lastValue > -0.3))):
 								continue
 							else:
-								command = f"axis_motion:{event.axis}:{event.value}:{movingJoint}"
-								await websocket.send(command)
+								# command[0] = 2 is for axis_motion
+								command = [2,event.axis,event.value,movingJoint]
+
+								await websocket.send(json.dumps(command))
 								print("BASE: Axis Motion:", event.axis, event.value, movingJoint)
 								lastMovingJoint = movingJoint
 								lastValue = event.value
