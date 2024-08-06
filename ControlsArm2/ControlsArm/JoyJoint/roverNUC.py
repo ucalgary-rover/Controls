@@ -7,7 +7,7 @@ from Phidget22.Devices.RCServo import *
 from Phidget22.Devices.DCMotor import * 
 import traceback
 import time
-import json
+import msgpack
 
 from shoulderLib import *
 from elbowLib import *
@@ -121,7 +121,7 @@ async def receive_commands(websocket, path):
 	async for message in websocket:
 		#gets kinda annoying so comment out when code is finalized
 		print("ROVER: Received:", message)
-		parts = json.loads(message)
+		parts = msgpack.unpackb(message, raw=False)
 		command = parts[0]
 		
 		if command == 0: # 0 is for button down
