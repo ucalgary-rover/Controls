@@ -118,25 +118,25 @@ def wrist2_init():
 
 
 
-def wrist12_up():
+def wrist12_up(speed):
 	if not wristMotor1.getIsMoving() and not wristMotor2.getIsMoving(): 
-		wristMotor1.setVelocityLimit(wristInfo1[5]) 
-		wristMotor2.setVelocityLimit(wristInfo2[5]) 
+		wristMotor1.setVelocityLimit(speed) 
+		wristMotor2.setVelocityLimit(speed) 
 
-def wrist12_down():
+def wrist12_down(speed):
 	if not wristMotor1.getIsMoving() and not wristMotor2.getIsMoving(): 
-		wristMotor1.setVelocityLimit(-wristInfo1[5]) 
-		wristMotor2.setVelocityLimit(-wristInfo2[5]) 
+		wristMotor1.setVelocityLimit(-speed) 
+		wristMotor2.setVelocityLimit(-speed) 
 
-def wrist12_left():
+def wrist12_left(speed):
 	if not wristMotor1.getIsMoving() and not wristMotor2.getIsMoving(): 
-		wristMotor1.setVelocityLimit(-wristInfo1[5]) 
-		wristMotor2.setVelocityLimit(wristInfo2[5]) 
+		wristMotor1.setVelocityLimit(-speed) 
+		wristMotor2.setVelocityLimit(speed) 
 
-def wrist12_right():
+def wrist12_right(speed):
 	if not wristMotor1.getIsMoving() and not wristMotor2.getIsMoving(): 
-		wristMotor1.setVelocityLimit(wristInfo1[5]) 
-		wristMotor2.setVelocityLimit(-wristInfo2[5]) 
+		wristMotor1.setVelocityLimit(speed) 
+		wristMotor2.setVelocityLimit(-speed) 
 	
 def wrist12_off():
 	lim = wristMotor1.getVelocityLimit() 

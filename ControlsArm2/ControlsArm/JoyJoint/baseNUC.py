@@ -13,6 +13,11 @@ jointMovement = ['base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', '
 # explicitly set when the input comes from controler 0
 jointLength = len(jointMovement) - 1
 
+# set the last moving joint to be an invalide one, so all three of the data will be re written right away
+lastMovingJoint = -1
+lastAxis = 0
+lastValue = 0
+
 # Initialize Pygame and joystick
 pygame.init()
 pygame.joystick.init()
@@ -36,6 +41,11 @@ async def send_commands():
 			while True:
 				global i
 				global movingJoint
+
+				global lastMovingJoint
+				global lastAxis
+				global lastValue
+
 				#event processing step.
 				for event in pygame.event.get():
 		            #to exit
@@ -96,9 +106,15 @@ async def send_commands():
 								#exit()
 
 						if event.type == pygame.JOYAXISMOTION and event.axis != None and event.value != None:
-							command = f"axis_motion:{event.axis}:{event.value}:{movingJoint}"
-							await websocket.send(command)
-							print("BASE: Axis Motion:", event.axis, event.value, movingJoint)
+							if (movingJoint == lastMovingJoint) and (event.axis == lastAxis) and ((event.value > 0.3 and lastValue > 0.3) or (event.value < -0.3 and lastValue < -0.3) or ((0.3 > event.value > -0.3) and (0.3 > lastValue > -0.3))):
+								continue
+							else:
+								command = f"axis_motion:{event.axis}:{event.value}:{movingJoint}"
+								await websocket.send(command)
+								print("BASE: Axis Motion:", event.axis, event.value, movingJoint)
+								lastMovingJoint = movingJoint
+								lastValue = event.value
+								lastAxis = event.axis
 
 						#if event.type == pygame.JOYHATMOTION:
 						#	command = f"hat_motion:{event.hat}:{event.value}:{movingJoint}"

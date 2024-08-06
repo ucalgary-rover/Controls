@@ -64,13 +64,13 @@ def elbow_init():
         elbowMotor.setEngaged(True)
         elbowMotor.setDataInterval(elbowMotor.getMinDataInterval())
 
-def elbow_up():
+def elbow_up(speed):
     if not elbowMotor.getIsMoving(): 
-        elbowMotor.setVelocityLimit(elbowInfo[5])
+        elbowMotor.setVelocityLimit(speed)
         
-def elbow_down():
+def elbow_down(speed):
     if not elbowMotor.getIsMoving(): 
-        elbowMotor.setVelocityLimit(-elbowInfo[5])
+        elbowMotor.setVelocityLimit(-speed)
     
 def elbow_off():
     lim = elbowMotor.getVelocityLimit()

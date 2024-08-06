@@ -67,13 +67,13 @@ def wrist_init():
 		wristMotor.setDataInterval(wristMotor.getMinDataInterval())
 
 
-def wrist_up():
+def wrist_up(speed):
     if not wristMotor.getIsMoving():
-        wristMotor.setVelocityLimit(wristInfo[5])
+        wristMotor.setVelocityLimit(speed)
 
-def wrist_down():
+def wrist_down(speed):
     if not wristMotor.getIsMoving():
-        wristMotor.setVelocityLimit(-wristInfo[5])
+        wristMotor.setVelocityLimit(-speed)
 
 def wrist_off():
     lim = wristMotor.getVelocityLimit()

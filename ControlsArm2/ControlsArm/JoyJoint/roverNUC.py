@@ -28,8 +28,10 @@ bristleMotor =  DCMotor()
 smoothing = 0.005
 
 jointMovement = ['base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
-pos = 0.35
-neg = -0.35
+speed = 0.6
+
+# keep last state to not add too many events to queue
+lastMovingJoint = 0
 
 '''# Motor and Servo initialization
 leftSideDriveMotors = DCMotor()
@@ -109,39 +111,36 @@ async def receive_commands(websocket, path):
 
 	# Keep Drive as last value in list
 	jointMovement = [ 'base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
-	pos = 0.35
-	neg = -0.35
+	global speed
+
+	global lastMovingJoint
 	
 	async for message in websocket:
 		#gets kinda annoying so comment out when code is finalized
 		print("ROVER: Received:", message)
 		parts = message.split(":")
 		command = parts[0]
-		movingJoint = int(parts[-1])
 		
 		if command == "button_down":
 			button = int(parts[1])
 			if button == 5:
 				# Increase driver speed
 				print("ROVER: Increasing speed")
-				pos = pos + 0.1
-				neg = neg - 0.1
-				if pos > 1 or neg < -1:
+				speed = speed + 0.1
+				if speed > 1:
 					print("ROVER: Speed is more than 100% duty cycle, slow down!")
-					pos = 1
-					neg = -1
-				print(f"pos : {pos}\nneg : {neg}")
+					speed = 1
+				print(f"speed : {speed * 100}%\n")
 
 			elif button == 4:
 				# Decrease driver speed
 				print("ROVER: Decreasing speed")
-				pos = pos - 0.1
-				neg = neg + 0.1
-				if pos < 0.2 or neg > 0.2:
+				speed = speed - 0.1
+				if speed < 0.2:
 					print("ROVER: speed is less than 20% Duty Cycle, speed up!")
-					pos = 0.2
-					neg = -0.2
-				print(f"pos : {pos}\nneg : {neg}")
+					speed = 0.2
+				print(f"speed : {speed * 100}%\n")
+
 			else:
 				print("button not used")
 
@@ -152,6 +151,7 @@ async def receive_commands(websocket, path):
 				exit()
 
 		elif command == "axis_motion":
+			movingJoint = int(parts[-1])
 			axis = int(parts[1])
 			value = float(parts[2])
 			print("ROVER: Axis Motion:", axis, value)
@@ -159,105 +159,123 @@ async def receive_commands(websocket, path):
 				if axis == 3: # Y-axis
 					if value > 0.3:
 						print("ROVER: Shoulder goes up")
-						shoulder_up()	
+						shoulder_up(speed)	
 					elif value < -0.3:
 						print("ROVER: Shoulder goes down")
-						shoulder_down()
+						shoulder_down(speed)
 					else:
 						print("ROVER: Shoulder stays in motion")
 						shoulder_off()
+					lastMovingJoint = movingJoint
+					continue
 
 			elif jointMovement[movingJoint] == 'elbow':
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Elbow goes up")
-						elbow_up() 
+						elbow_up(speed) 
 					elif value > 0.3:
 						print("ROVER: Elbow goes down")
-						elbow_down() 
+						elbow_down(speed) 
 					else:
 						print("ROVER: Elbow stays in motion")
 						elbow_off() 
+					lastMovingJoint = movingJoint
+					continue
 
 			elif jointMovement[movingJoint] == 'base':
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Base goes up")
-						base_up()	
+						base_up(speed)	
 					elif value > 0.3:
 						print("ROVER: Base goes down")
-						base_down()
+						base_down(speed)
 					else:
 						print("ROVER: Base stays in motion")
 						base_off() 
+					lastMovingJoint = movingJoint
+					continue
 
 			elif jointMovement[movingJoint] == 'wrist main':
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Wrist goes up")
-						wrist_up() 
+						wrist_up(speed) 
 					elif value > 0.3:
 						print("ROVER: Wrist goes down")
-						wrist_down() 
+						wrist_down(speed) 
 					else:
 						print("ROVER: Wrist stays in motion")
 						wrist_off() 
+					lastMovingJoint = movingJoint
+					continue
 
 			elif jointMovement[movingJoint] == 'wrist12':
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Wrist 1 and 2 goes up")
-						wrist12_up() 	
+						wrist12_up(speed) 	
 					elif value > 0.3:
 						print("ROVER: Wrist 1 and 2 goes down")
-						wrist12_down() 
+						wrist12_down(speed) 
 					else:
 						print("ROVER: Wrist 1 and 2 stays in motion")
 						wrist12_off() 
+					lastMovingJoint = movingJoint
+					continue
 				if axis == 2: # Y-axis
 					if value < -0.3:
 						print("ROVER: Wrist 1 and 2 goes left")
-						wrist12_left() 	
+						wrist12_left(speed) 	
 					elif value > 0.3:
 						print("ROVER: Wrist 1 and 2 goes right")
-						wrist12_right() 
+						wrist12_right(speed) 
 					else:
 						print("ROVER: Wrist 1 and 2 stays in motion")
 						wrist12_off()
+					lastMovingJoint = movingJoint
+					continue
 			elif jointMovement[movingJoint] == 'claw':
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: claw opens")
-						claw_open() 
+						claw_open(speed) 
 					elif value > 0.3:
 						print("ROVER: claw closes")
-						claw_close() 
+						claw_close(speed) 
 					else:
 						print("ROVER: claw stays in motion")
 						claw_off()
+					lastMovingJoint = movingJoint
+					continue
 			
 			elif jointMovement[movingJoint] == 'drive':
 				if axis == 0:  # X-axis (left-right)
 					if value < -0.3:
 						print("ROVER: Drive left")
-						drive_left()
+						drive_left(speed)
 					elif value > 0.3:
 						print("ROVER: Drive right")
-						drive_right()
+						drive_right(speed)
 					else:
 						print("ROVER: Drive stop")
 						drive_stop()
+					lastMovingJoint = movingJoint
+					continue
 				
 				elif axis == 1:  # Y-axis (up-down)
 					if value < -0.3:
 						print("ROVER: Drive forward")
-						drive_forward(pos, neg)
+						drive_forward(speed)
 					elif value > 0.3:
 						print("ROVER: Drive backward")
-						drive_backward(pos, neg)
+						drive_backward(speed)
 					else:
 						print("ROVER: Drive stop")
 						drive_stop()
+					lastMovingJoint = movingJoint
+					continue
 		elif command == "hat_motion":
 			hat = int(parts[1])
 			value = float(parts[2])

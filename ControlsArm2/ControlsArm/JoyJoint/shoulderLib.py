@@ -64,13 +64,13 @@ def shoulder_init():
         shoulderMotor.setEngaged(True)
         shoulderMotor.setDataInterval(shoulderMotor.getMinDataInterval())
 
-def shoulder_up():
+def shoulder_up(speed):
     if not shoulderMotor.getIsMoving():
-        shoulderMotor.setVelocityLimit(shoulderInfo[5])
+        shoulderMotor.setVelocityLimit(speed)
 
-def shoulder_down():
+def shoulder_down(speed):
     if not shoulderMotor.getIsMoving():
-        shoulderMotor.setVelocityLimit(-shoulderInfo[5])
+        shoulderMotor.setVelocityLimit(-speed)
 
 def shoulder_off():
     lim = shoulderMotor.getVelocityLimit()

@@ -66,13 +66,13 @@ def base_init():
         baseMotor.setEngaged(True) 
         baseMotor.setDataInterval(baseMotor.getMinDataInterval())
 
-def base_up():
+def base_up(speed):
     if not baseMotor.getIsMoving():
-        baseMotor.setVelocityLimit(baseInfo[5])
+        baseMotor.setVelocityLimit(speed)
 
-def base_down():
+def base_down(speed):
     if not baseMotor.getIsMoving():
-        baseMotor.setVelocityLimit(-baseInfo[5])
+        baseMotor.setVelocityLimit(-speed)
 
 def base_off():
     lim = baseMotor.getVelocityLimit()

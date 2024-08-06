@@ -52,21 +52,21 @@ def driver_init():
         leftSideDriveMotors.setTargetVelocity(0)
         rightSideDriveMotors.setTargetVelocity(0)
 
-def drive_forward(pos, neg):
-    leftSideDriveMotors.setTargetVelocity(pos)
-    rightSideDriveMotors.setTargetVelocity(neg)
+def drive_forward(speed):
+    leftSideDriveMotors.setTargetVelocity(speed)
+    rightSideDriveMotors.setTargetVelocity(-speed)
 
-def drive_backward(pos, neg):
-    leftSideDriveMotors.setTargetVelocity(neg)
-    rightSideDriveMotors.setTargetVelocity(pos)
+def drive_backward(speed):
+    leftSideDriveMotors.setTargetVelocity(-speed)
+    rightSideDriveMotors.setTargetVelocity(speed)
 
-def drive_right():
-    leftSideDriveMotors.setTargetVelocity(-1)
-    rightSideDriveMotors.setTargetVelocity(-1)
+def drive_right(speed):
+    leftSideDriveMotors.setTargetVelocity(-speed)
+    rightSideDriveMotors.setTargetVelocity(-speed)
 
-def drive_left():
-    leftSideDriveMotors.setTargetVelocity(1)
-    rightSideDriveMotors.setTargetVelocity(1)
+def drive_left(speed):
+    leftSideDriveMotors.setTargetVelocity(speed)
+    rightSideDriveMotors.setTargetVelocity(speed)
 
 def drive_stop():
     leftSideDriveMotors.setTargetVelocity(0)
