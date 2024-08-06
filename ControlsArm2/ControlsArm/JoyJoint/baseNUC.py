@@ -49,6 +49,8 @@ async def send_commands():
 
 				#event processing step.
 				for event in pygame.event.get():
+					if (event.type == pygame.JOYAXISMOTION and (movingJoint == lastMovingJoint) and (event.axis == lastAxis) and ((event.value > 0.3 and lastValue > 0.3) or (event.value < -0.3 and lastValue < -0.3) or ((0.3 > event.value > -0.3) and (0.3 > lastValue > -0.3)))):
+						continue
 		            #to exit
 					if event.type == pygame.QUIT:
 						pygame.quit()
@@ -109,17 +111,14 @@ async def send_commands():
 								#exit()
 
 						if event.type == pygame.JOYAXISMOTION and event.axis != None and event.value != None:
-							if (movingJoint == lastMovingJoint) and (event.axis == lastAxis) and ((event.value > 0.3 and lastValue > 0.3) or (event.value < -0.3 and lastValue < -0.3) or ((0.3 > event.value > -0.3) and (0.3 > lastValue > -0.3))):
-								continue
-							else:
-								# command[0] = 2 is for axis_motion
-								command = [2,event.axis,event.value,movingJoint]
+							# command[0] = 2 is for axis_motion
+							command = [2,event.axis,event.value,movingJoint]
 
-								await websocket.send(json.dumps(command))
-								print("BASE: Axis Motion:", event.axis, event.value, movingJoint)
-								lastMovingJoint = movingJoint
-								lastValue = event.value
-								lastAxis = event.axis
+							await websocket.send(json.dumps(command))
+							print("BASE: Axis Motion:", event.axis, event.value, movingJoint)
+							lastMovingJoint = movingJoint
+							lastValue = event.value
+							lastAxis = event.axis
 
 						#if event.type == pygame.JOYHATMOTION:
 						#	command = f"hat_motion:{event.hat}:{event.value}:{movingJoint}"

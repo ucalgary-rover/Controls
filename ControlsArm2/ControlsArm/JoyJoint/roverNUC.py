@@ -111,7 +111,7 @@ async def receive_commands(websocket, path):
 	smoothing = 0.005
 
 	# Keep Drive as last value in list
-	jointMovement = [ 'base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
+	# jointMovement = [ 'base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
 	global speed
 
 	global lastMovingJoint
