@@ -37,16 +37,15 @@ print("BASE: Initialized joystick ", joystick0.get_name())
 print("BASE: Initialized joystick ", joystick1.get_name())
 
 async def send_commands():
+	global i
+	global movingJoint
+
+	global lastMovingJoint
+	global lastAxis
+	global lastValue
 	async with websockets.connect(uri) as websocket:
 		try:
 			while True:
-				global i
-				global movingJoint
-
-				global lastMovingJoint
-				global lastAxis
-				global lastValue
-
 				#event processing step.
 				for event in pygame.event.get():
 					if (event.type == pygame.JOYAXISMOTION and (movingJoint == lastMovingJoint) and (event.axis == lastAxis) and ((event.value > 0.3 and lastValue > 0.3) or (event.value < -0.3 and lastValue < -0.3) or ((0.3 > event.value > -0.3) and (0.3 > lastValue > -0.3)))):

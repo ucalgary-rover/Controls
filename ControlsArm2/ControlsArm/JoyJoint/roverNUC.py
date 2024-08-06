@@ -28,11 +28,12 @@ bristleMotor =  DCMotor()
 
 smoothing = 0.005
 
-jointMovement = ['base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
+# jointMovement = ['base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
 speed = 0.6
 
 # keep last state to not add too many events to queue
-lastMovingJoint = 0
+driveControlerLastMovingJoint = -1
+armControlerLastMovingJoint = -1
 
 '''# Motor and Servo initialization
 leftSideDriveMotors = DCMotor()
@@ -111,10 +112,11 @@ async def receive_commands(websocket, path):
 	smoothing = 0.005
 
 	# Keep Drive as last value in list
-	# jointMovement = [ 'base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
+	oldJointStop = [ lambda : base_off(), lambda : shoulder_off(), lambda : elbow_off(), lambda : wrist_off(), lambda : wrist12_off(), lambda : claw_off(), lambda : drive_stop()]
 	global speed
 
-	global lastMovingJoint
+	global driveControlerLastMovingJoint
+	global armControlerLastMovingJoint
 	
 	async for message in websocket:
 		#gets kinda annoying so comment out when code is finalized
@@ -153,6 +155,10 @@ async def receive_commands(websocket, path):
 
 		elif command == 2: # 2 is for axis_motion
 			movingJoint = int(parts[-1])
+			# if the joint changes, the make sure that the old joint turns offdrive will never be the old joint as it is separate
+			if movingJoint != armControlerLastMovingJoint:
+				oldJointStop[armControlerLastMovingJoint]()
+				print("Turning off old Joint")
 			axis = parts[1]
 			value = parts[2]
 			print("ROVER: Axis Motion:", axis, value)
@@ -167,7 +173,7 @@ async def receive_commands(websocket, path):
 					else:
 						print("ROVER: Shoulder stays in motion")
 						shoulder_off()
-					lastMovingJoint = movingJoint
+					armControlerLastMovingJoint = movingJoint
 					continue
 
 			elif movingJoint == 2: # 2 is for elbow
@@ -181,7 +187,7 @@ async def receive_commands(websocket, path):
 					else:
 						print("ROVER: Elbow stays in motion")
 						elbow_off() 
-					lastMovingJoint = movingJoint
+					armControlerLastMovingJoint = movingJoint
 					continue
 
 			elif movingJoint == 0: # 0 is for base
@@ -195,7 +201,7 @@ async def receive_commands(websocket, path):
 					else:
 						print("ROVER: Base stays in motion")
 						base_off() 
-					lastMovingJoint = movingJoint
+					armControlerLastMovingJoint = movingJoint
 					continue
 
 			elif movingJoint == 3: # 3 is for wrist main
@@ -209,7 +215,7 @@ async def receive_commands(websocket, path):
 					else:
 						print("ROVER: Wrist stays in motion")
 						wrist_off() 
-					lastMovingJoint = movingJoint
+					armControlerLastMovingJoint = movingJoint
 					continue
 
 			elif movingJoint == 4: # 4 is for wrist12
@@ -223,7 +229,7 @@ async def receive_commands(websocket, path):
 					else:
 						print("ROVER: Wrist 1 and 2 stays in motion")
 						wrist12_off() 
-					lastMovingJoint = movingJoint
+					armControlerLastMovingJoint = movingJoint
 					continue
 				if axis == 2: # Y-axis
 					if value < -0.3:
@@ -235,7 +241,7 @@ async def receive_commands(websocket, path):
 					else:
 						print("ROVER: Wrist 1 and 2 stays in motion")
 						wrist12_off()
-					lastMovingJoint = movingJoint
+					armControlerLastMovingJoint = movingJoint
 					continue
 			elif movingJoint == 5: # 5 is for claw
 				if axis == 3: # Y-axis
@@ -248,7 +254,7 @@ async def receive_commands(websocket, path):
 					else:
 						print("ROVER: claw stays in motion")
 						claw_off()
-					lastMovingJoint = movingJoint
+					armControlerLastMovingJoint = movingJoint
 					continue
 			
 			elif movingJoint == 6: # 6 is for drive
@@ -262,7 +268,7 @@ async def receive_commands(websocket, path):
 					else:
 						print("ROVER: Drive stop")
 						drive_stop()
-					lastMovingJoint = movingJoint
+					driveControlerLastMovingJoint = movingJoint
 					continue
 				
 				elif axis == 1:  # Y-axis (up-down)
@@ -275,7 +281,7 @@ async def receive_commands(websocket, path):
 					else:
 						print("ROVER: Drive stop")
 						drive_stop()
-					lastMovingJoint = movingJoint
+					driveControlerLastMovingJoint = movingJoint
 					continue
 		# elif command == "hat_motion":
 		# 	hat = int(parts[1])
