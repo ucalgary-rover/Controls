@@ -15,9 +15,12 @@ jointMovement = ['base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', '
 jointLength = len(jointMovement) - 1
 
 # set the last moving joint to be an invalide one, so all three of the data will be re written right away
-lastMovingJoint = -1
-lastAxis = 0
-lastValue = 0
+lastDriveMovingJoint = -1
+lastDriveAxis = 0
+lastDriveValue = 0
+lastArmMovingJoint = -1
+lastArmAxis = 0
+lastArmValue = 0
 
 # Initialize Pygame and joystick
 pygame.init()
@@ -40,16 +43,22 @@ async def send_commands():
 	global i
 	global movingJoint
 
-	global lastMovingJoint
-	global lastAxis
-	global lastValue
+	global lastDriveMovingJoint
+	global lastDriveAxis
+	global lastDriveValue
+	global lastArmMovingJoint
+	global lastArmAxis
+	global lastArmValue
 	async with websockets.connect(uri) as websocket:
 		try:
 			while True:
 				#event processing step.
 				for event in pygame.event.get():
-					if (event.type == pygame.JOYAXISMOTION and (movingJoint == lastMovingJoint) and (event.axis == lastAxis) and ((event.value > 0.3 and lastValue > 0.3) or (event.value < -0.3 and lastValue < -0.3) or ((0.3 > event.value > -0.3) and (0.3 > lastValue > -0.3)))):
-						continue
+					if(event.type == pygame.JOYAXISMOTION):
+						if ((event.__dict__["instance_id"]  == 0) and (movingJoint == lastDriveMovingJoint) and (event.axis == lastDriveAxis) and ((event.value > 0.3 and lastDriveValue > 0.3) or (event.value < -0.3 and lastDriveValue < -0.3) or ((0.3 > event.value > -0.3) and (0.3 > lastDriveValue > -0.3)))):
+							continue
+						if ((event.__dict__["instance_id"]  == 1) and (movingJoint == lastArmMovingJoint) and (event.axis == lastArmAxis) and ((event.value > 0.3 and lastArmValue > 0.3) or (event.value < -0.3 and lastArmValue < -0.3) or ((0.3 > event.value > -0.3) and (0.3 > lastArmValue > -0.3)))):
+							continue
 		            #to exit
 					if event.type == pygame.QUIT:
 						pygame.quit()
@@ -117,9 +126,14 @@ async def send_commands():
 							packedCommand = msgpack.packb(command)
 							await websocket.send(packedCommand, binary = True)
 							print("BASE: Axis Motion:", event.axis, event.value, movingJoint)
-							lastMovingJoint = movingJoint
-							lastValue = event.value
-							lastAxis = event.axis
+							if event.__dict__["instance_id"] == 0:
+								lastDriveMovingJoint = movingJoint
+								lastDriveValue = event.value
+								lastDriveAxis = event.axis
+							elif event.__dict__["instance_id"]  == 1: 
+								lastArmMovingJoint = movingJoint
+								lastArmValue = event.value
+								lastArmAxis = event.axis
 
 						#if event.type == pygame.JOYHATMOTION:
 						#	command = f"hat_motion:{event.hat}:{event.value}:{movingJoint}"
