@@ -98,7 +98,7 @@ try:
 			print() 
 			print("PhidgetException " + str(ex.code) + " (" + ex.description + "): " + ex.details)
 			print(f"Successfully quit program.\n\nGoodbye!\n")
-
+'''
 	def claw_open():
 		global claw
 		global isClawMoving
@@ -130,37 +130,6 @@ try:
 		except PhidgetException as ex:
 			print(f"PhidgetException in claw_off: {ex.code} ({ex.description})")
 
-
-	'''
-	def tool_right():
-		global tool
-  		global isToolMoving
-		try:
-			isToolMoving = True
-			tool.setTargetPosition(toolPositions[0]) # 0 degrees
-			tool.setEngaged(True)
-		except PhidgetException as ex:
-			print(f"PhidgetException in tool_right: {ex.code} ({ex.description})")
-
-	def tool_middle():
-		global tool
-  		global isToolMoving
-		try:
-			isToolMoving = True
-			tool.setTargetPosition(toolPositions[1]) # 90 degrees
-			tool.setEngaged(True)
-		except PhidgetException as ex:
-			print(f"PhidgetException in tool_middle: {ex.code} ({ex.description})")
-	
-	def tool_right():
-		global tool
-		global isToolMoving
-		try:
-			isToolMoving = True
-			tool.setTargetPosition(toolPositions[2]) # 180 degrees
-			tool.setEngaged(True)
-		except PhidgetException as ex:
-			print(f"PhidgetException in tool_left: {ex.code} ({ex.description})")
 '''
 
 
