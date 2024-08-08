@@ -25,7 +25,11 @@ try:
 	smoothing = 0.005
 
 	claw = RCServo()
-	'''tool = RCServo()'''
+	tool_right = RCServo()
+	tool_middle = RCServo()
+	tool_left = RCServo()
+	tools = {"right" : tool_right, "middle" : tool_middle, "left" : tool_left}
+	toolsMoving = {"right" : False, "middle" : False, "left" : False}
 
 	def connect_motor(motor):
 		try:
@@ -34,19 +38,11 @@ try:
 		except:
 			print("Failed to connect")
 
-	isClawAttached = False
-	clawSpeeds = [100, 80]
+	# isClawAttached = False  // unused
+	speeds = [100, 80]
 	isClawMoving = False
 
-	stopFlag = False
-
-	isClawMoving = False 
-############################################# added these for the science tool
-	'''
-	isToolAttached = False
-	toolPositions = [0, 90, 180]
-	isToolMoving = False
-	'''
+	# stopFlag = False  //unused
 	
 
 	def onAttach_motor(self):
@@ -65,10 +61,7 @@ try:
 		global claw
 		try:
 		    # Functions to initialize components 
-			print(f"\nInitializing...\n\n") 
-		    #initialize_motors() 
-			print(f"\nSuccessfully initialized!\n")
-	
+			print(f"\nInitializing...\n\n") 	
 		
 			claw.setChannel(0)
 			claw.setHubPort(0)
@@ -78,19 +71,7 @@ try:
 			claw.setMinPulseWidth(500)
 			claw.setMaxPulseWidth(2500)		
 
-
-			'''## both channel and Hubport will depend on what port we physcially connect the sci-tool to on the controller phidget & vint hub
-			# other libs dont set channel so might not be neccessary because i think it defaults to channel 0 anyways
-			tool.setChannel(0)
-			tool.setHubPort(1)
-			##### this may or may not need to be changed based off the serial code on the acc servo or vint hub that its connected to
-			tool.setDeviceSerialNumber(VHubSerial_servo)
-			tool.openWaitForAttachment(1000)
-			## this stands assuming we running the servos on 7.4v
-			tool.setVoltage(RCServoVoltage.RCSERVO_VOLTAGE_7_4V)
-			## pre sure these are same as for the claw if they are the same servo(part defined value)
-			tool.setMinPulseWidth(500)
-			tool.setMaxPulseWidth(2500)'''	
+			print(f"\nSuccessfully initialized!\n")	
 
 
 		except PhidgetException as ex: 
@@ -98,13 +79,13 @@ try:
 			print() 
 			print("PhidgetException " + str(ex.code) + " (" + ex.description + "): " + ex.details)
 			print(f"Successfully quit program.\n\nGoodbye!\n")
-'''
-	def claw_open():
+
+		def claw_open():
 		global claw
 		global isClawMoving
 		try:
 			isClawMoving = True
-			claw.setTargetPosition(clawSpeeds[0]) 
+			claw.setTargetPosition(speeds[0]) 
 			claw.setEngaged(True)
 		except PhidgetException as ex:
 			print(f"PhidgetException in claw_open: {ex.code} ({ex.description})")
@@ -114,7 +95,7 @@ try:
 		global isClawMoving
 		try: 
 			isClawMoving = True
-			claw.setTargetPosition(clawSpeeds[1]) 
+			claw.setTargetPosition(speeds[1]) 
 			claw.setEngaged(True) 
 		except PhidgetException as ex:
 			print(f"PhidgetException in claw_close: {ex.code} ({ex.description})")
@@ -130,10 +111,72 @@ try:
 		except PhidgetException as ex:
 			print(f"PhidgetException in claw_off: {ex.code} ({ex.description})")
 
-'''
+
+	def tool_init(str):
+		global tools
+		try:
+			i=0
+			for tool in tools.values():
+		    # Functions to initialize components 
+				print(f"\nInitializing tool{i}...\n\n") 	
+			
+				tool.setChannel(i)
+				tool.setHubPort(0)
+				tool.setDeviceSerialNumber(VHubSerial_servo)
+				tool.openWaitForAttachment(1000)
+				tool.setVoltage(RCServoVoltage.RCSERVO_VOLTAGE_7_4V)
+				tool.setMinPulseWidth(500)
+				tool.setMaxPulseWidth(2500)		
+
+				print(f"\nSuccessfully initialized tool {i}!\n")	
+
+		except PhidgetException as ex: 
+			traceback.print_exc() 
+			print() 
+			print("PhidgetException " + str(ex.code) + " (" + ex.description + "): " + ex.details)
+			print(f"Successfully quit program.\n\nGoodbye!\n")
+
+	def tool_lower(str):
+		if (str not in ["right", "middle", "left"]):
+			print("Invalide Tool")
+			exit()
+		global tools
+		global toolsMoving
+		try:
+			toolsMoving[str] = True
+			tools[str].setTargetPosition(speeds[0]) 
+			tools[str].setEngaged(True)
+		except PhidgetException as ex:
+			print(f"PhidgetException in tool_open for {str}: {ex.code} ({ex.description})")
+
+	def tool_raise(str):
+		if (str not in ["right", "middle", "left"]):
+			print("Invalide Tool")
+			exit()
+		global tools
+		global toolsMoving
+		try: 
+			toolsMoving[str] = True
+			tools[str].setTargetPosition(speeds[1]) 
+			tools[str].setEngaged(True) 
+		except PhidgetException as ex:
+			print(f"PhidgetException in tool_close for {str}: {ex.code} ({ex.description})")
+	
+	def tool_off(str):
+		if (str not in ["right", "middle", "left"]):
+			print("Invalide Tool")
+			exit()
+		global tools
+		global toolsMoving
+		try:
+			if toolsMoving[str]:
+				tools[str].setTargetPosition(90)
+				tools[str].setEngaged(False)
+				toolsMoving[str] = False
+		except PhidgetException as ex:
+			print(f"PhidgetException in tool_off for {str}: {ex.code} ({ex.description})")
+
 
 
 except Exception as ex:
 	print(f"An exception occurred: {ex}")		
-
-
