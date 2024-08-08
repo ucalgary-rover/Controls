@@ -93,10 +93,6 @@ try:
 			tool.setMaxPulseWidth(2500)'''	
 
 
-		    # Main loop of code, stopFlag becomes True when 'p' is pressed 
-			while(stopFlag == False): 
-				time.sleep(0.1)
-				#baseMotor.setVelocityLimit(motorsInfo[baseIndex][5]) 
 		except PhidgetException as ex: 
 			traceback.print_exc() 
 			print() 
@@ -105,6 +101,7 @@ try:
 
 	def claw_open():
 		global claw
+		global isClawMoving
 		try:
 			isClawMoving = True
 			claw.setTargetPosition(clawSpeeds[0]) 
@@ -114,6 +111,7 @@ try:
 
 	def claw_close():
 		global claw
+		global isClawMoving
 		try: 
 			isClawMoving = True
 			claw.setTargetPosition(clawSpeeds[1]) 
@@ -123,6 +121,7 @@ try:
 	
 	def claw_off():
 		global claw
+		global isClawMoving
 		try:
 			if isClawMoving:
 				claw.setTargetPosition(90)
@@ -135,6 +134,7 @@ try:
 	'''
 	def tool_right():
 		global tool
+  		global isToolMoving
 		try:
 			isToolMoving = True
 			tool.setTargetPosition(toolPositions[0]) # 0 degrees
@@ -144,6 +144,7 @@ try:
 
 	def tool_middle():
 		global tool
+  		global isToolMoving
 		try:
 			isToolMoving = True
 			tool.setTargetPosition(toolPositions[1]) # 90 degrees
@@ -153,6 +154,7 @@ try:
 	
 	def tool_right():
 		global tool
+		global isToolMoving
 		try:
 			isToolMoving = True
 			tool.setTargetPosition(toolPositions[2]) # 180 degrees
