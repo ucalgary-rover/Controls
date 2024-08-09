@@ -18,6 +18,14 @@ from clawLib import *
 from wrist12Lib import *
 from DriveJoyStick import *
 
+# --------------------------------------------- #
+# ################# IMPORTANT: ##################
+# 
+# If using the claw, set usingSciTools to False only
+# if using science tools, set usingSciTools to TRUE
+# --------------------------------------------- #
+usingSciTools = False
+
 VHubSerial_motors = 697103
 VHubSerial_servo = 697066
 
@@ -28,7 +36,11 @@ bristleMotor =  DCMotor()
 
 smoothing = 0.005
 
-# jointMovement = ['base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
+if not usingSciTools:
+	jointMovement = ['base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
+else:
+	jointMovement = [ 'tool_left', 'tool_middle', 'tool_right', 'drive']
+
 driveSpeed = 0.6
 armSpeed = 5
 
@@ -101,7 +113,10 @@ try:
 	wrist1_init()
 	wrist2_init()
 	driver_init()
-	claw_init()
+	if not usingSciTools:
+		claw_init()
+	else:
+		tool_init()
 
 except PhidgetException as ex:
 	traceback.print_exc()
@@ -114,13 +129,19 @@ async def receive_commands(websocket, path):
 	smoothing = 0.005
 
 	# Keep Drive as last value in list
-	oldJointStop = [ lambda : base_off(), lambda : shoulder_off(), lambda : elbow_off(), lambda : wrist_off(), lambda : wrist12_off(), lambda : claw_off(), lambda : drive_stop()]
+	global usingSciTools
 	global driveSpeed
 	global armSpeed
+	global jointMovement
 
 	global driveControlerLastMovingJoint
 	global armControlerLastMovingJoint
 	
+	if not usingSciTools:
+		oldJointStop = [ lambda : base_off(), lambda : shoulder_off(), lambda : elbow_off(), lambda : wrist_off(), lambda : wrist12_off(), lambda : claw_off(), lambda : drive_stop()]
+	else:
+		oldJointStop = [lambda : tool_off("tool_left") ,lambda : tool_off("tool_middle"),lambda : tool_off("tool_right"), lambda : drive_stop()]
+
 	async for message in websocket:
 		#gets kinda annoying so comment out when code is finalized
 		print("ROVER: Received:", message)
@@ -130,7 +151,10 @@ async def receive_commands(websocket, path):
 		if command == 0: # 0 is for button down
 			button = parts[1]
 			controllerId = parts[2]
-			if button == 5:
+			if button == 2 and controllerId == 1:
+				brush_switch()
+
+			elif button == 5:
 				# Increase driver speed
 				if (controllerId == 0):
 					print("ROVER: Increasing driveSpeed")
@@ -167,117 +191,17 @@ async def receive_commands(websocket, path):
 			else:
 				print("button not used")
 
-		elif command == 1: # 1 is for button up
-			button = parts[1]
-			if button == 2:
-				print("ROVER: off")
-				exit()
 
 		elif command == 2: # 2 is for axis_motion
 			movingJoint = int(parts[-1])
 			# if the joint changes, the make sure that the old joint turns offdrive will never be the old joint as it is separate
-			if movingJoint != armControlerLastMovingJoint:
+			if movingJoint != armControlerLastMovingJoint and controllerId == 1:
 				oldJointStop[armControlerLastMovingJoint]()
 				print("Turning off old Joint")
 			axis = parts[1]
 			value = parts[2]
 			print("ROVER: Axis Motion:", axis, value)
-			if movingJoint == 1: # 1 is for shoulder
-				if axis == 3: # Y-axis
-					if value > 0.3:
-						print("ROVER: Shoulder goes up")
-						shoulder_up(armSpeed)	
-					elif value < -0.3:
-						print("ROVER: Shoulder goes down")
-						shoulder_down(armSpeed)
-					else:
-						print("ROVER: Shoulder stays in motion")
-						shoulder_off()
-					armControlerLastMovingJoint = movingJoint
-					continue
-
-			elif movingJoint == 2: # 2 is for elbow
-				if axis == 3: # Y-axis
-					if value < -0.3:
-						print("ROVER: Elbow goes up")
-						elbow_up(armSpeed) 
-					elif value > 0.3:
-						print("ROVER: Elbow goes down")
-						elbow_down(armSpeed) 
-					else:
-						print("ROVER: Elbow stays in motion")
-						elbow_off() 
-					armControlerLastMovingJoint = movingJoint
-					continue
-
-			elif movingJoint == 0: # 0 is for base
-				if axis == 3: # Y-axis
-					if value < -0.3:
-						print("ROVER: Base goes up")
-						base_up(armSpeed)	
-					elif value > 0.3:
-						print("ROVER: Base goes down")
-						base_down(armSpeed)
-					else:
-						print("ROVER: Base stays in motion")
-						base_off() 
-					armControlerLastMovingJoint = movingJoint
-					continue
-
-			elif movingJoint == 3: # 3 is for wrist main
-				if axis == 3: # Y-axis
-					if value < -0.3:
-						print("ROVER: Wrist goes up")
-						wrist_up(armSpeed) 
-					elif value > 0.3:
-						print("ROVER: Wrist goes down")
-						wrist_down(armSpeed) 
-					else:
-						print("ROVER: Wrist stays in motion")
-						wrist_off() 
-					armControlerLastMovingJoint = movingJoint
-					continue
-
-			elif movingJoint == 4: # 4 is for wrist12
-				if axis == 3: # Y-axis
-					if value < -0.3:
-						print("ROVER: Wrist 1 and 2 goes up")
-						wrist12_up(armSpeed) 	
-					elif value > 0.3:
-						print("ROVER: Wrist 1 and 2 goes down")
-						wrist12_down(armSpeed) 
-					else:
-						print("ROVER: Wrist 1 and 2 stays in motion")
-						wrist12_off() 
-					armControlerLastMovingJoint = movingJoint
-					continue
-				if axis == 2: # Y-axis
-					if value < -0.3:
-						print("ROVER: Wrist 1 and 2 goes left")
-						wrist12_left(armSpeed) 	
-					elif value > 0.3:
-						print("ROVER: Wrist 1 and 2 goes right")
-						wrist12_right(armSpeed) 
-					else:
-						print("ROVER: Wrist 1 and 2 stays in motion")
-						wrist12_off()
-					armControlerLastMovingJoint = movingJoint
-					continue
-			elif movingJoint == 5: # 5 is for claw
-				if axis == 3: # Y-axis
-					if value < -0.3:
-						print("ROVER: claw opens")
-						claw_open() 
-					elif value > 0.3:
-						print("ROVER: claw closes")
-						claw_close() 
-					else:
-						print("ROVER: claw stays in motion")
-						claw_off()
-					armControlerLastMovingJoint = movingJoint
-					continue
-			
-			elif movingJoint == 6: # 6 is for drive
+			if movingJoint == 6: # 6 is for drive
 				if axis == 0:  # X-axis (left-right)
 					if value < -0.3:
 						print("ROVER: Drive left")
@@ -303,6 +227,115 @@ async def receive_commands(websocket, path):
 						drive_stop()
 					driveControlerLastMovingJoint = movingJoint
 					continue
+			elif not usingSciTools:
+				if movingJoint == 1: # 1 is for shoulder
+					if axis == 3: # Y-axis
+						if value > 0.3:
+							print("ROVER: Shoulder goes up")
+							shoulder_up(armSpeed)	
+						elif value < -0.3:
+							print("ROVER: Shoulder goes down")
+							shoulder_down(armSpeed)
+						else:
+							print("ROVER: Shoulder stays in motion")
+							shoulder_off()
+						armControlerLastMovingJoint = movingJoint
+						continue
+
+				elif movingJoint == 2: # 2 is for elbow
+					if axis == 3: # Y-axis
+						if value < -0.3:
+							print("ROVER: Elbow goes up")
+							elbow_up(armSpeed) 
+						elif value > 0.3:
+							print("ROVER: Elbow goes down")
+							elbow_down(armSpeed) 
+						else:
+							print("ROVER: Elbow stays in motion")
+							elbow_off() 
+						armControlerLastMovingJoint = movingJoint
+						continue
+
+				elif movingJoint == 0: # 0 is for base
+					if axis == 3: # Y-axis
+						if value < -0.3:
+							print("ROVER: Base goes up")
+							base_up(armSpeed)	
+						elif value > 0.3:
+							print("ROVER: Base goes down")
+							base_down(armSpeed)
+						else:
+							print("ROVER: Base stays in motion")
+							base_off() 
+						armControlerLastMovingJoint = movingJoint
+						continue
+
+				elif movingJoint == 3: # 3 is for wrist main
+					if axis == 3: # Y-axis
+						if value < -0.3:
+							print("ROVER: Wrist goes up")
+							wrist_up(armSpeed) 
+						elif value > 0.3:
+							print("ROVER: Wrist goes down")
+							wrist_down(armSpeed) 
+						else:
+							print("ROVER: Wrist stays in motion")
+							wrist_off() 
+						armControlerLastMovingJoint = movingJoint
+						continue
+
+				elif movingJoint == 4: # 4 is for wrist12
+					if axis == 3: # Y-axis
+						if value < -0.3:
+							print("ROVER: Wrist 1 and 2 goes up")
+							wrist12_up(armSpeed) 	
+						elif value > 0.3:
+							print("ROVER: Wrist 1 and 2 goes down")
+							wrist12_down(armSpeed) 
+						else:
+							print("ROVER: Wrist 1 and 2 stays in motion")
+							wrist12_off() 
+						armControlerLastMovingJoint = movingJoint
+						continue
+					if axis == 2: # Y-axis
+						if value < -0.3:
+							print("ROVER: Wrist 1 and 2 goes left")
+							wrist12_left(armSpeed) 	
+						elif value > 0.3:
+							print("ROVER: Wrist 1 and 2 goes right")
+							wrist12_right(armSpeed) 
+						else:
+							print("ROVER: Wrist 1 and 2 stays in motion")
+							wrist12_off()
+						armControlerLastMovingJoint = movingJoint
+						continue
+				elif movingJoint == 5: # 5 is for claw
+					if axis == 3: # Y-axis
+						if value < -0.3:
+							print("ROVER: claw opens")
+							claw_open() 
+						elif value > 0.3:
+							print("ROVER: claw closes")
+							claw_close() 
+						else:
+							print("ROVER: claw stays in motion")
+							claw_off()
+						armControlerLastMovingJoint = movingJoint
+						continue
+			else:
+				if axis == 3: # Y-axis
+					if value < -0.3:
+						print("ROVER: Tool lowers")
+						tool_lower(jointMovement[movingJoint]) 
+					elif value > 0.3:
+						print("ROVER: Tool raises")
+						tool_raise(jointMovement[movingJoint]) 
+					else:
+						print("ROVER: Tool stops")
+						tool_off(jointMovement[movingJoint])
+					armControlerLastMovingJoint = movingJoint
+					continue
+
 		# elif command == "hat_motion":
 		# 	hat = int(parts[1])
 		# 	value = float(parts[2])
@@ -311,14 +344,8 @@ async def receive_commands(websocket, path):
 print("ROVER: I'm done")
 
 async def main():
-	print("oof")
 	server = await websockets.serve(receive_commands, "0.0.0.0", 12345, ping_interval=None, ping_timeout=None)
 	print("ROVER: WebSocket server started")
 	await server.wait_closed()
 
 asyncio.get_event_loop().run_until_complete(main())
-'''
-start_server = websockets.serve(receive_commands, "0.0.0.0", 12345)
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
-'''
