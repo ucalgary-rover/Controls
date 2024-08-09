@@ -1,22 +1,22 @@
 import asyncio
+import msgpack
+import sys
+import traceback
 import websockets
+
+from Phidget22.Devices.DCMotor import * 
+from Phidget22.Devices.RCServo import *
+from Phidget22.Devices.Stepper import *
 from Phidget22.Phidget import *
 from Phidget22.PhidgetException import *
-from Phidget22.Devices.Stepper import *
-from Phidget22.Devices.RCServo import *
-from Phidget22.Devices.DCMotor import * 
-import traceback
-import time
-import msgpack
 
-from shoulderLib import *
-from elbowLib import *
 from baseLib import *
-from wristLib import *
 from clawLib import * 
-#this was commented from before idk why 
-from wrist12Lib import *
 from DriveJoyStick import *
+from elbowLib import *
+from shoulderLib import *
+from wristLib import *
+from wrist12Lib import *
 
 # --------------------------------------------- #
 # ################# IMPORTANT: ##################
@@ -25,6 +25,14 @@ from DriveJoyStick import *
 # if using science tools, set usingSciTools to TRUE
 # --------------------------------------------- #
 usingSciTools = False
+
+if len(sys.argv) > 1 and (sys.argv[1] == "-S" or sys.argv[1] == "-s" or sys.argv[1] == "--science-tool"):
+	usingSciTools = True
+
+if usingSciTools:
+	print("Using Science tool!")
+else:
+	print("Not using Science tool!")
 
 VHubSerial_motors = 697103
 VHubSerial_servo = 697066
