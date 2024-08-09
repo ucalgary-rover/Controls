@@ -66,11 +66,11 @@ def elbow_init():
 
 def elbow_up(speed):
     if not elbowMotor.getIsMoving(): 
-        elbowMotor.setVelocityLimit(speed)
+        elbowMotor.setVelocityLimit(speed*3)
         
 def elbow_down(speed):
     if not elbowMotor.getIsMoving(): 
-        elbowMotor.setVelocityLimit(-speed)
+        elbowMotor.setVelocityLimit(-speed*3)
     
 def elbow_off():
     lim = elbowMotor.getVelocityLimit()
