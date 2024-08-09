@@ -70,10 +70,10 @@ async def send_commands():
 							print("BASE: off")
 
 						elif event.button == 5:
-							print("BASE: Increase driver speed")
+							print("BASE: Increase speed")
 
 						elif event.button == 4:
-							print("BASE: Decrease driver speed")
+							print("BASE: Decrease speed")
 
 						# to make sure only remote #1 can cycle between arm joints, added event.instance_id == 1
 						elif event.button == 8: # and event.instance_id == 1:
@@ -90,10 +90,10 @@ async def send_commands():
 						
 						#what gets sent to the rover nuc
 						# command[0] = 0 is for button down
-						command = [0,event.button,movingJoint]
+						command = [0,event.button,int(event.__dict__["instance_id"])]
 						packedCommand = msgpack.packb(command)
-						await websocket.send(packedCommand, binary = True)
-						print("BASE: Button Pressed:", event.button, movingJoint)
+						await websocket.send(packedCommand)
+						print("BASE: Button Pressed:", event.button, int(event.__dict__["instance_id"]))
 							
 					print(event.__dict__)
 					# check if its the drive controler or the arm contoler
@@ -113,9 +113,9 @@ async def send_commands():
 						# button on the joystick is pressed up
 						if event.type == pygame.JOYBUTTONUP:
 							# command[0] = 1 is for button up
-							command = [1,event.button,0,movingJoint]
+							command = [1,event.button,int(event.__dict__["instance_id"])],
 							packedCommand = msgpack.packb(command)
-							await websocket.send(packedCommand, binary = True)
+							await websocket.send(packedCommand)
 							#if event.button == 2:
 								#print("BASE: off")
 								#exit()
@@ -124,8 +124,8 @@ async def send_commands():
 							# command[0] = 2 is for axis_motion
 							command = [2,event.axis,event.value,movingJoint]
 							packedCommand = msgpack.packb(command)
-							await websocket.send(packedCommand, binary = True)
-							print("BASE: Axis Motion:", event.axis, event.value, movingJoint)
+							await websocket.send(packedCommand)
+							print("BASE: Axis Motion:", event.axis, event.value, int(event.__dict__["instance_id"]))
 							if event.__dict__["instance_id"] == 0:
 								lastDriveMovingJoint = movingJoint
 								lastDriveValue = event.value
