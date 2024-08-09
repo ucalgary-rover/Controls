@@ -2,6 +2,7 @@ from Phidget22.Phidget import *
 from Phidget22.PhidgetException import *
 from Phidget22.Devices.Stepper import *
 from Phidget22.Devices.RCServo import *
+from Phidget22.Devices.DCMotor import *
 import traceback
 import time
 
@@ -19,7 +20,7 @@ tool_middle - science tool servo goes middle - 90 degrees
 tool_left - science tool servo turns left - 180 degrees
 '''
 try: 
-	VHubSerial_motors = 697103
+	VHubSerial_motors = 697178
 	VHubSerial_servo = 697066
 
 	smoothing = 0.005
@@ -28,8 +29,10 @@ try:
 	tool_right = RCServo()
 	tool_middle = RCServo()
 	tool_left = RCServo()
-	tools = {"right" : tool_right, "middle" : tool_middle, "left" : tool_left}
-	toolsMoving = {"right" : False, "middle" : False, "left" : False}
+	brush = DCMotor()
+	tools = {"tool_right" : tool_right, "tool_middle" : tool_middle, "tool_left" : tool_left}
+	toolsMoving = {"tool_right" : False, "tool_middle" : False, "tool_left" : False}
+	DCMotorInfo = [1.68, 1.68, 100, 1, 10, 10]
 
 	def connect_motor(motor):
 		try:
@@ -80,7 +83,7 @@ try:
 			print("PhidgetException " + str(ex.code) + " (" + ex.description + "): " + ex.details)
 			print(f"Successfully quit program.\n\nGoodbye!\n")
 
-		def claw_open():
+	def claw_open():
 		global claw
 		global isClawMoving
 		try:
@@ -112,10 +115,11 @@ try:
 			print(f"PhidgetException in claw_off: {ex.code} ({ex.description})")
 
 
-	def tool_init(str):
+	def tool_init():
 		global tools
+		# setup tool servo
 		try:
-			i=0
+			i=1
 			for tool in tools.values():
 		    # Functions to initialize components 
 				print(f"\nInitializing tool{i}...\n\n") 	
@@ -136,45 +140,72 @@ try:
 			print("PhidgetException " + str(ex.code) + " (" + ex.description + "): " + ex.details)
 			print(f"Successfully quit program.\n\nGoodbye!\n")
 
-	def tool_lower(str):
-		if (str not in ["right", "middle", "left"]):
+		# setup tool brush
+		brush.setDeviceSerialNumber(VHubSerial_motors)
+		brush.setHubPort(1)
+
+		try:
+			brush.openWaitForAttachment(5000)
+			print("Test connection")
+			print("Drivers connected")
+			print("Is brush attached: ", brush.getAttached())
+		except:
+			print("Driver Failed to connect")
+			print("Drivers not connected")
+			
+		else:
+			brush.setCurrentLimit(10)
+			brush.setTargetVelocity(0)
+			brush.setAcceleration(5)
+			brush.setAcceleration(100)
+			brush.setTargetVelocity(0)
+
+
+	def tool_lower(toolName):
+		if (toolName not in ["tool_right", "tool_middle", "tool_left"]):
 			print("Invalide Tool")
 			exit()
 		global tools
 		global toolsMoving
 		try:
-			toolsMoving[str] = True
-			tools[str].setTargetPosition(speeds[0]) 
-			tools[str].setEngaged(True)
+			toolsMoving[toolName] = True
+			tools[toolName].setTargetPosition(speeds[0]) 
+			tools[toolName].setEngaged(True)
 		except PhidgetException as ex:
-			print(f"PhidgetException in tool_open for {str}: {ex.code} ({ex.description})")
+			print(f"PhidgetException in tool_open for {toolName}: {ex.code} ({ex.description})")
 
-	def tool_raise(str):
-		if (str not in ["right", "middle", "left"]):
+	def tool_raise(toolName):
+		if (toolName not in ["tool_right", "tool_middle", "tool_left"]):
 			print("Invalide Tool")
 			exit()
 		global tools
 		global toolsMoving
 		try: 
-			toolsMoving[str] = True
-			tools[str].setTargetPosition(speeds[1]) 
-			tools[str].setEngaged(True) 
+			toolsMoving[toolName] = True
+			tools[toolName].setTargetPosition(speeds[1]) 
+			tools[toolName].setEngaged(True) 
 		except PhidgetException as ex:
-			print(f"PhidgetException in tool_close for {str}: {ex.code} ({ex.description})")
+			print(f"PhidgetException in tool_close for {toolName}: {ex.code} ({ex.description})")
 	
-	def tool_off(str):
-		if (str not in ["right", "middle", "left"]):
+	def tool_off(toolName):
+		if (toolName not in ["tool_right", "tool_middle", "tool_left"]):
 			print("Invalide Tool")
 			exit()
 		global tools
 		global toolsMoving
 		try:
-			if toolsMoving[str]:
-				tools[str].setTargetPosition(90)
-				tools[str].setEngaged(False)
-				toolsMoving[str] = False
+			if toolsMoving[toolName]:
+				tools[toolName].setTargetPosition(90)
+				tools[toolName].setEngaged(False)
+				toolsMoving[toolName] = False
 		except PhidgetException as ex:
-			print(f"PhidgetException in tool_off for {str}: {ex.code} ({ex.description})")
+			print(f"PhidgetException in tool_off for {toolName}: {ex.code} ({ex.description})")
+
+	def brush_switch():
+		if brush.getIsMoving():
+			brush.setVelocityLimit(0)
+		else:
+			brush.setVelocityLimit(1)
 
 
 
