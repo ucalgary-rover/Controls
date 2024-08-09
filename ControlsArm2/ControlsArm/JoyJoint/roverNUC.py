@@ -29,7 +29,8 @@ bristleMotor =  DCMotor()
 smoothing = 0.005
 
 # jointMovement = ['base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
-speed = 0.6
+driveSpeed = 0.6
+armSpeed = 5
 
 # keep last state to not add too many events to queue
 driveControlerLastMovingJoint = -1
@@ -100,6 +101,7 @@ try:
 	wrist1_init()
 	wrist2_init()
 	driver_init()
+	claw_init()
 
 except PhidgetException as ex:
 	traceback.print_exc()
@@ -113,7 +115,8 @@ async def receive_commands(websocket, path):
 
 	# Keep Drive as last value in list
 	oldJointStop = [ lambda : base_off(), lambda : shoulder_off(), lambda : elbow_off(), lambda : wrist_off(), lambda : wrist12_off(), lambda : claw_off(), lambda : drive_stop()]
-	global speed
+	global driveSpeed
+	global armSpeed
 
 	global driveControlerLastMovingJoint
 	global armControlerLastMovingJoint
@@ -126,23 +129,40 @@ async def receive_commands(websocket, path):
 		
 		if command == 0: # 0 is for button down
 			button = parts[1]
+			controllerId = parts[2]
 			if button == 5:
 				# Increase driver speed
-				print("ROVER: Increasing speed")
-				speed = speed + 0.1
-				if speed > 1:
-					print("ROVER: Speed is more than 100% duty cycle, slow down!")
-					speed = 1
-				print(f"speed : {speed * 100}%\n")
+				if (controllerId == 0):
+					print("ROVER: Increasing driveSpeed")
+					driveSpeed = driveSpeed + 0.1
+					if driveSpeed > 1:
+						print("ROVER: driveSpeed is more than 100% duty cycle, slow down!")
+						driveSpeed = 1
+					print(f"driveSpeed : {driveSpeed * 100}%\n")
+				elif (controllerId == 1):
+					print("ROVER: Increasing armSpeed")
+					armSpeed = armSpeed + 1
+					if armSpeed > 10:
+						print("ROVER: armSpeed is more than 100% duty cycle, slow down!")
+						armSpeed = 10
+					print(f"armSpeed : {armSpeed * 10}%\n")
 
 			elif button == 4:
 				# Decrease driver speed
-				print("ROVER: Decreasing speed")
-				speed = speed - 0.1
-				if speed < 0.2:
-					print("ROVER: speed is less than 20% Duty Cycle, speed up!")
-					speed = 0.2
-				print(f"speed : {speed * 100}%\n")
+				if (controllerId == 0):
+					print("ROVER: Decreasing driveSpeed")
+					driveSpeed = driveSpeed - 0.1
+					if driveSpeed < 0.2:
+						print("ROVER: driveSpeed is less than 20% Duty Cycle, driveSpeed up!")
+						driveSpeed = 0.2
+					print(f"driveSpeed : {driveSpeed * 100}%\n")
+				if (controllerId == 1):
+					print("ROVER: Decreasing armSpeed")
+					armSpeed = armSpeed - 1
+					if armSpeed < 2:
+						print("ROVER: armSpeed is less than 20% Duty Cycle, armSpeed up!")
+						armSpeed = 2
+					print(f"armSpeed : {armSpeed * 10}%\n")
 
 			else:
 				print("button not used")
@@ -166,10 +186,10 @@ async def receive_commands(websocket, path):
 				if axis == 3: # Y-axis
 					if value > 0.3:
 						print("ROVER: Shoulder goes up")
-						shoulder_up(speed)	
+						shoulder_up(armSpeed)	
 					elif value < -0.3:
 						print("ROVER: Shoulder goes down")
-						shoulder_down(speed)
+						shoulder_down(armSpeed)
 					else:
 						print("ROVER: Shoulder stays in motion")
 						shoulder_off()
@@ -180,10 +200,10 @@ async def receive_commands(websocket, path):
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Elbow goes up")
-						elbow_up(speed) 
+						elbow_up(armSpeed) 
 					elif value > 0.3:
 						print("ROVER: Elbow goes down")
-						elbow_down(speed) 
+						elbow_down(armSpeed) 
 					else:
 						print("ROVER: Elbow stays in motion")
 						elbow_off() 
@@ -194,10 +214,10 @@ async def receive_commands(websocket, path):
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Base goes up")
-						base_up(speed)	
+						base_up(armSpeed)	
 					elif value > 0.3:
 						print("ROVER: Base goes down")
-						base_down(speed)
+						base_down(armSpeed)
 					else:
 						print("ROVER: Base stays in motion")
 						base_off() 
@@ -208,10 +228,10 @@ async def receive_commands(websocket, path):
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Wrist goes up")
-						wrist_up(speed) 
+						wrist_up(armSpeed) 
 					elif value > 0.3:
 						print("ROVER: Wrist goes down")
-						wrist_down(speed) 
+						wrist_down(armSpeed) 
 					else:
 						print("ROVER: Wrist stays in motion")
 						wrist_off() 
@@ -222,10 +242,10 @@ async def receive_commands(websocket, path):
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: Wrist 1 and 2 goes up")
-						wrist12_up(speed) 	
+						wrist12_up(armSpeed) 	
 					elif value > 0.3:
 						print("ROVER: Wrist 1 and 2 goes down")
-						wrist12_down(speed) 
+						wrist12_down(armSpeed) 
 					else:
 						print("ROVER: Wrist 1 and 2 stays in motion")
 						wrist12_off() 
@@ -234,10 +254,10 @@ async def receive_commands(websocket, path):
 				if axis == 2: # Y-axis
 					if value < -0.3:
 						print("ROVER: Wrist 1 and 2 goes left")
-						wrist12_left(speed) 	
+						wrist12_left(armSpeed) 	
 					elif value > 0.3:
 						print("ROVER: Wrist 1 and 2 goes right")
-						wrist12_right(speed) 
+						wrist12_right(armSpeed) 
 					else:
 						print("ROVER: Wrist 1 and 2 stays in motion")
 						wrist12_off()
@@ -247,10 +267,10 @@ async def receive_commands(websocket, path):
 				if axis == 3: # Y-axis
 					if value < -0.3:
 						print("ROVER: claw opens")
-						claw_open(speed) 
+						claw_open() 
 					elif value > 0.3:
 						print("ROVER: claw closes")
-						claw_close(speed) 
+						claw_close() 
 					else:
 						print("ROVER: claw stays in motion")
 						claw_off()
@@ -261,10 +281,10 @@ async def receive_commands(websocket, path):
 				if axis == 0:  # X-axis (left-right)
 					if value < -0.3:
 						print("ROVER: Drive left")
-						drive_left(speed)
+						drive_left(driveSpeed)
 					elif value > 0.3:
 						print("ROVER: Drive right")
-						drive_right(speed)
+						drive_right(driveSpeed)
 					else:
 						print("ROVER: Drive stop")
 						drive_stop()
@@ -274,10 +294,10 @@ async def receive_commands(websocket, path):
 				elif axis == 1:  # Y-axis (up-down)
 					if value < -0.3:
 						print("ROVER: Drive forward")
-						drive_forward(speed)
+						drive_forward(driveSpeed)
 					elif value > 0.3:
 						print("ROVER: Drive backward")
-						drive_backward(speed)
+						drive_backward(driveSpeed)
 					else:
 						print("ROVER: Drive stop")
 						drive_stop()
@@ -291,6 +311,7 @@ async def receive_commands(websocket, path):
 print("ROVER: I'm done")
 
 async def main():
+	print("oof")
 	server = await websockets.serve(receive_commands, "0.0.0.0", 12345, ping_interval=None, ping_timeout=None)
 	print("ROVER: WebSocket server started")
 	await server.wait_closed()
@@ -301,4 +322,3 @@ start_server = websockets.serve(receive_commands, "0.0.0.0", 12345)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
 '''
-
