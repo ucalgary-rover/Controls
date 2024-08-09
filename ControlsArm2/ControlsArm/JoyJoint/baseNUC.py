@@ -3,13 +3,24 @@ import websockets
 import pygame
 import msgpack
 
+# --------------------------------------------- #
+# ################# IMPORTANT: ##################
+# 
+# If using the claw, set usingSciTools to False only
+# if using science tools, set usingSciTools to TRUE
+# --------------------------------------------- #
+usingSciTools = False
+
 # WebSocket server address
 uri = "ws://192.168.1.22:12345" ############################################### ws://roverNUC_ip:some random port
 
 # init variables
 i = 0
-# Keep Drive as last value in list
-jointMovement = ['base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
+# Keep Drive as last value in the following list, no matter the definition
+if not usingSciTools:
+	jointMovement = ['base', 'shoulder', 'elbow', 'wrist main', 'wrist12', 'claw', 'drive']
+else:
+	jointMovement = [ 'tool_left', 'tool_middle', 'tool_right', 'drive']
 # the -1 makes it so that the shuffle excludes the drive mode, which will be 
 # explicitly set when the input comes from controler 0
 jointLength = len(jointMovement) - 1
@@ -42,6 +53,7 @@ print("BASE: Initialized joystick ", joystick1.get_name())
 async def send_commands():
 	global i
 	global movingJoint
+	global usingSciTools
 
 	global lastDriveMovingJoint
 	global lastDriveAxis
@@ -67,33 +79,40 @@ async def send_commands():
 		            #button on the joystick is pressed down
 					if event.type == pygame.JOYBUTTONDOWN:
 						if event.button == 2:
-							print("BASE: off")
+							if usingSciTools:
+								print("BASE: bristles on")
+							else:
+								continue
 
 						elif event.button == 5:
-							print("BASE: Increase speed")
+							print("BASE: Increase driver speed")
 
 						elif event.button == 4:
-							print("BASE: Decrease speed")
+							print("BASE: Decrease driver speed")
 
 						# to make sure only remote #1 can cycle between arm joints, added event.instance_id == 1
 						elif event.button == 8: # and event.instance_id == 1:
-							print("BASE: Previous Joint Movement mode")
+							if not usingSciTools:
+								print("BASE: Previous Joint Movement mode")
+							else:
+								print("BASE: Previous Tool mode")
 							# Next mode
 							i = (i - 1)%jointLength
-							print(jointMovement[i])
+							print(f"Now on {jointMovement[i]}")
 
 						elif event.button == 9: # and event.instance_id == 1:
 							print("BASE: Next Joint Movement mode")
 							# Next mode
 							i = (i + 1)%jointLength
 							print(jointMovement[i])
-						
-						#what gets sent to the rover nuc
-						# command[0] = 0 is for button down
-						command = [0,event.button,int(event.__dict__["instance_id"])]
-						packedCommand = msgpack.packb(command)
-						await websocket.send(packedCommand)
-						print("BASE: Button Pressed:", event.button, int(event.__dict__["instance_id"]))
+						if 	event.button in [2,4,5]	:		
+							#what gets sent to the rover nuc
+							# command[0] = 0 is for button down
+							command = [0, event.button, int(event.__dict__["instance_id"])]
+							packedCommand = msgpack.packb(command)
+							await websocket.send(packedCommand)
+							print("BASE: Button Pressed:", event.button, int(event.__dict__["instance_id"]))
+						continue
 							
 					print(event.__dict__)
 					# check if its the drive controler or the arm contoler
@@ -110,22 +129,13 @@ async def send_commands():
 							# for future if we want to add extra controlers
 							pass
 						print(jointMovement[movingJoint])
-						# button on the joystick is pressed up
-						if event.type == pygame.JOYBUTTONUP:
-							# command[0] = 1 is for button up
-							command = [1,event.button,int(event.__dict__["instance_id"])],
-							packedCommand = msgpack.packb(command)
-							await websocket.send(packedCommand)
-							#if event.button == 2:
-								#print("BASE: off")
-								#exit()
 
 						if event.type == pygame.JOYAXISMOTION and event.axis != None and event.value != None:
 							# command[0] = 2 is for axis_motion
 							command = [2,event.axis,event.value,movingJoint]
 							packedCommand = msgpack.packb(command)
 							await websocket.send(packedCommand)
-							print("BASE: Axis Motion:", event.axis, event.value, int(event.__dict__["instance_id"]))
+							print("BASE: Axis Motion:", event.axis, event.value, movingJoint)
 							if event.__dict__["instance_id"] == 0:
 								lastDriveMovingJoint = movingJoint
 								lastDriveValue = event.value
