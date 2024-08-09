@@ -1,7 +1,9 @@
 import asyncio
-import websockets
-import pygame
 import msgpack
+import pygame
+import sys
+import websockets
+
 
 # --------------------------------------------- #
 # ################# IMPORTANT: ##################
@@ -10,6 +12,14 @@ import msgpack
 # if using science tools, set usingSciTools to TRUE
 # --------------------------------------------- #
 usingSciTools = False
+
+if len(sys.argv) > 1 and (sys.argv[1] == "-S" or sys.argv[1] == "-s" or sys.argv[1] == "--science-tool"):
+	usingSciTools = True
+
+if usingSciTools:
+	print("Using Science tool!")
+else:
+	print("Not using Science tool!")
 
 # WebSocket server address
 uri = "ws://192.168.1.22:12345" ############################################### ws://roverNUC_ip:some random port
