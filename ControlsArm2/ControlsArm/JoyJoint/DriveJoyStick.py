@@ -1,4 +1,4 @@
-#Created byt the one and only Ramisa Islam
+#Created by the one and only Ramisa Islam
 
 import pygame
 from Phidget22.Phidget import *
@@ -6,8 +6,10 @@ from Phidget22.PhidgetException import *
 from Phidget22.Devices.Stepper import *
 from Phidget22.Devices.RCServo import *
 from Phidget22.Devices.DCMotor import * 
+from Phidget22.FanMode imort *
 import traceback
 import time
+
 
 VHubSerial_motors = 697178
 VHubSerial_servo = 697066 #verify this matches what is in the rover
@@ -51,6 +53,8 @@ def driver_init():
         # rightSideDriveMotors.setVelocityLimit(100)
         leftSideDriveMotors.setTargetVelocity(0)
         rightSideDriveMotors.setTargetVelocity(0)
+        leftSideDriveMotors.setFanMode(0x2)  # 0x2 is FAN_MODE_ON
+        rightSideDriveMotors.setFanMode(0x2)  # 0x2 is FAN_MODE_ON
 
 def drive_forward(speed):
     leftSideDriveMotors.setTargetVelocity(speed)
@@ -61,14 +65,13 @@ def drive_backward(speed):
     rightSideDriveMotors.setTargetVelocity(speed)
 
 def drive_right(speed):
-    leftSideDriveMotors.setTargetVelocity(-speed)
-    rightSideDriveMotors.setTargetVelocity(-speed)
-
-def drive_left(speed):
     leftSideDriveMotors.setTargetVelocity(speed)
     rightSideDriveMotors.setTargetVelocity(speed)
+
+def drive_left(speed):
+    leftSideDriveMotors.setTargetVelocity(-speed)
+    rightSideDriveMotors.setTargetVelocity(-speed)
 
 def drive_stop():
     leftSideDriveMotors.setTargetVelocity(0)
     rightSideDriveMotors.setTargetVelocity(0)
-
