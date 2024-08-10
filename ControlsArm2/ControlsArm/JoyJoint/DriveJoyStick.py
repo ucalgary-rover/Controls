@@ -6,7 +6,6 @@ from Phidget22.PhidgetException import *
 from Phidget22.Devices.Stepper import *
 from Phidget22.Devices.RCServo import *
 from Phidget22.Devices.DCMotor import * 
-from Phidget22.FanMode imort *
 import traceback
 import time
 
