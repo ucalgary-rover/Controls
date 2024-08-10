@@ -159,6 +159,7 @@ try:
 			brush.setAcceleration(5)
 			brush.setAcceleration(100)
 			brush.setTargetVelocity(0)
+			brush.setFanMode(0x2) # 0x2 is FAN_MODE_ON
 
 
 	def tool_lower(toolName):
