@@ -27,7 +27,7 @@ def connect_motor(motor):
         print("Failed to connect")
         
 elbowMotor = Stepper()
-elbowInfo = [1.68, 1.68, 77, 1, 10, 10]
+elbowInfo = [2.8, 2.8, 77, 1, 10, 10]
 elbowInitialPos = 0
 elbowAttached = False
 
