@@ -27,7 +27,7 @@ def connect_motor(motor):
         print("Failed to connect")
         
 elbowMotor = Stepper()
-elbowInfo = [2.8, 2.8, 77, 1, 10, 10]
+elbowInfo = [1.6, 1.6, 77, 1, 10, 10]
 elbowInitialPos = 0
 elbowAttached = False
 
@@ -66,11 +66,11 @@ def elbow_init():
 
 def elbow_up(speed):
     if not elbowMotor.getIsMoving(): 
-        elbowMotor.setVelocityLimit(speed)
+        elbowMotor.setVelocityLimit(-speed)
         
 def elbow_down(speed):
     if not elbowMotor.getIsMoving(): 
-        elbowMotor.setVelocityLimit(-speed)
+        elbowMotor.setVelocityLimit(speed)
     
 def elbow_off():
     lim = elbowMotor.getVelocityLimit()
@@ -81,5 +81,3 @@ def elbow_off():
     elbowMotor.setVelocityLimit(lim / 4)
     time.sleep(0.005 / 4)
     elbowMotor.setVelocityLimit(0)
-
-
