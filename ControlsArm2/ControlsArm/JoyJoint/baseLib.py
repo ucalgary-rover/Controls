@@ -83,6 +83,3 @@ def base_off():
     baseMotor.setVelocityLimit(lim / 4)
     time.sleep(smoothing/ 4)
     baseMotor.setVelocityLimit(0)
-
-
-
