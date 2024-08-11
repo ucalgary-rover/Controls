@@ -81,5 +81,3 @@ def shoulder_off():
     shoulderMotor.setVelocityLimit(lim / 4)
     time.sleep(0.005 / 4)
     shoulderMotor.setVelocityLimit(0)
-
-
