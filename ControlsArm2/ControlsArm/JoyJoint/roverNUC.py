@@ -33,7 +33,7 @@ if usingSciTools:
 	print("Using Science tool!")
 else:
 	print("Not using Science tool!")
-
+	
 VHubSerial_motors = 697103
 VHubSerial_servo = 697066
 
@@ -117,7 +117,6 @@ try:
 	elbow_init()
 	base_init()
 	wrist_init() 
-	# initialize_motors()
 	wrist1_init()
 	wrist2_init()
 	driver_init()
@@ -159,10 +158,21 @@ async def receive_commands(websocket, path):
 		if command == 0: # 0 is for button down
 			button = parts[1]
 			controllerId = parts[2]
-			if button == 2 and controllerId == 1:
-				brush_switch()
+			if usingSciTools:
+				if controllerId == 1:
+					if button == 0:
+						turn_claw()
+						
+					elif button == 1:
+						cam_left()
+						
+					elif button == 2:
+						brush_switch(parts[3])
+						
+					elif button == 3:
+						cam_right()
 
-			elif button == 5:
+			if button == 5:
 				# Increase driver speed
 				if (controllerId == 0):
 					print("ROVER: Increasing driveSpeed")
@@ -201,7 +211,8 @@ async def receive_commands(websocket, path):
 
 
 		elif command == 2: # 2 is for axis_motion
-			movingJoint = int(parts[-1])
+			movingJoint = parts[3]
+			controllerId = parts[4]
 			# if the joint changes, the make sure that the old joint turns offdrive will never be the old joint as it is separate
 			if movingJoint != armControlerLastMovingJoint and controllerId == 1:
 				oldJointStop[armControlerLastMovingJoint]()
@@ -352,7 +363,7 @@ async def receive_commands(websocket, path):
 print("ROVER: I'm done")
 
 async def main():
-	server = await websockets.serve(receive_commands, "0.0.0.0", 12345, ping_interval=None, ping_timeout=None)
+	server = await websockets.serve(receive_commands, "0.0.0.0", 12346, ping_interval=None, ping_timeout=None)
 	print("ROVER: WebSocket server started")
 	await server.wait_closed()
 
