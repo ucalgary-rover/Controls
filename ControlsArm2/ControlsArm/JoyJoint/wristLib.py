@@ -84,6 +84,3 @@ def wrist_off():
     wristMotor.setVelocityLimit(lim / 4)
     time.sleep(smoothing/ 4)
     wristMotor.setVelocityLimit(0)
-
-
-
