@@ -22,11 +22,11 @@ def connect_motor(motor):
 
 
 wristMotor1 = Stepper() 
-wristInfo1 = [.67, .67, 100, 1, 15, 10]
+wristInfo1 = [1.5, 1.5, 100, 1, 15, 10]
 wristInitialPos1 = 0
     
 wristMotor2 = Stepper() 
-wristInfo2 = [.67, .67, 100, 1, 15, 10]
+wristInfo2 = [1.5, 1.5, 100, 1, 15, 10]
 wristInitialPos2 = 0
 
 #motors = [wrist1Motor, wrist2Motor] 
@@ -119,24 +119,28 @@ def wrist2_init():
 
 
 def wrist12_up(speed):
-	if not wristMotor1.getIsMoving() and not wristMotor2.getIsMoving(): 
-		wristMotor1.setVelocityLimit(speed) 
+#	if not wristMotor1.getIsMoving() and not wristMotor2.getIsMoving(): 
+		print("up")
+		wristMotor1.setVelocityLimit(-speed) 
 		wristMotor2.setVelocityLimit(speed) 
 
 def wrist12_down(speed):
-	if not wristMotor1.getIsMoving() and not wristMotor2.getIsMoving(): 
-		wristMotor1.setVelocityLimit(-speed) 
+#	if not wristMotor1.getIsMoving() and not wristMotor2.getIsMoving(): 
+		print("down")
+		wristMotor1.setVelocityLimit(speed) 
 		wristMotor2.setVelocityLimit(-speed) 
 
 def wrist12_left(speed):
-	if not wristMotor1.getIsMoving() and not wristMotor2.getIsMoving(): 
+#	if not wristMotor1.getIsMoving() and not wristMotor2.getIsMoving(): 
+		print("left")
 		wristMotor1.setVelocityLimit(-speed) 
-		wristMotor2.setVelocityLimit(speed) 
+		wristMotor2.setVelocityLimit(-speed) 
 
 def wrist12_right(speed):
-	if not wristMotor1.getIsMoving() and not wristMotor2.getIsMoving(): 
+#	if not wristMotor1.getIsMoving() and not wristMotor2.getIsMoving(): 
+		print("right")
 		wristMotor1.setVelocityLimit(speed) 
-		wristMotor2.setVelocityLimit(-speed) 
+		wristMotor2.setVelocityLimit(speed) 
 	
 def wrist12_off():
 	lim = wristMotor1.getVelocityLimit() 
@@ -155,7 +159,3 @@ def wrist12_off():
 	wristMotor2.setVelocityLimit(lim / 4) 
 	time.sleep(smoothing / 4) 
 	wristMotor2.setVelocityLimit(0)
-
-
-
-
