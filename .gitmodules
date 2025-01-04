@@ -1,9 +1,0 @@
-[submodule "ROS_Pub_Sub_Scripts_Comp"]
-	path = ROS_Pub_Sub_Scripts_Comp
-	url = git@github.com:ucalgary-rover/ROS_Pub_Sub_Scripts_Comp.git
-[submodule "rover-sim"]
-	path = rover-sim
-	url = git@github.com:ucalgary-rover/rover-sim.git
-[submodule "rover-arm-firmware"]
-	path = rover-arm-firmware
-	url = git@github.com:ucalgary-rover/rover-arm-firmware.git
