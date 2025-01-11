@@ -9,6 +9,7 @@ Install pre-commit using pip:
 pip install pre-commit
 ```
 
+
 ## Verification
 
 After installation, verify the installation by checking the version:
@@ -22,3 +23,9 @@ pre-commit 4.0.1
 ```
 
 If you see the expected version, pre-commit is successfully installed and ready to use!
+
+## Using git hooks
+Run pre-commit install to install pre-commit into your git hooks
+```bash
+pre-commit install
+```
