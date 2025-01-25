@@ -1,5 +1,13 @@
 #include "MessageQueue.h"
 
+MessageQueue::MessageQueue() {
+
+}
+
+MessageQueue::~MessageQueue() {
+
+}
+
 //-------------------------------//
 /* DATA CREATION AND DESTRUCTION */
 //-------------------------------//
@@ -15,16 +23,26 @@
 void MessageQueue::push(const Message message)
 {
 
+    // Thread acquires lock
+    std::unique_lock<std::mutex> lock(m_mutex);
+
     if (message.isPriority())
     {
         priorityQueue.push(message);
-        return;
     }
     else
     {
         regularQueue.push(message);
-        return;
     }
+
+    // NOTE: As of 2024-01-24 we don't need this because there are conditionals to check if the thread is is empty in the pop() method.
+    // Keeping this here in case we change our minds
+
+    // If there is a thread waiting to pop an element with nothing in the queues, this sends a signal
+    // to let that thread know that something has been added to the queue and it is now safe to pop
+    // m_cond.notify_one();
+
+    return;
 }
 
 /* Remove message into correct queue depending on priority
@@ -37,6 +55,17 @@ void MessageQueue::push(const Message message)
  */
 void MessageQueue::pop()
 {
+
+    // Thread acquires lock
+    std::unique_lock<std::mutex> lock(m_mutex);
+
+    // NOTE: As of 2024-01-24 we don't need this because there are conditionals to check if the thread is is empty in the pop() method.
+    // Keeping this here in case we change our minds
+
+    // Waits for a signal from push() method if the queue is empty.
+    // Makes sure that there is something to pop
+    // m_cond.wait(lock, [this]() { return !priorityQueue.empty() && regularQueue.empty(); });
+
     if (!priorityQueue.empty())
     {
         priorityQueue.pop();
@@ -45,6 +74,8 @@ void MessageQueue::pop()
     {
         regularQueue.pop();
     }
+
+    return;
 }
 
 //----------------//
@@ -192,6 +223,10 @@ bool MessageQueue::empty() const
 // Made by ChatGPT
 int main()
 {
+
+#if 0
+    /* REGULAR TESTING */
+
     // Create Messages
     Message msg1(1, 10, {1, 2, 3});    // Priority message
     Message msg2(0, 20, {4, 5, 6});    // Regular message
@@ -257,6 +292,13 @@ int main()
     {
         std::cout << "Handled empty queue for back()\n";
     }
+
+#endif
+#if 1
+
+#endif
+    /* REGULAR TESTING */
+
 
     return 0;
 }

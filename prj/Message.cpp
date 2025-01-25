@@ -1,7 +1,11 @@
 #include "Message.h"
 
 Message::Message(int prty, int frmt, const std::vector<int> &instr)
-    : m_priority(prty), m_format(frmt), m_instructions(instr) {} // I think we would need to create a deep copy of m_instructions
+    : m_priority(prty), m_format(frmt), m_instructions(instr) {} 
+
+Message::~Message() {
+
+}
 
 bool Message::isPriority() const
 {

@@ -4,6 +4,10 @@
 #include "Message.h"
 #include <queue>
 #include <iostream>
+#include <mutex>
+#include <condition_variable>
+#include <thread> // For testing purposes only
+
 
 #pragma once
 
@@ -120,6 +124,10 @@ public:
 private:
   std::queue<Message> priorityQueue;
   std::queue<Message> regularQueue;
+
+  std::mutex m_mutex;
+  std::condition_variable m_cond;
+
 };
 
 #endif
