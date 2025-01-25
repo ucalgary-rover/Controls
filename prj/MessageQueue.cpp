@@ -1,11 +1,11 @@
 #include "MessageQueue.h"
 
-MessageQueue::MessageQueue() {
-
+MessageQueue::MessageQueue()
+{
 }
 
-MessageQueue::~MessageQueue() {
-
+MessageQueue::~MessageQueue()
+{
 }
 
 //-------------------------------//
@@ -38,10 +38,9 @@ void MessageQueue::push(const Message message)
     // If there is a thread waiting to pop an element with nothing in the queues, this sends a signal
     // to let that thread know that something has been added to the queue and it is now safe to pop
     m_cond_push.notify_one();
-
 }
 
-/* Remove message into correct queue depending on priority
+/* Remove message from correct queue depending on priority
  *
  * args:
  * none
@@ -49,27 +48,31 @@ void MessageQueue::push(const Message message)
  * returns:
  * none
  */
-void MessageQueue::pop()
+Message MessageQueue::pop()
 {
+    Message returnMessage;
 
     // Thread acquires lock
     std::unique_lock<std::mutex> lock(m_mutex);
 
     // Waits for a signal from push() method if the queue is empty.
     // Makes sure that there is something to pop
-    m_cond_push.wait(lock, [this]() { return !priorityQueue.empty() || !regularQueue.empty(); });
-    // m_cond_front.wait(lock, [this]() { return !priorityQueue.empty() || !regularQueue.empty(); });
+    m_cond_push.wait(lock, [this]()
+                     { return !priorityQueue.empty() || !regularQueue.empty(); });
 
+    // get front() and pop
     if (!priorityQueue.empty())
     {
+        returnMessage = priorityQueue.front();
         priorityQueue.pop();
     }
     else if (!regularQueue.empty())
     {
+        returnMessage = regularQueue.front();
         regularQueue.pop();
     }
 
-    return;
+    return returnMessage;
 }
 
 //----------------//
@@ -91,7 +94,8 @@ Message MessageQueue::front()
 
     // Waits for a signal from push() method if the queue is empty.
     // Makes sure that there is a message to view
-    m_cond_push.wait(lock, [this]() { return !priorityQueue.empty() || !regularQueue.empty(); });
+    m_cond_push.wait(lock, [this]()
+                     { return !priorityQueue.empty() || !regularQueue.empty(); });
 
     if (!priorityQueue.empty())
     {
@@ -122,7 +126,8 @@ Message MessageQueue::frontRegular()
 
     // Waits for a signal from push() method if the queue is empty.
     // Makes sure that there is a message to view
-    m_cond_push.wait(lock, [this]() { return !priorityQueue.empty() || !regularQueue.empty(); });
+    m_cond_push.wait(lock, [this]()
+                     { return !regularQueue.empty(); });
 
     if (!regularQueue.empty())
     {
@@ -141,7 +146,7 @@ Message MessageQueue::frontRegular()
  * returns:
  * (Message) the Message object in the back of the queue
  */
-Message MessageQueue::back() 
+Message MessageQueue::back()
 {
 
     // Thread acquires lock
@@ -149,7 +154,8 @@ Message MessageQueue::back()
 
     // Waits for a signal from push() method if the queue is empty.
     // Makes sure that there is a message to view
-    m_cond_push.wait(lock, [this]() { return !priorityQueue.empty() || !regularQueue.empty(); });
+    m_cond_push.wait(lock, [this]()
+                     { return !priorityQueue.empty() || !regularQueue.empty(); });
 
     if (!regularQueue.empty())
     {
@@ -172,7 +178,7 @@ Message MessageQueue::back()
  * returns:
  * (Message) the Message object in the back of the priority queue
  */
-Message MessageQueue::backPriority() 
+Message MessageQueue::backPriority()
 {
 
     // Thread acquires lock
@@ -180,8 +186,9 @@ Message MessageQueue::backPriority()
 
     // Waits for a signal from push() method if the queue is empty.
     // Makes sure that there is a message to view
-    m_cond_push.wait(lock, [this]() { return !priorityQueue.empty() || !regularQueue.empty(); });
-    
+    m_cond_push.wait(lock, [this]()
+                     { return !priorityQueue.empty(); });
+
     if (!priorityQueue.empty())
     {
         return priorityQueue.back();
@@ -216,7 +223,7 @@ size_t MessageQueue::size()
  * returns:
  * (size_t) the number of elements in the queue
  */
-size_t MessageQueue::sizePriority() 
+size_t MessageQueue::sizePriority()
 {
 
     // Thread acquires lock
@@ -233,7 +240,7 @@ size_t MessageQueue::sizePriority()
  * returns:
  * (size_t) the number of elements in the queue
  */
-size_t MessageQueue::sizeRegular() 
+size_t MessageQueue::sizeRegular()
 {
 
     // Thread acquires lock
@@ -250,7 +257,7 @@ size_t MessageQueue::sizeRegular()
  * returns:
  * (bool) if the queue is empty (True) or not (False)
  */
-bool MessageQueue::empty() 
+bool MessageQueue::empty()
 {
 
     // Thread acquires lock

@@ -8,13 +8,14 @@
 #include <condition_variable>
 #include <thread> // For testing purposes only
 
-
 #pragma once
 
 class MessageQueue
 {
 public:
+  // Constructor
   MessageQueue();
+  // Destructor
   ~MessageQueue();
 
   /* Add message into correct queue depending on priority
@@ -33,9 +34,9 @@ public:
    * none
    *
    * returns:
-   * none
+   * (Message) the Message object in the front of the queue
    */
-  void pop();
+  Message pop();
 
   //----------------//
   /* DATA RETRIEVAL */
@@ -127,7 +128,6 @@ private:
 
   std::mutex m_mutex;
   std::condition_variable m_cond_push;
-
 };
 
 #endif
