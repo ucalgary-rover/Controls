@@ -11,7 +11,10 @@ class Message
 {
 public:
   Message(int prty, int frmt, const std::vector<int> &instr);
+  Message();
+  Message(Message const &src);
   ~Message();
+  Message &operator=(const Message &src);
 
   bool isPriority() const;
   void printMessage() const;
