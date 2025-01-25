@@ -16,22 +16,23 @@ Compile using:
 #include <iostream>
 #include <thread>
 #include <vector>
-#include <mutex>  // For std::mutex
+#include <mutex> // For std::mutex
 #include "MessageQueue.h"
 
+// std::mutex coutMutex;
 
-// std::mutex coutMutex; 
+std::mutex coutMutex_push;
+std::mutex coutMutex_pop;
+std::mutex coutMutex_peek;
 
-std::mutex coutMutex_push; 
-std::mutex coutMutex_pop; 
-std::mutex coutMutex_peek; 
-
-// Remove all 
+// Remove all
 // std::lock_guard<std::mutex> lock(coutMutex);
 // lines to get real output (it's unreadable)
 
-void producer(MessageQueue &queue, int id, int numMessages) {
-    for (int i = 0; i < numMessages; ++i) {
+void producer(MessageQueue &queue, int id, int numMessages)
+{
+    for (int i = 0; i < numMessages; ++i)
+    {
         // Alternate between priority and regular messages
         bool isPriority = (i % 2 == 0);
         Message msg(isPriority, id * 100 + i, {id, i});
@@ -45,17 +46,21 @@ void producer(MessageQueue &queue, int id, int numMessages) {
     }
 }
 
-void consumer(MessageQueue &queue, int id, int numMessages) {
-    for (int i = 0; i < numMessages; ++i) {
-        try {
-            Message msg = queue.front(); // Peek the front message
-            queue.pop();                // Remove the front message
+void consumer(MessageQueue &queue, int id, int numMessages)
+{
+    for (int i = 0; i < numMessages; ++i)
+    {
+        try
+        {
+            Message msg = queue.pop(); // Remove the front message
 
             // Lock std::cout to ensure output is readable
-            std::lock_guard<std::mutex> lock(coutMutex_pop);    // remove this for true output
+            std::lock_guard<std::mutex> lock(coutMutex_pop); // remove this for true output
             // std::lock_guard<std::mutex> lock(coutMutex);
             std::cout << "Consumer " << id << " popped message  (Priority: " << msg.isPriority() << ")\n";
-        } catch (const std::runtime_error &e) {
+        }
+        catch (const std::runtime_error &e)
+        {
 
             // Lock std::cout to ensure output is readable
             std::lock_guard<std::mutex> lock(coutMutex_pop);
@@ -67,8 +72,10 @@ void consumer(MessageQueue &queue, int id, int numMessages) {
 }
 
 // New method to just peek the front message without removing it
-void peekFront(MessageQueue &queue, int id) {
-    try {
+void peekFront(MessageQueue &queue, int id)
+{
+    try
+    {
         Message msg = queue.front(); // Get the front message without popping it
 
         // Lock std::cout to ensure output is readable
@@ -76,7 +83,9 @@ void peekFront(MessageQueue &queue, int id) {
         // std::lock_guard<std::mutex> lock(coutMutex);
 
         std::cout << "Consumer " << id << " peeked message (Priority: " << msg.isPriority() << ")\n";
-    } catch (const std::runtime_error &e) {
+    }
+    catch (const std::runtime_error &e)
+    {
 
         // Lock std::cout to ensure output is readable
         std::lock_guard<std::mutex> lock(coutMutex_peek);
@@ -87,7 +96,8 @@ void peekFront(MessageQueue &queue, int id) {
 }
 
 #if 1
-int main() {
+int main()
+{
     MessageQueue queue;
 
     // Number of producers, consumers, and messages per thread
@@ -97,30 +107,36 @@ int main() {
 
     // Launch producer threads
     std::vector<std::thread> producers;
-    for (int i = 0; i < numProducers; ++i) {
+    for (int i = 0; i < numProducers; ++i)
+    {
         producers.emplace_back(producer, std::ref(queue), i + 1, messagesPerProducer);
     }
 
     // Launch consumer threads
     std::vector<std::thread> consumers;
-    for (int i = 0; i < numConsumers; ++i) {
+    for (int i = 0; i < numConsumers; ++i)
+    {
         consumers.emplace_back(consumer, std::ref(queue), i + 1, messagesPerProducer);
     }
 
     // Launch some peek-only threads
     std::vector<std::thread> peekers;
-    for (int i = 0; i < numConsumers; ++i) {
+    for (int i = 0; i < numConsumers; ++i)
+    {
         peekers.emplace_back(peekFront, std::ref(queue), i + 1);
     }
 
     // Join all threads
-    for (auto &p : producers) {
+    for (auto &p : producers)
+    {
         p.join();
     }
-    for (auto &c : consumers) {
+    for (auto &c : consumers)
+    {
         c.join();
     }
-    for (auto &peeker : peekers) {
+    for (auto &peeker : peekers)
+    {
         peeker.join();
     }
 
