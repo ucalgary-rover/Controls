@@ -49,7 +49,7 @@ public:
    * returns:
    * (Message) the Message object in the front of the queue
    */
-  Message front() const;
+  Message front();
 
   /* Returns the message in the front of the regular (non-priority) queue
    *
@@ -59,7 +59,7 @@ public:
    * returns:
    * (Message) the Message object in the front of the queue
    */
-  Message frontRegular() const;
+  Message frontRegular();
 
   /* Returns the message in the back of the queue
    *
@@ -69,7 +69,7 @@ public:
    * returns:
    * (Message) the Message object in the back of the queue
    */
-  Message back() const;
+  Message back();
 
   /* Returns the message in the front of the priority queue
    *
@@ -79,7 +79,7 @@ public:
    * returns:
    * (Message) the Message object in the back of the priority queue
    */
-  Message backPriority() const;
+  Message backPriority();
 
   /* Returns how many elements are in the queue
    *
@@ -89,7 +89,7 @@ public:
    * returns:
    * (size_t) the number of elements in the queue
    */
-  size_t size() const;
+  size_t size();
 
   /* Returns how many elements are in the priority queue
    *
@@ -99,7 +99,7 @@ public:
    * returns:
    * (size_t) the number of elements in the queue
    */
-  size_t sizePriority() const;
+  size_t sizePriority();
 
   /* Returns how many elements are in the regular queue
    *
@@ -109,7 +109,7 @@ public:
    * returns:
    * (size_t) the number of elements in the queue
    */
-  size_t sizeRegular() const;
+  size_t sizeRegular();
 
   /* Returns if the queue is empty (True) or not (False)
    *
@@ -119,14 +119,14 @@ public:
    * returns:
    * (bool) if the queue is empty (True) or not (False)
    */
-  bool empty() const;
+  bool empty();
 
 private:
   std::queue<Message> priorityQueue;
   std::queue<Message> regularQueue;
 
   std::mutex m_mutex;
-  std::condition_variable m_cond;
+  std::condition_variable m_cond_push;
 
 };
 

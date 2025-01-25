@@ -35,14 +35,10 @@ void MessageQueue::push(const Message message)
         regularQueue.push(message);
     }
 
-    // NOTE: As of 2024-01-24 we don't need this because there are conditionals to check if the thread is is empty in the pop() method.
-    // Keeping this here in case we change our minds
-
     // If there is a thread waiting to pop an element with nothing in the queues, this sends a signal
     // to let that thread know that something has been added to the queue and it is now safe to pop
-    // m_cond.notify_one();
+    m_cond_push.notify_one();
 
-    return;
 }
 
 /* Remove message into correct queue depending on priority
@@ -59,12 +55,10 @@ void MessageQueue::pop()
     // Thread acquires lock
     std::unique_lock<std::mutex> lock(m_mutex);
 
-    // NOTE: As of 2024-01-24 we don't need this because there are conditionals to check if the thread is is empty in the pop() method.
-    // Keeping this here in case we change our minds
-
     // Waits for a signal from push() method if the queue is empty.
     // Makes sure that there is something to pop
-    // m_cond.wait(lock, [this]() { return !priorityQueue.empty() && regularQueue.empty(); });
+    m_cond_push.wait(lock, [this]() { return !priorityQueue.empty() || !regularQueue.empty(); });
+    // m_cond_front.wait(lock, [this]() { return !priorityQueue.empty() || !regularQueue.empty(); });
 
     if (!priorityQueue.empty())
     {
@@ -90,8 +84,14 @@ void MessageQueue::pop()
  * returns:
  * (Message) the Message object in the front of the queue
  */
-Message MessageQueue::front() const
+Message MessageQueue::front()
 {
+    // Thread acquires lock
+    std::unique_lock<std::mutex> lock(m_mutex);
+
+    // Waits for a signal from push() method if the queue is empty.
+    // Makes sure that there is a message to view
+    m_cond_push.wait(lock, [this]() { return !priorityQueue.empty() || !regularQueue.empty(); });
 
     if (!priorityQueue.empty())
     {
@@ -114,8 +114,16 @@ Message MessageQueue::front() const
  * returns:
  * (Message) the Message object in the front of the queue
  */
-Message MessageQueue::frontRegular() const
+Message MessageQueue::frontRegular()
 {
+
+    // Thread acquires lock
+    std::unique_lock<std::mutex> lock(m_mutex);
+
+    // Waits for a signal from push() method if the queue is empty.
+    // Makes sure that there is a message to view
+    m_cond_push.wait(lock, [this]() { return !priorityQueue.empty() || !regularQueue.empty(); });
+
     if (!regularQueue.empty())
     {
         return regularQueue.front();
@@ -133,8 +141,16 @@ Message MessageQueue::frontRegular() const
  * returns:
  * (Message) the Message object in the back of the queue
  */
-Message MessageQueue::back() const
+Message MessageQueue::back() 
 {
+
+    // Thread acquires lock
+    std::unique_lock<std::mutex> lock(m_mutex);
+
+    // Waits for a signal from push() method if the queue is empty.
+    // Makes sure that there is a message to view
+    m_cond_push.wait(lock, [this]() { return !priorityQueue.empty() || !regularQueue.empty(); });
+
     if (!regularQueue.empty())
     {
         return regularQueue.back();
@@ -156,8 +172,16 @@ Message MessageQueue::back() const
  * returns:
  * (Message) the Message object in the back of the priority queue
  */
-Message MessageQueue::backPriority() const
+Message MessageQueue::backPriority() 
 {
+
+    // Thread acquires lock
+    std::unique_lock<std::mutex> lock(m_mutex);
+
+    // Waits for a signal from push() method if the queue is empty.
+    // Makes sure that there is a message to view
+    m_cond_push.wait(lock, [this]() { return !priorityQueue.empty() || !regularQueue.empty(); });
+    
     if (!priorityQueue.empty())
     {
         return priorityQueue.back();
@@ -175,8 +199,12 @@ Message MessageQueue::backPriority() const
  * returns:
  * (size_t) the number of elements in the queue
  */
-size_t MessageQueue::size() const
+size_t MessageQueue::size()
 {
+
+    // Thread acquires lock
+    std::unique_lock<std::mutex> lock(m_mutex);
+
     return priorityQueue.size() + regularQueue.size();
 }
 
@@ -188,8 +216,12 @@ size_t MessageQueue::size() const
  * returns:
  * (size_t) the number of elements in the queue
  */
-size_t MessageQueue::sizePriority() const
+size_t MessageQueue::sizePriority() 
 {
+
+    // Thread acquires lock
+    std::unique_lock<std::mutex> lock(m_mutex);
+
     return priorityQueue.size();
 }
 
@@ -201,8 +233,12 @@ size_t MessageQueue::sizePriority() const
  * returns:
  * (size_t) the number of elements in the queue
  */
-size_t MessageQueue::sizeRegular() const
+size_t MessageQueue::sizeRegular() 
 {
+
+    // Thread acquires lock
+    std::unique_lock<std::mutex> lock(m_mutex);
+
     return regularQueue.size();
 }
 
@@ -214,17 +250,21 @@ size_t MessageQueue::sizeRegular() const
  * returns:
  * (bool) if the queue is empty (True) or not (False)
  */
-bool MessageQueue::empty() const
+bool MessageQueue::empty() 
 {
+
+    // Thread acquires lock
+    std::unique_lock<std::mutex> lock(m_mutex);
+
     return (priorityQueue.empty() && regularQueue.empty());
 }
 
 // Testing for custom MessageQueue
-// Made by ChatGPT
+#if 0
 int main()
 {
 
-#if 0
+
     /* REGULAR TESTING */
 
     // Create Messages
@@ -293,12 +333,14 @@ int main()
         std::cout << "Handled empty queue for back()\n";
     }
 
-#endif
-#if 1
 
-#endif
+
+
+
     /* REGULAR TESTING */
 
 
     return 0;
 }
+
+#endif
