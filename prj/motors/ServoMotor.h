@@ -5,8 +5,8 @@
 
 class ServoMotor {
 public:
-  ServoMotor();
-  ~ServoMotor();
+    ServoMotor();
+    ~ServoMotor();
 
 private:
 };

@@ -5,8 +5,8 @@
 
 class LinearActuator {
 public:
-  LinearActuator();
-  ~LinearActuator();
+    LinearActuator();
+    ~LinearActuator();
 
 private:
 };

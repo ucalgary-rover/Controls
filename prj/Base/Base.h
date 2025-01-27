@@ -5,8 +5,8 @@
 
 class Base {
 public:
-  Base();
-  ~Base();
+    Base();
+    ~Base();
 
 private:
 };

@@ -5,8 +5,8 @@
 
 class DCMotor {
 public:
-  DCMotor();
-  ~DCMotor();
+    DCMotor();
+    ~DCMotor();
 
 private:
 };

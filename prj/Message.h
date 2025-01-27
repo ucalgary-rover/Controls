@@ -9,19 +9,19 @@
 
 class Message {
 public:
-  Message(int prty, int frmt, const std::vector<int> &instr);
-  Message();
-  Message(Message const &src);
-  ~Message();
-  Message &operator=(const Message &src);
+    Message(int prty, int frmt, const std::vector<int>& instr);
+    Message();
+    Message(Message const& src);
+    ~Message();
+    Message& operator=(const Message& src);
 
-  bool isPriority() const;
-  void printMessage() const;
+    bool isPriority() const;
+    void printMessage() const;
 
 private:
-  bool m_priority;
-  int m_format;
-  std::vector<int> m_instructions;
+    bool m_priority;
+    int m_format;
+    std::vector<int> m_instructions;
 };
 
 #endif

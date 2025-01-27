@@ -5,8 +5,8 @@
 
 class Rover {
 public:
-  Rover();
-  ~Rover();
+    Rover();
+    ~Rover();
 
 private:
 };
