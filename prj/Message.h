@@ -3,12 +3,11 @@
 
 #pragma once
 
-#include <vector>
 #include <iostream>
 #include <stdint.h>
+#include <vector>
 
-class Message
-{
+class Message {
 public:
   Message(int prty, int frmt, const std::vector<int> &instr);
   Message();

@@ -1,12 +1,8 @@
 #include "MessageQueue.h"
 
-MessageQueue::MessageQueue()
-{
-}
+MessageQueue::MessageQueue() {}
 
-MessageQueue::~MessageQueue()
-{
-}
+MessageQueue::~MessageQueue() {}
 
 //-------------------------------//
 /* DATA CREATION AND DESTRUCTION */
@@ -20,24 +16,21 @@ MessageQueue::~MessageQueue()
  * returns:
  * none
  */
-void MessageQueue::push(const Message message)
-{
+void MessageQueue::push(const Message message) {
 
-    // Thread acquires lock
-    std::unique_lock<std::mutex> lock(m_mutex);
+  // Thread acquires lock
+  std::unique_lock<std::mutex> lock(m_mutex);
 
-    if (message.isPriority())
-    {
-        priorityQueue.push(message);
-    }
-    else
-    {
-        regularQueue.push(message);
-    }
+  if (message.isPriority()) {
+    priorityQueue.push(message);
+  } else {
+    regularQueue.push(message);
+  }
 
-    // If there is a thread waiting to pop an element with nothing in the queues, this sends a signal
-    // to let that thread know that something has been added to the queue and it is now safe to pop
-    m_cond_push.notify_one();
+  // If there is a thread waiting to pop an element with nothing in the queues,
+  // this sends a signal to let that thread know that something has been added
+  // to the queue and it is now safe to pop
+  m_cond_push.notify_one();
 }
 
 /* Remove message from correct queue depending on priority
@@ -48,31 +41,28 @@ void MessageQueue::push(const Message message)
  * returns:
  * none
  */
-Message MessageQueue::pop()
-{
-    Message returnMessage;
+Message MessageQueue::pop() {
+  Message returnMessage;
 
-    // Thread acquires lock
-    std::unique_lock<std::mutex> lock(m_mutex);
+  // Thread acquires lock
+  std::unique_lock<std::mutex> lock(m_mutex);
 
-    // Waits for a signal from push() method if the queue is empty.
-    // Makes sure that there is something to pop
-    m_cond_push.wait(lock, [this]()
-                     { return !priorityQueue.empty() || !regularQueue.empty(); });
+  // Waits for a signal from push() method if the queue is empty.
+  // Makes sure that there is something to pop
+  m_cond_push.wait(lock, [this]() {
+    return !priorityQueue.empty() || !regularQueue.empty();
+  });
 
-    // get front() and pop
-    if (!priorityQueue.empty())
-    {
-        returnMessage = priorityQueue.front();
-        priorityQueue.pop();
-    }
-    else if (!regularQueue.empty())
-    {
-        returnMessage = regularQueue.front();
-        regularQueue.pop();
-    }
+  // get front() and pop
+  if (!priorityQueue.empty()) {
+    returnMessage = priorityQueue.front();
+    priorityQueue.pop();
+  } else if (!regularQueue.empty()) {
+    returnMessage = regularQueue.front();
+    regularQueue.pop();
+  }
 
-    return returnMessage;
+  return returnMessage;
 }
 
 //----------------//
@@ -87,27 +77,24 @@ Message MessageQueue::pop()
  * returns:
  * (Message) the Message object in the front of the queue
  */
-Message MessageQueue::front()
-{
-    // Thread acquires lock
-    std::unique_lock<std::mutex> lock(m_mutex);
+Message MessageQueue::front() {
+  // Thread acquires lock
+  std::unique_lock<std::mutex> lock(m_mutex);
 
-    // Waits for a signal from push() method if the queue is empty.
-    // Makes sure that there is a message to view
-    m_cond_push.wait(lock, [this]()
-                     { return !priorityQueue.empty() || !regularQueue.empty(); });
+  // Waits for a signal from push() method if the queue is empty.
+  // Makes sure that there is a message to view
+  m_cond_push.wait(lock, [this]() {
+    return !priorityQueue.empty() || !regularQueue.empty();
+  });
 
-    if (!priorityQueue.empty())
-    {
-        return priorityQueue.front();
-    }
-    else if (!regularQueue.empty())
-    {
-        return regularQueue.front();
-    }
+  if (!priorityQueue.empty()) {
+    return priorityQueue.front();
+  } else if (!regularQueue.empty()) {
+    return regularQueue.front();
+  }
 
-    // Throw runtime error if queue is empty
-    throw std::runtime_error("Queue is empty. Cannot retrieve front element.");
+  // Throw runtime error if queue is empty
+  throw std::runtime_error("Queue is empty. Cannot retrieve front element.");
 }
 
 /* Returns the message in the front of the regular (non-priority) queue
@@ -118,24 +105,22 @@ Message MessageQueue::front()
  * returns:
  * (Message) the Message object in the front of the queue
  */
-Message MessageQueue::frontRegular()
-{
+Message MessageQueue::frontRegular() {
 
-    // Thread acquires lock
-    std::unique_lock<std::mutex> lock(m_mutex);
+  // Thread acquires lock
+  std::unique_lock<std::mutex> lock(m_mutex);
 
-    // Waits for a signal from push() method if the queue is empty.
-    // Makes sure that there is a message to view
-    m_cond_push.wait(lock, [this]()
-                     { return !regularQueue.empty(); });
+  // Waits for a signal from push() method if the queue is empty.
+  // Makes sure that there is a message to view
+  m_cond_push.wait(lock, [this]() { return !regularQueue.empty(); });
 
-    if (!regularQueue.empty())
-    {
-        return regularQueue.front();
-    }
+  if (!regularQueue.empty()) {
+    return regularQueue.front();
+  }
 
-    // Throw runtime error if queue is empty
-    throw std::runtime_error("Queue is empty. Cannot retrieve frontRegular element.");
+  // Throw runtime error if queue is empty
+  throw std::runtime_error(
+      "Queue is empty. Cannot retrieve frontRegular element.");
 }
 
 /* Returns the message in the back of the queue
@@ -146,28 +131,25 @@ Message MessageQueue::frontRegular()
  * returns:
  * (Message) the Message object in the back of the queue
  */
-Message MessageQueue::back()
-{
+Message MessageQueue::back() {
 
-    // Thread acquires lock
-    std::unique_lock<std::mutex> lock(m_mutex);
+  // Thread acquires lock
+  std::unique_lock<std::mutex> lock(m_mutex);
 
-    // Waits for a signal from push() method if the queue is empty.
-    // Makes sure that there is a message to view
-    m_cond_push.wait(lock, [this]()
-                     { return !priorityQueue.empty() || !regularQueue.empty(); });
+  // Waits for a signal from push() method if the queue is empty.
+  // Makes sure that there is a message to view
+  m_cond_push.wait(lock, [this]() {
+    return !priorityQueue.empty() || !regularQueue.empty();
+  });
 
-    if (!regularQueue.empty())
-    {
-        return regularQueue.back();
-    }
-    else if (!priorityQueue.empty())
-    {
-        return priorityQueue.back();
-    }
+  if (!regularQueue.empty()) {
+    return regularQueue.back();
+  } else if (!priorityQueue.empty()) {
+    return priorityQueue.back();
+  }
 
-    // Throw runtime error if queue is empty
-    throw std::runtime_error("Queue is empty. Cannot retrieve back element.");
+  // Throw runtime error if queue is empty
+  throw std::runtime_error("Queue is empty. Cannot retrieve back element.");
 }
 
 /* Returns the message in the front of the priority queue
@@ -178,24 +160,22 @@ Message MessageQueue::back()
  * returns:
  * (Message) the Message object in the back of the priority queue
  */
-Message MessageQueue::backPriority()
-{
+Message MessageQueue::backPriority() {
 
-    // Thread acquires lock
-    std::unique_lock<std::mutex> lock(m_mutex);
+  // Thread acquires lock
+  std::unique_lock<std::mutex> lock(m_mutex);
 
-    // Waits for a signal from push() method if the queue is empty.
-    // Makes sure that there is a message to view
-    m_cond_push.wait(lock, [this]()
-                     { return !priorityQueue.empty(); });
+  // Waits for a signal from push() method if the queue is empty.
+  // Makes sure that there is a message to view
+  m_cond_push.wait(lock, [this]() { return !priorityQueue.empty(); });
 
-    if (!priorityQueue.empty())
-    {
-        return priorityQueue.back();
-    }
+  if (!priorityQueue.empty()) {
+    return priorityQueue.back();
+  }
 
-    // Throw runtime error if queue is empty
-    throw std::runtime_error("Queue is empty. Cannot retrieve backPriority element.");
+  // Throw runtime error if queue is empty
+  throw std::runtime_error(
+      "Queue is empty. Cannot retrieve backPriority element.");
 }
 
 /* Returns how many elements are in the queue
@@ -206,13 +186,12 @@ Message MessageQueue::backPriority()
  * returns:
  * (size_t) the number of elements in the queue
  */
-size_t MessageQueue::size()
-{
+size_t MessageQueue::size() {
 
-    // Thread acquires lock
-    std::unique_lock<std::mutex> lock(m_mutex);
+  // Thread acquires lock
+  std::unique_lock<std::mutex> lock(m_mutex);
 
-    return priorityQueue.size() + regularQueue.size();
+  return priorityQueue.size() + regularQueue.size();
 }
 
 /* Returns how many elements are in the priority queue
@@ -223,13 +202,12 @@ size_t MessageQueue::size()
  * returns:
  * (size_t) the number of elements in the queue
  */
-size_t MessageQueue::sizePriority()
-{
+size_t MessageQueue::sizePriority() {
 
-    // Thread acquires lock
-    std::unique_lock<std::mutex> lock(m_mutex);
+  // Thread acquires lock
+  std::unique_lock<std::mutex> lock(m_mutex);
 
-    return priorityQueue.size();
+  return priorityQueue.size();
 }
 
 /* Returns how many elements are in the regular queue
@@ -240,13 +218,12 @@ size_t MessageQueue::sizePriority()
  * returns:
  * (size_t) the number of elements in the queue
  */
-size_t MessageQueue::sizeRegular()
-{
+size_t MessageQueue::sizeRegular() {
 
-    // Thread acquires lock
-    std::unique_lock<std::mutex> lock(m_mutex);
+  // Thread acquires lock
+  std::unique_lock<std::mutex> lock(m_mutex);
 
-    return regularQueue.size();
+  return regularQueue.size();
 }
 
 /* Returns if the queue is empty (True) or not (False)
@@ -257,13 +234,12 @@ size_t MessageQueue::sizeRegular()
  * returns:
  * (bool) if the queue is empty (True) or not (False)
  */
-bool MessageQueue::empty()
-{
+bool MessageQueue::empty() {
 
-    // Thread acquires lock
-    std::unique_lock<std::mutex> lock(m_mutex);
+  // Thread acquires lock
+  std::unique_lock<std::mutex> lock(m_mutex);
 
-    return (priorityQueue.empty() && regularQueue.empty());
+  return (priorityQueue.empty() && regularQueue.empty());
 }
 
 // Testing for custom MessageQueue

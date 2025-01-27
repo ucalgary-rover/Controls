@@ -2,16 +2,15 @@
 #define QUEUE_H
 
 #include "Message.h"
-#include <queue>
+#include <condition_variable>
 #include <iostream>
 #include <mutex>
-#include <condition_variable>
+#include <queue>
 #include <thread> // For testing purposes only
 
 #pragma once
 
-class MessageQueue
-{
+class MessageQueue {
 public:
   // Constructor
   MessageQueue();

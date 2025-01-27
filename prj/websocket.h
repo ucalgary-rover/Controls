@@ -1,21 +1,20 @@
 #ifndef WEB_SOCKET_H
 #define WEB_SOCKET_H
 
+#include <iostream>
+#include <mutex>
+#include <queue>
+#include <string>
+#include <vector>
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
-#include <queue>
-#include <vector>
-#include <string>
-#include <mutex>
-#include <iostream>
 
 // Type aliases for convenience
 using WebSocketServer = websocketpp::server<websocketpp::config::asio>;
 using ConnectionHandle = websocketpp::connection_hdl;
 
 /* Represents a message exchanged between the WebSocket server and clients */
-class WebSocketMessage
-{
+class WebSocketMessage {
 public:
   /* Constructs a WebSocketMessage object
    *
@@ -24,8 +23,10 @@ public:
    * messagePriority (int) - Priority of the message (0 = low, 1 = high)
    * payload (std::vector<int>) - The data payload of the message
    */
-  WebSocketMessage(int messageType, int messagePriority, const std::vector<int> &payload)
-      : messageType(messageType), messagePriority(messagePriority), payload(payload) {}
+  WebSocketMessage(int messageType, int messagePriority,
+                   const std::vector<int> &payload)
+      : messageType(messageType), messagePriority(messagePriority),
+        payload(payload) {}
 
   /* Checks if the message is marked as a priority
    *
@@ -45,12 +46,10 @@ public:
    * returns:
    * none
    */
-  void printMessage() const
-  {
+  void printMessage() const {
     std::cout << "Type: " << messageType << ", Priority: " << messagePriority
               << ", Data: ";
-    for (const auto &dataElement : payload)
-    {
+    for (const auto &dataElement : payload) {
       std::cout << dataElement << " ";
     }
     std::cout << std::endl;
@@ -63,8 +62,7 @@ private:
 };
 
 /* Represents a WebSocket server for communication with clients */
-class WebSocket
-{
+class WebSocket {
 public:
   /* Constructs a WebSocket server instance */
   WebSocket();
@@ -106,20 +104,23 @@ private:
   /* Handles incoming messages from clients
    *
    * args:
-   * serverInstance (WebSocketServer*) - Pointer to the WebSocket server instance
-   * connection (ConnectionHandle) - The connection handle for the client
-   * message (WebSocketServer::message_ptr) - The message received from the client
+   * serverInstance (WebSocketServer*) - Pointer to the WebSocket server
+   * instance connection (ConnectionHandle) - The connection handle for the
+   * client message (WebSocketServer::message_ptr) - The message received from
+   * the client
    *
    * returns:
    * none
    */
-  void onMessage(WebSocketServer *serverInstance, ConnectionHandle connection, WebSocketServer::message_ptr message);
+  void onMessage(WebSocketServer *serverInstance, ConnectionHandle connection,
+                 WebSocketServer::message_ptr message);
 
   WebSocketServer webSocketServer;       // WebSocket server instance
   mutable ConnectionHandle activeClient; // Current active client connection
 
-  std::queue<WebSocketMessage> messageQueue; // Queue for storing received messages
-  std::mutex queueMutex;                     // Mutex for thread-safe access to the queue
+  std::queue<WebSocketMessage>
+      messageQueue;      // Queue for storing received messages
+  std::mutex queueMutex; // Mutex for thread-safe access to the queue
 };
 
 #endif // WEB_SOCKET_H
