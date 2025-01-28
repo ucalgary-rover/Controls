@@ -30,6 +30,15 @@ Run pre-commit install to install pre-commit into your git hooks
 pre-commit install
 ```
 
+# Enabling git commit template
+
+git commit template gives a format to fill out when writting a commit message. Run the following command from the root of the repo to allow the template to be active:
+
+```bash
+git config commit.template .gitmessage
+```
+
+
 # Setting up "make"
 
 "make" is required to run the make file to simplefy compelation of the program. These instructions include installing choco, as its is one way to install make in a simple manor
