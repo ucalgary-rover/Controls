@@ -5,7 +5,32 @@
 
 #include <iostream>
 #include <stdint.h>
+#include <variant>
 #include <vector>
+
+// Commented out section below allows multiple message types (structs) while
+// letting Message have the same format
+/*
+struct WheelMessage {
+    int velocity;
+    int theta;
+    int angle_velocity;
+};
+
+struct ArmMessage {
+    int armXPos;
+    int armYPos;
+};
+
+struct ClawMessage {
+    int clawOpenDistance;
+    int rotation;
+    int tilt;
+};
+
+// Allows for different message formats
+using MessagePayload = std::variant<WheelMessage, ArmMessage, ClawMessage>;
+*/
 
 class Message {
 public:
@@ -20,6 +45,7 @@ public:
 
 private:
     bool m_priority;
+    // MessagePayload m_payload;
     int m_format;
     std::vector<int> m_instructions;
 };

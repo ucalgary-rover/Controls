@@ -4,6 +4,11 @@
 Message::Message(int prty, int frmt, const std::vector<int>& instr) :
     m_priority(prty), m_format(frmt), m_instructions(instr) { }
 
+/*
+// Constructor for struct messages commented out in Message.h
+Message(int prty, MessagePayload payload)
+        : m_priority(prty), m_payload(std::move(payload)) { }
+*/
 // Default Constructor
 Message::Message() {
     m_priority = 0;
