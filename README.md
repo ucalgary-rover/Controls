@@ -1,3 +1,11 @@
+# Repo Setup
+
+Please run 
+```bash
+./setup.sh
+```
+To run the necessary commands for setting up the repo. This step does not include setting up "make" (steps for that can be seen below). These steps have been tested on Windows, but not on IOS or Linux. There is a step by step below that explains the commands and why they are needed.
+
 # Setting Up Pre-Commit
 
 To ensure consistent code quality and enforce standards, we use **pre-commit** hooks. Follow the steps below to install and verify it:
