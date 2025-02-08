@@ -28,15 +28,13 @@ struct ArmMessage {
     int armXPos;
     int armYPos;
     int armZPos;
-    int wristRotation;
-};
 
-// Message format for claw
-struct ClawMessage {
     int clawXPos;
     int clawYPos;
     int clawOpen;
     int clawRotation;
+
+    int wristRotation;
 };
 
 // Message format for science tool
@@ -46,8 +44,8 @@ struct ScienceToolMessage {
 };
 
 // Allows for different message formats
-using MessagePayload = std::variant<Generic, WheelMessage, ArmMessage,
-                                    ClawMessage, ScienceToolMessage>;
+using MessagePayload
+    = std::variant<Generic, WheelMessage, ArmMessage, ScienceToolMessage>;
 
 class Message {
 public:

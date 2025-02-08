@@ -42,9 +42,8 @@ void Message::printMessage() const {
                 std::cout << "ArmMessage - X: " << payload.armXPos
                           << ", Y: " << payload.armYPos
                           << ", Z: " << payload.armZPos
-                          << ", Wrist Rotation: " << payload.wristRotation;
-            } else if constexpr (std::is_same_v<T, ClawMessage>) {
-                std::cout << "ClawMessage - X: " << payload.clawXPos
+                          << ", Wrist Rotation: " << payload.wristRotation
+                          << "ClawMessage - X: " << payload.clawXPos
                           << ", Y: " << payload.clawYPos
                           << ", Open: " << payload.clawOpen
                           << ", Rotation: " << payload.clawRotation;
