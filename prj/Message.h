@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "pub_general.h"
 #include <iostream>
 #include <stdint.h>
 #include <variant>
@@ -12,36 +13,6 @@
 // letting Message have the same format
 
 // Generic message format for default constructor
-struct Generic {
-    int value;
-};
-
-// Message format for wheels
-struct WheelMessage {
-    int velocity;
-    int theta;
-    int angle_velocity;
-};
-
-// Message format for arm
-struct ArmMessage {
-    int armXPos;
-    int armYPos;
-    int armZPos;
-
-    int clawXPos;
-    int clawYPos;
-    int clawOpen;
-    int clawRotation;
-
-    int wristRotation;
-};
-
-// Message format for science tool
-struct ScienceToolMessage {
-    int moveUpDown;
-    int moveLeftRight;
-};
 
 // Allows for different message formats
 using MessagePayload
