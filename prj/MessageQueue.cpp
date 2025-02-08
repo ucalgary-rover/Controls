@@ -21,6 +21,11 @@ void MessageQueue::push(const Message message) {
     // Thread acquires lock
     std::unique_lock<std::mutex> lock(m_mutex);
 
+    if (!this->isQueueLimit()) {
+        std::cout << "Queue limit reached. push discarded" << std::endl;
+        return;
+    }
+
     if (message.isPriority()) {
         priorityQueue.push(message);
     } else {
@@ -240,6 +245,24 @@ bool MessageQueue::empty() {
     std::unique_lock<std::mutex> lock(m_mutex);
 
     return (priorityQueue.empty() && regularQueue.empty());
+}
+
+/* Returns if the queue is empty (True) or not (False)
+ *
+ * args:
+ * none
+ *
+ * returns:
+ * (bool) if the queue is empty (True) or not (False)
+ */
+bool MessageQueue::isQueueLimit() {
+
+    // Compare size of this MessageQueue Object to the QUEUE_LIMIT
+    if (this->size() > QUEUE_LIMIT)
+        return true;
+
+    else
+        return false;
 }
 
 // Testing for custom MessageQueue

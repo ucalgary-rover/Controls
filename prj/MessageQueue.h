@@ -1,6 +1,8 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
+#define QUEUE_LIMIT 100 // The maximum size of the queue
+
 #include "Message.h"
 #include <condition_variable>
 #include <iostream>
@@ -11,6 +13,7 @@
 #pragma once
 
 class MessageQueue {
+
 public:
     // Constructor
     MessageQueue();
@@ -122,11 +125,23 @@ public:
     bool empty();
 
 private:
-    std::queue<Message> priorityQueue;
-    std::queue<Message> regularQueue;
+    std::queue<Message> priorityQueue; // The priority queue
+    std::queue<Message> regularQueue;  // The regular queue
 
-    std::mutex m_mutex;
-    std::condition_variable m_cond_push;
+    std::mutex m_mutex; // Lock to prevent accesses by multiples threads
+    std::condition_variable
+        m_cond_push; // Used to signal when a push has been done on a queue (For
+                     // threading purposes)
+
+    /* Returns if queue has reached a maximum capacity
+     *
+     * args:
+     * none
+     *
+     * returns:
+     * (bool) if the queue is at its limit (True) or not (False)
+     */
+    bool isQueueLimit();
 };
 
 #endif
