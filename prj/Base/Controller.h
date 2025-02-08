@@ -1,33 +1,9 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#pragma once
-
+#include "pub_general.h"
 #include <SDL2/SDL.h>
 #include <iostream>
-
-// Used to streamline the struct
-typedef void (*ControllerFunc)(void *args);
-
-// a struct for function pointers used for button mapping
-struct buttonFunctions {
-  ControllerFunc Button;
-  ControllerFunc BUTTON_A;
-  ControllerFunc BUTTON_B;
-  ControllerFunc BUTTON_X;
-  ControllerFunc BUTTON_Y;
-  ControllerFunc BUTTON_BACK;
-  ControllerFunc BUTTON_GUIDE;
-  ControllerFunc BUTTON_START;
-  ControllerFunc BUTTON_LEFTSTICK;
-  ControllerFunc BUTTON_RIGHTSTICK;
-  ControllerFunc BUTTON_LEFTSHOULDER;
-  ControllerFunc BUTTON_RIGHTSHOULDER;
-  ControllerFunc BUTTON_DPAD_UP;
-  ControllerFunc BUTTON_DPAD_DOWN;
-  ControllerFunc BUTTON_DPAD_LEFT;
-  ControllerFunc BUTTON_DPAD_RIGHT;
-};
 
 // A class for initializing controllers and running the pollEvent loop
 // Holds a list of structs that are linked to the positions of the controllers
@@ -70,7 +46,7 @@ class ControllerHolder {
 
   private:
     // the identifier (a pointer to the controller object and its instance ID)
-    SDL_GameController *m_pointerID;
+    SDL_GameController* m_pointerID;
     SDL_JoystickID m_instanceID;
 
     // the values used to initialize sticks just identify a generic left or
@@ -86,7 +62,7 @@ class ControllerHolder {
 
     // these are never changed unless there is a new controller anyways so no
     // setter needed
-    SDL_GameController *getPointerID() { return m_pointerID; };
+    SDL_GameController* getPointerID() { return m_pointerID; };
     SDL_JoystickID getInstanceID() { return m_instanceID; };
 
     Stick getLeftStick() { return m_leftStick; };
@@ -114,7 +90,7 @@ class ControllerHolder {
      *@return None
      *
      */
-    Controller(SDL_GameController *identifier) {
+    Controller(SDL_GameController* identifier) {
       m_pointerID = identifier;
 
       // joystick / controller instance ID <- joystick pointer <- controller

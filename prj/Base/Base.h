@@ -4,18 +4,18 @@
 #ifndef BASE_H
 #define BASE_H
 
-#include <iostream>
 #include <initializer_list>
+#include <iostream>
 #include <vector>
 
 #include "Controller.h"
+#include "pub_general.h"
 
 using namespace std;
 
 #pragma once
 
-class Base
-{
+class Base {
 private:
   // Constant variables for calculations
   float PI = 3.1415926;
