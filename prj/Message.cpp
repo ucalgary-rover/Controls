@@ -2,14 +2,14 @@
 
 // Constructor
 Message::Message(int prty, MessagePayload payload) :
-    m_priority(prty), m_payload(std::move(payload)) { }
+    m_isHighPriority(prty), m_payload(std::move(payload)) { }
 
 // Default Constructor
-Message::Message() : m_priority(0), m_payload(Generic { 0 }) { }
+Message::Message() : m_isHighPriority(0), m_payload(Generic { 0 }) { }
 
 // Copy Constructor
 Message::Message(Message const& src) :
-    m_priority(src.m_priority), m_payload(src.m_payload) { }
+    m_isHighPriority(src.m_isHighPriority), m_payload(src.m_payload) { }
 
 // Destructor
 Message::~Message() { }
@@ -17,18 +17,18 @@ Message::~Message() { }
 // Assignment Operator
 Message& Message::operator=(const Message& src) {
     if (this != &src) {
-        m_priority = src.m_priority;
+        m_isHighPriority = src.m_isHighPriority;
         m_payload = src.m_payload;
     }
     return *this;
 }
 
 // Check if the message is a priority
-bool Message::isPriority() const { return m_priority; }
+bool Message::isHighPriority() const { return m_isHighPriority; }
 
 // Print Message details
 void Message::printMessage() const {
-    std::cout << "Priority: " << m_priority << ", Payload: ";
+    std::cout << "Priority: " << m_isHighPriority << ", Payload: ";
     std::visit(
         [](auto&& payload) {
             using T = std::decay_t<decltype(payload)>;

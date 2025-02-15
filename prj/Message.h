@@ -22,7 +22,7 @@ class Message {
 public:
     /* Constructor for message
      *
-     * args:
+     * @param
      *  prty: int - The priority of the message
      *  payload: MessagePayload - The type of struct being put into the message
      *
@@ -38,29 +38,28 @@ public:
 
     /* Returns if a message has priority
      *
-     * args:
+     * @param
      * none
      *
-     * returns:
+     * @return
      * (bool) if the message has priority (True) or not (False)
      */
-    bool isPriority() const;
+    bool isHighPriority() const;
 
     /* prints contents of Message
      *
-     * args:
+     * @param
      * none
      *
-     * returns:
+     * @return
      * none
      */
     void printMessage() const;
 
 private:
-    bool m_priority;          // Priority of message
+    bool m_isHighPriority;    // Priority of message
     MessagePayload m_payload; // One of the struct messages
-    // int m_format;
-    // std::vector<int> m_instructions;
+    MessageFormat m_format;
 };
 
 #endif

@@ -54,7 +54,7 @@ void consumer(MessageQueue& queue, int id, int numMessages) {
             // Lock std::cout to ensure output is readable
             // std::lock_guard<std::mutex> lock(coutMutex);
             std::cout << "Consumer " << id
-                      << " popped message  (Priority: " << msg.isPriority()
+                      << " popped message  (Priority: " << msg.isHighPriority()
                       << ")\n";
         } catch (const std::runtime_error& e) {
 

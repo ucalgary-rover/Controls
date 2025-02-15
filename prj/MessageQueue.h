@@ -22,20 +22,20 @@ public:
 
     /* Add message into correct queue depending on priority
      *
-     * args:
+     * @param
      * message (Message): the Message object being added to the queue
      *
-     * returns:
+     * @return
      * none
      */
     void push(const Message message);
 
     /* Remove message into correct queue depending on priority
      *
-     * args:
+     * @param
      * none
      *
-     * returns:
+     * @return
      * (Message) the Message object in the front of the queue
      */
     Message pop();
@@ -46,87 +46,87 @@ public:
 
     /* Returns the message in the front of the queue
      *
-     * args:
+     * @param
      * none
      *
-     * returns:
+     * @return
      * (Message) the Message object in the front of the queue
      */
     Message front();
 
     /* Returns the message in the front of the regular (non-priority) queue
      *
-     * args:
+     * @param
      * none
      *
-     * returns:
+     * @return
      * (Message) the Message object in the front of the queue
      */
     Message frontRegular();
 
     /* Returns the message in the back of the queue
      *
-     * args:
+     * @param
      * none
      *
-     * returns:
+     * @return
      * (Message) the Message object in the back of the queue
      */
     Message back();
 
     /* Returns the message in the front of the priority queue
      *
-     * args:
+     * @param
      * none
      *
-     * returns:
+     * @return
      * (Message) the Message object in the back of the priority queue
      */
     Message backPriority();
 
     /* Returns how many elements are in the queue
      *
-     * args:
+     * @param
      * none
      *
-     * returns:
+     * @return
      * (size_t) the number of elements in the queue
      */
     size_t size();
 
     /* Returns how many elements are in the priority queue
      *
-     * args:
+     * @param
      * none
      *
-     * returns:
+     * @return
      * (size_t) the number of elements in the queue
      */
     size_t sizePriority();
 
     /* Returns how many elements are in the regular queue
      *
-     * args:
+     * @param
      * none
      *
-     * returns:
+     * @return
      * (size_t) the number of elements in the queue
      */
     size_t sizeRegular();
 
     /* Returns if the queue is empty (True) or not (False)
      *
-     * args:
+     * @param
      * none
      *
-     * returns:
+     * @return
      * (bool) if the queue is empty (True) or not (False)
      */
     bool empty();
 
 private:
-    std::queue<Message> priorityQueue; // The priority queue
-    std::queue<Message> regularQueue;  // The regular queue
+    std::queue<Message> m_priorityQueue; // The priority queue
+    std::queue<Message> m_regularQueue;  // The regular queue
 
     std::mutex m_mutex; // Lock to prevent accesses by multiples threads
     std::condition_variable
@@ -135,10 +135,10 @@ private:
 
     /* Returns if queue has reached a maximum capacity
      *
-     * args:
+     * @param
      * none
      *
-     * returns:
+     * @return
      * (bool) if the queue is at its limit (True) or not (False)
      */
     bool isQueueLimit();

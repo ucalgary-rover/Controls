@@ -8,13 +8,8 @@ MessageQueue::~MessageQueue() { }
 /* DATA CREATION AND DESTRUCTION */
 //-------------------------------//
 
-/* Add message into correct queue depending on priority
- *
- * args:
- * message (Message): the Message object being added to the queue
- *
- * returns:
- * none
+/* 
+ * Add message into correct queue depending on priority
  */
 void MessageQueue::push(const Message message) {
 
@@ -27,10 +22,10 @@ void MessageQueue::push(const Message message) {
     // Thread acquires lock
     std::unique_lock<std::mutex> lock(m_mutex);
 
-    if (message.isPriority()) {
-        priorityQueue.push(message);
+    if (message.isHighPriority()) {
+        m_priorityQueue.push(message);
     } else {
-        regularQueue.push(message);
+        m_regularQueue.push(message);
     }
 
     // If there is a thread waiting to pop an element with nothing in the
@@ -39,13 +34,8 @@ void MessageQueue::push(const Message message) {
     m_cond_push.notify_one();
 }
 
-/* Remove message from correct queue depending on priority
- *
- * args:
- * none
- *
- * returns:
- * none
+/* 
+ * Remove message from correct queue depending on priority
  */
 Message MessageQueue::pop() {
     Message returnMessage;
@@ -56,16 +46,16 @@ Message MessageQueue::pop() {
     // Waits for a signal from push() method if the queue is empty.
     // Makes sure that there is something to pop
     m_cond_push.wait(lock, [this]() {
-        return !priorityQueue.empty() || !regularQueue.empty();
+        return !m_priorityQueue.empty() || !m_regularQueue.empty();
     });
 
     // get front() and pop
-    if (!priorityQueue.empty()) {
-        returnMessage = priorityQueue.front();
-        priorityQueue.pop();
-    } else if (!regularQueue.empty()) {
-        returnMessage = regularQueue.front();
-        regularQueue.pop();
+    if (!m_priorityQueue.empty()) {
+        returnMessage = m_priorityQueue.front();
+        m_priorityQueue.pop();
+    } else if (!m_regularQueue.empty()) {
+        returnMessage = m_regularQueue.front();
+        m_regularQueue.pop();
     }
 
     return returnMessage;
@@ -75,13 +65,8 @@ Message MessageQueue::pop() {
 /* DATA RETRIEVAL */
 //----------------//
 
-/* Returns the message in the front of the queue
- *
- * args:
- * none
- *
- * returns:
- * (Message) the Message object in the front of the queue
+/* 
+ * Returns the message in the front of the queue
  */
 Message MessageQueue::front() {
     // Thread acquires lock
@@ -90,26 +75,21 @@ Message MessageQueue::front() {
     // Waits for a signal from push() method if the queue is empty.
     // Makes sure that there is a message to view
     m_cond_push.wait(lock, [this]() {
-        return !priorityQueue.empty() || !regularQueue.empty();
+        return !m_priorityQueue.empty() || !m_regularQueue.empty();
     });
 
-    if (!priorityQueue.empty()) {
-        return priorityQueue.front();
-    } else if (!regularQueue.empty()) {
-        return regularQueue.front();
+    if (!m_priorityQueue.empty()) {
+        return m_priorityQueue.front();
+    } else if (!m_regularQueue.empty()) {
+        return m_regularQueue.front();
     }
 
     // Throw runtime error if queue is empty
     throw std::runtime_error("Queue is empty. Cannot retrieve front element.");
 }
 
-/* Returns the message in the front of the regular (non-priority) queue
- *
- * args:
- * none
- *
- * returns:
- * (Message) the Message object in the front of the queue
+/* 
+ * Returns the message in the front of the regular (non-priority) queue
  */
 Message MessageQueue::frontRegular() {
 
@@ -118,10 +98,10 @@ Message MessageQueue::frontRegular() {
 
     // Waits for a signal from push() method if the queue is empty.
     // Makes sure that there is a message to view
-    m_cond_push.wait(lock, [this]() { return !regularQueue.empty(); });
+    m_cond_push.wait(lock, [this]() { return !m_regularQueue.empty(); });
 
-    if (!regularQueue.empty()) {
-        return regularQueue.front();
+    if (!m_regularQueue.empty()) {
+        return m_regularQueue.front();
     }
 
     // Throw runtime error if queue is empty
@@ -129,13 +109,8 @@ Message MessageQueue::frontRegular() {
         "Queue is empty. Cannot retrieve frontRegular element.");
 }
 
-/* Returns the message in the back of the queue
- *
- * args:
- * none
- *
- * returns:
- * (Message) the Message object in the back of the queue
+/* 
+ * Returns the message in the back of the queue
  */
 Message MessageQueue::back() {
 
@@ -145,26 +120,21 @@ Message MessageQueue::back() {
     // Waits for a signal from push() method if the queue is empty.
     // Makes sure that there is a message to view
     m_cond_push.wait(lock, [this]() {
-        return !priorityQueue.empty() || !regularQueue.empty();
+        return !m_priorityQueue.empty() || !m_regularQueue.empty();
     });
 
-    if (!regularQueue.empty()) {
-        return regularQueue.back();
-    } else if (!priorityQueue.empty()) {
-        return priorityQueue.back();
+    if (!m_regularQueue.empty()) {
+        return m_regularQueue.back();
+    } else if (!m_priorityQueue.empty()) {
+        return m_priorityQueue.back();
     }
 
     // Throw runtime error if queue is empty
     throw std::runtime_error("Queue is empty. Cannot retrieve back element.");
 }
 
-/* Returns the message in the front of the priority queue
- *
- * args:
- * none
- *
- * returns:
- * (Message) the Message object in the back of the priority queue
+/* 
+ * Returns the message in the front of the priority queue
  */
 Message MessageQueue::backPriority() {
 
@@ -173,10 +143,10 @@ Message MessageQueue::backPriority() {
 
     // Waits for a signal from push() method if the queue is empty.
     // Makes sure that there is a message to view
-    m_cond_push.wait(lock, [this]() { return !priorityQueue.empty(); });
+    m_cond_push.wait(lock, [this]() { return !m_priorityQueue.empty(); });
 
-    if (!priorityQueue.empty()) {
-        return priorityQueue.back();
+    if (!m_priorityQueue.empty()) {
+        return m_priorityQueue.back();
     }
 
     // Throw runtime error if queue is empty
@@ -184,77 +154,52 @@ Message MessageQueue::backPriority() {
         "Queue is empty. Cannot retrieve backPriority element.");
 }
 
-/* Returns how many elements are in the queue
- *
- * args:
- * none
- *
- * returns:
- * (size_t) the number of elements in the queue
+/* 
+ * Returns how many elements are in the queue
  */
 size_t MessageQueue::size() {
 
     // Thread acquires lock
     std::unique_lock<std::mutex> lock(m_mutex);
 
-    return priorityQueue.size() + regularQueue.size();
+    return m_priorityQueue.size() + m_regularQueue.size();
 }
 
-/* Returns how many elements are in the priority queue
- *
- * args:
- * none
- *
- * returns:
- * (size_t) the number of elements in the queue
+/* 
+ * Returns how many elements are in the priority queue
  */
 size_t MessageQueue::sizePriority() {
 
     // Thread acquires lock
     std::unique_lock<std::mutex> lock(m_mutex);
 
-    return priorityQueue.size();
+    return m_priorityQueue.size();
 }
 
-/* Returns how many elements are in the regular queue
- *
- * args:
- * none
- *
- * returns:
- * (size_t) the number of elements in the queue
+/* 
+ * Returns how many elements are in the regular queue
  */
 size_t MessageQueue::sizeRegular() {
 
     // Thread acquires lock
     std::unique_lock<std::mutex> lock(m_mutex);
 
-    return regularQueue.size();
+    return m_regularQueue.size();
 }
 
-/* Returns if the queue is empty (True) or not (False)
- *
- * args:
- * none
- *
- * returns:
- * (bool) if the queue is empty (True) or not (False)
+/* 
+ * Returns if the queue is empty (True) or not (False)
  */
 bool MessageQueue::empty() {
 
     // Thread acquires lock
     std::unique_lock<std::mutex> lock(m_mutex);
 
-    return (priorityQueue.empty() && regularQueue.empty());
+    return (m_priorityQueue.empty() && m_regularQueue.empty());
 }
 
-/* Returns if the queue is empty (True) or not (False)
- *
- * args:
- * none
- *
- * returns:
- * (bool) if the queue is empty (True) or not (False)
+/* 
+ * Returns if the queue is empty (True) or not (False)
  */
 bool MessageQueue::isQueueLimit() {
 

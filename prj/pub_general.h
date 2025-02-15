@@ -9,6 +9,12 @@ enum class ExtentionType {
     NONE,
 };
 
+enum MessageFormat {
+    WHEEL,
+    ARM,
+    SCIENCE_TOOL,
+};
+
 // Used to streamline the struct (Don't keep in final)<<<<<<<<<<<<<<<<<<<<<<<<<<
 typedef void (*ControllerFunc)(void* args);
 
@@ -63,4 +69,7 @@ struct ArmMessage {
 struct ScienceToolMessage {
     int moveUpDown;
     int moveLeftRight;
+
+    int xPos;
+    int yPos;
 };
