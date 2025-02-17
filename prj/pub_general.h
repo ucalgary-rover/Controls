@@ -1,3 +1,5 @@
+#include <SDL2/SDL.h>
+
 enum class BuildSide {
     BASE,
     ROVER,
@@ -19,22 +21,25 @@ enum MessageFormat {
 typedef void (*ControllerFunc)(void* args);
 
 // a struct for function pointers used for button mapping
+// fill buttonArray with button functions
+// Can treat the array as a dictionary and these values as keys
+// SDL_CONTROLLER_BUTTON_A
+// SDL_CONTROLLER_BUTTON_B
+// SDL_CONTROLLER_BUTTON_X
+// SDL_CONTROLLER_BUTTON_Y
+// SDL_CONTROLLER_BUTTON_BACK
+// SDL_CONTROLLER_BUTTON_GUIDE
+// SDL_CONTROLLER_BUTTON_START
+// SDL_CONTROLLER_BUTTON_LEFTSTICK
+// SDL_CONTROLLER_BUTTON_RIGHTSTICK
+// SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+// SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
+// SDL_CONTROLLER_BUTTON_DPAD_UP
+// SDL_CONTROLLER_BUTTON_DPAD_DOWN
+// SDL_CONTROLLER_BUTTON_DPAD_LEFT
+// SDL_CONTROLLER_BUTTON_DPAD_RIGHT
 struct buttonFunctions {
-    ControllerFunc BUTTON_A;
-    ControllerFunc BUTTON_B;
-    ControllerFunc BUTTON_X;
-    ControllerFunc BUTTON_Y;
-    ControllerFunc BUTTON_BACK;
-    ControllerFunc BUTTON_GUIDE;
-    ControllerFunc BUTTON_START;
-    ControllerFunc BUTTON_LEFTSTICK;
-    ControllerFunc BUTTON_RIGHTSTICK;
-    ControllerFunc BUTTON_LEFTSHOULDER;
-    ControllerFunc BUTTON_RIGHTSHOULDER;
-    ControllerFunc BUTTON_DPAD_UP;
-    ControllerFunc BUTTON_DPAD_DOWN;
-    ControllerFunc BUTTON_DPAD_LEFT;
-    ControllerFunc BUTTON_DPAD_RIGHT;
+    ControllerFunc buttonArray[15];
     void (*LEFT_JOYSTICK)(int xValue, int yValue);
     void (*RIGHT_JOYSTICK)(int xValue, int yValue);
 };

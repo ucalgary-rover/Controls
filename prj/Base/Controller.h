@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "pub_general.h"
+#include "Controls/prj/pub_general.h"
 #include <SDL2/SDL.h>
 #include <iostream>
 
@@ -12,8 +12,8 @@ class Stick {
 private:
     // identifiers for the axes
     // funny enough, triggers also operate with axes
-    SDL_GameControllerAxis X_AXIS;
-    SDL_GameControllerAxis Y_AXIS;
+    SDL_GameControllerAxis m_xAxis;
+    SDL_GameControllerAxis m_yAxis;
 
     // positions values from -255 - 255 (note up and left are negative)
     int m_posX = 0;
@@ -22,6 +22,9 @@ private:
     // raw values for the use of moving deadzone comparison
     float m_rawX = 0;
     float m_rawY = 0;
+
+    // a function for sending this stick's data
+    void (*m_stickFunc)(int xValue, int yValue);
 
 public:
     /**
@@ -40,6 +43,13 @@ public:
     // getters
     float getPosX() { return m_posX; };
     float getPosY() { return m_posY; };
+    SDL_GameControllerAxis getXAxis() { return m_xAxis; };
+    SDL_GameControllerAxis getYAxis() { return m_yAxis; };
+
+    // setter
+    void setStickFunc(void (*newStickFunc)(int xValue, int yValue)) {
+        m_stickFunc = newStickFunc;
+    };
 
     /**
      *Takes raw stick data and processes it into an output in line with a
@@ -50,7 +60,7 @@ public:
      *respectively)
      *
      *
-     *@return The adjusted float value of the changed axis
+     *@return The updated stick
      *
      */
     float stickUpdate(Sint16 axisValue, int axisID);
@@ -94,36 +104,23 @@ public:
     SDL_GameController* getPointerID() { return m_pointerID; };
     SDL_JoystickID getInstanceID() { return m_instanceID; };
 
-    // sticks get changed via stickResponse and stickUpdate
+    // sticks get changed via stickResponse and stickUpdate must be saved with
+    // stik setters
     Stick getLeftStick() { return m_leftStick; };
     Stick getRightStick() { return m_rightStick; };
 
+    void setLeftStick(Stick newStick) { m_leftStick = newStick; };
+    void setRightStick(Stick newStick) { m_rightStick = newStick; };
+
+    buttonFunctions getButtonFuncs() { return m_buttonFuncs; };
+
     void setButtonFuncs(buttonFunctions funcsStruct) {
         m_buttonFuncs = funcsStruct;
+
+        // also assigns appropriate
+        m_leftStick.setStickFunc(funcsStruct.LEFT_JOYSTICK);
+        m_rightStick.setStickFunc(funcsStruct.RIGHT_JOYSTICK);
     };
-
-    /**
-     *Executes a function when a button is pressed
-     *
-     *@param buttonID The ID of the button pressed
-     *
-     *@return None
-     *
-     */
-    void buttonResponse(Uint8 buttonID);
-
-    /**
-     *Identifies which stick requires an update and pass in variable for the
-     *appropriate stick update function
-     *
-     *@param axisValue The value of the axis moved
-     *@param axisID An ID differentiating the x and y axes across both sticks
-     *
-     *
-     *@return None. Updates values directly through stick functions
-     *
-     */
-    void stickResponse(Sint16 axisValue, int axisID);
 };
 
 // A class for initializing controllers and running the pollEvent loop
@@ -162,9 +159,55 @@ public:
     };
 
     /**
-     *Runs the event loop to recieve any controller events
+     *Executes a function when a button is pressed
      *
-     *@param values None
+     *@param buttonID The ID of the button pressed
+     *@param controllerIndex The index of the active controller for the event
+     *
+     *@return None
+     *
+     */
+    void buttonResponse(Uint8 buttonID, int controllerIndex);
+
+    /**
+     *Identifies which stick requires an update and pass in variable for the
+     *appropriate stick update function
+     *
+     *@param axisValue The value of the axis moved
+     *@param axisID An ID differentiating the x and y axes across both sticks
+     *@param controllerIndex The index of the active controller for the event
+     *
+     *
+     *@return None. Updates values directly through stick functions
+     *
+     */
+    void stickResponse(Sint16 axisValue, int axisID, int controllerIndex);
+
+    /**
+     *Executes a function when a button is pressed
+     *
+     *@param controllerIndex The index of the active controller for the event
+     *
+     *@return None
+     *
+     */
+    void controllerAddedResponse(int controllerIndex);
+
+    /**
+     *Closes the removed controller and sends an update with all zero values
+     *
+     *@param controllerIndex The index of the active controller for the event
+     *
+     *@return None
+     *
+     */
+    void controllerRemovedResponse(int controllerIndex);
+
+    /**
+     *Runs the event loop to recieve any controller events. Initializes SDL
+     *subsystems and closes them once the loop is terminated.
+     *
+     *@param None
      *
      *@return None
      *

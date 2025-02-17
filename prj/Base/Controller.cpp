@@ -46,9 +46,10 @@ std::string getButtonName(Uint8 button) {
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 // Stick definitions------------------------------------------------------
+
 Stick::Stick(SDL_GameControllerAxis xID, SDL_GameControllerAxis yID) {
-    X_AXIS = xID;
-    Y_AXIS = yID;
+    m_xAxis = xID;
+    m_yAxis = yID;
 }
 
 float Stick::stickUpdate(Sint16 axisValue, int axisID) {
@@ -74,8 +75,6 @@ float Stick::stickUpdate(Sint16 axisValue, int axisID) {
     // kind of gross way to switch to the other index value
     // otherPos is used to normalize Pos to circular coordinates
     float otherPos = *rawPosList[(int)!((bool)axisID)] / INT16_MAX;
-
-    //------------------------------------------------------------------------------------
 
     // If near the maximum value, adjusts the value to the maximum
     if (abs(Pos) > (INT16_MAX - STATIC_ZONE_RADIUS)) {
@@ -115,6 +114,9 @@ float Stick::stickUpdate(Sint16 axisValue, int axisID) {
     // setting new value
     *posList[axisID] = Pos * SDL_sqrt((1 - (SDL_pow(otherPos, 2) / 2))) * 255;
 
+    // sending new values
+    m_stickFunc(m_posX, m_posY);
+
     return *posList[axisID];
 }
 
@@ -130,8 +132,8 @@ Controller::Controller() {
 Controller::Controller(SDL_GameController* identifier) {
     m_pointerID = identifier;
 
-    // joystick / controller instance ID <- joystick pointer <- controller
-    // pointer
+    // joystick / controller instance ID <- joystick pointer <-
+    // controller pointer
     m_instanceID
         = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(identifier));
 
@@ -140,89 +142,109 @@ Controller::Controller(SDL_GameController* identifier) {
     m_leftStick = Stick(SDL_CONTROLLER_AXIS_LEFTX, SDL_CONTROLLER_AXIS_LEFTY);
 }
 
-void Controller::buttonResponse(Uint8 buttonID) {
-    switch (buttonID) {
-    case SDL_CONTROLLER_BUTTON_A:
-        m_buttonFuncs.BUTTON_A;
-        break;
-    case SDL_CONTROLLER_BUTTON_B:
-        m_buttonFuncs.BUTTON_B;
-        break;
-    case SDL_CONTROLLER_BUTTON_X:
-        m_buttonFuncs.BUTTON_X;
-        break;
-    case SDL_CONTROLLER_BUTTON_Y:
-        m_buttonFuncs.BUTTON_Y;
-        break;
-    case SDL_CONTROLLER_BUTTON_BACK:
-        m_buttonFuncs.BUTTON_BACK;
-        break;
-    case SDL_CONTROLLER_BUTTON_GUIDE:
-        m_buttonFuncs.BUTTON_GUIDE;
-        break;
-    case SDL_CONTROLLER_BUTTON_START:
-        m_buttonFuncs.BUTTON_START;
-        break;
-    case SDL_CONTROLLER_BUTTON_LEFTSTICK:
-        m_buttonFuncs.BUTTON_LEFTSTICK;
-        break;
-    case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
-        m_buttonFuncs.BUTTON_RIGHTSTICK;
-        break;
-    case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-        m_buttonFuncs.BUTTON_LEFTSHOULDER;
-        break;
-    case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-        m_buttonFuncs.BUTTON_RIGHTSHOULDER;
-        break;
-    case SDL_CONTROLLER_BUTTON_DPAD_UP:
-        m_buttonFuncs.BUTTON_DPAD_UP;
-        break;
-    case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-        m_buttonFuncs.BUTTON_DPAD_DOWN;
-        break;
-    case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-        m_buttonFuncs.BUTTON_DPAD_LEFT;
-        break;
-    case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-        m_buttonFuncs.BUTTON_DPAD_RIGHT;
-        break;
-
-    // yet to trigger for some reason
-    default:
-        std::cout << "Unknown Button" << std::endl;
-    }
-}
-
-void Controller::stickResponse(Sint16 axisValue, int axisID) {
-
-    // an axis ID to pass into the stick update function
-    int stickAxisID = (axisID == 1 || axisID == 3) ? 1 : 0;
-
-    // identifies if left stick
-    if (axisID < 2) {
-        m_leftStick.stickUpdate(axisValue, stickAxisID);
-        m_buttonFuncs.LEFT_JOYSTICK(m_leftStick.getPosX(),
-                                    m_leftStick.getPosY());
-
-        // otherwise it is right stick
-    } else {
-        m_rightStick.stickUpdate(axisValue, stickAxisID);
-        m_buttonFuncs.RIGHT_JOYSTICK(m_rightStick.getPosX(),
-                                     m_rightStick.getPosY());
-    }
-}
-
 // ControllerHolder definitions -----------------------------------------
+
 ControllerHolder::ControllerHolder(buttonFunctions functionStruct1,
                                    buttonFunctions functionStruct2) {
 
-    // storing the structs in the controller objects and the list
+    // storing the structs in a list
     m_buttonFuncList[0] = functionStruct1;
     m_buttonFuncList[1] = functionStruct2;
+}
 
-    m_controllerList[0].setButtonFuncs(functionStruct1);
-    m_controllerList[1].setButtonFuncs(functionStruct2);
+// Controllerholder eventloop and response
+// functions--------------------------------------
+
+void ControllerHolder::buttonResponse(Uint8 buttonID, int controllerIndex) {
+
+    std::cout << controllerIndex << std::endl;
+    std::cout << "Button press\n";
+    std::cout << getButtonName(buttonID) << std::endl;
+
+    // searches thru the dictionary to execute the appropriate function
+    m_controllerList[controllerIndex].getButtonFuncs().buttonArray[buttonID](0);
+}
+
+void ControllerHolder::stickResponse(Sint16 axisValue, int axisID,
+                                     int controllerIndex) {
+
+    // setting which controller to update for this event
+    Controller* activeController = &m_controllerList[controllerIndex];
+
+    // Making temp sticks
+    Stick leftStick = (*activeController).getLeftStick();
+    Stick rightStick = (*activeController).getRightStick();
+
+    // an axis ID to pass into the stick update function
+    int stickAxisID = (axisID == (int)leftStick.getXAxis()
+                       || axisID == (int)rightStick.getXAxis())
+                          ? 0
+                          : 1;
+
+    // identifies if left stick
+
+    if (axisID == (int)leftStick.getXAxis()
+        || axisID == (int)leftStick.getYAxis()) {
+        // updating temp stick
+        leftStick.stickUpdate(axisValue, stickAxisID);
+
+        // saving updated stick
+        (*activeController).setLeftStick(rightStick);
+
+        // otherwise it is right stick
+    } else {
+        // updating temp stick
+        rightStick.stickUpdate(axisValue, stickAxisID);
+
+        // saving updated stick
+        (*activeController).setRightStick(rightStick);
+    }
+}
+
+void ControllerHolder::controllerAddedResponse(int controllerIndex) {
+    // checks for which controller object is not active and connects
+    // the new controller there
+    for (int i = 0; i < 3; i++) {
+
+        // have to do this since nullptrs are special little
+        // snowflakes they don't play nice with "!" I guess
+        if (!((bool)m_controllerList[i].getPointerID())) {
+            m_controllerList[i]
+                = Controller(SDL_GameControllerOpen(controllerIndex));
+
+            // sets buttonfuncs based on the position the connected
+            // controller is assigned
+            m_controllerList[i].setButtonFuncs(m_buttonFuncList[i]);
+
+            std::cout << i << " added" << std::endl;
+            break;
+        }
+    }
+}
+
+void ControllerHolder::controllerRemovedResponse(int controllerIndex) {
+    // checks if there is a controller id and the controller id
+    // matches the current controller
+    for (int i = 0; i < 3; i++) {
+        if (m_controllerList[i].getInstanceID() == controllerIndex) {
+
+            // closes the controller in question
+            SDL_GameControllerClose(m_controllerList[i].getPointerID());
+            m_controllerList[i] = Controller();
+
+            // sends an update that sets all values to zero to prevent any ghost
+            // movement
+            for (int j = 0; j < 4; j++) {
+                stickResponse(0, j, i);
+            };
+            break;
+        }
+    }
+}
+
+void ControllerHolder::eventLoop() {
+
+    bool quit = false;
 
     // initializing SDL sub systems`
     // This combo works, it is a little strange tho
@@ -239,11 +261,7 @@ ControllerHolder::ControllerHolder(buttonFunctions functionStruct1,
                   << SDL_NumJoysticks();
         SDL_Quit();
     }
-}
 
-void ControllerHolder::eventLoop() {
-
-    bool quit = false;
     SDL_Event event;
 
     // the main update loop
@@ -263,68 +281,34 @@ void ControllerHolder::eventLoop() {
 
             case SDL_CONTROLLERDEVICEADDED:
 
-                // checks for which controller object is not active and connects
-                // the new controller there
-                for (int i = 0; i < 3; i++) {
-
-                    // have to do this since nullptrs are special little
-                    // snowflakes they don't play nice with "!" I guess
-                    if (!((bool)m_controllerList[i].getPointerID())) {
-                        m_controllerList[i] = Controller(
-                            SDL_GameControllerOpen(event.cdevice.which));
-
-                        // sets buttonfuncs based on the position the connected
-                        // controller is assigned
-                        m_controllerList[i].setButtonFuncs(m_buttonFuncList[i]);
-
-                        std::cout << i << std::endl;
-                        break;
-                    }
-                }
+                controllerAddedResponse(event.cdevice.which);
                 break;
 
             case SDL_CONTROLLERDEVICEREMOVED:
 
-                // checks if there is a controller id and the controller id
-                // matches the current controller
-                for (int i = 0; i < 3; i++) {
-                    if (m_controllerList[i].getInstanceID()
-                        == event.cdevice.which) {
-                        SDL_GameControllerClose(
-                            m_controllerList[i].getPointerID());
-                        m_controllerList[i] = Controller();
-                        break;
-                    }
-                }
-
+                controllerRemovedResponse(event.cdevice.which);
                 break;
 
-            // Truly superficial!
-            // Adding stuff here really lagged things out
-            // Testing may be needed to see if updates can be placed here or I
-            // am just dumb
+            // working now!
+            // featuring dante from devil may cry! /satire
             case SDL_JOYAXISMOTION:
 
-                // std::cout << "\nAxis motion\n";
-
-                // axis index has to be converted to be an int
-                // std::cout << event.cdevice.which << std::endl
-                //           << (int)event.jaxis.axis << std::endl
-                //           << event.jaxis.value << std::endl;
-                // executes the function according to what controller was used
-                m_controllerList[event.cdevice.which].stickResponse(
-                    event.jaxis.value, event.jaxis.axis);
+                stickResponse(event.jaxis.value, event.jaxis.axis,
+                              event.cdevice.which);
 
                 break;
 
             case SDL_CONTROLLERBUTTONDOWN:
-                std::cout << event.cdevice.which << std::endl;
-                std::cout << "Button press\n";
-                std::cout << getButtonName(event.cbutton.button) << std::endl;
 
-                // executes the function according to what controller was used
-                m_controllerList[event.cdevice.which].buttonResponse(
-                    event.cbutton.button);
+                buttonResponse(event.cbutton.button, event.cdevice.which);
+
+                //-------------------------------------------------------------
+                // Hardcoding a button that quits the loop
+                if (SDL_CONTROLLER_BUTTON_START == event.cbutton.button) {
+                    quit = true;
+                }
+
+                break;
             }
         }
     }
@@ -342,16 +326,16 @@ void ControllerHolder::eventLoop() {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 // detecting inital controller and opening it
-int main(int argc, char* argv[]) {
+// int main(int argc, char* argv[]) {
 
-    buttonFunctions example;
+//     buttonFunctions example;
 
-    buttonFunctions example2;
+//     buttonFunctions example2;
 
-    // making the controller holder
-    ControllerHolder cHolder = ControllerHolder(example, example2);
+//     // making the controller holder
+//     ControllerHolder cHolder = ControllerHolder(example, example2);
 
-    cHolder.eventLoop();
+//     cHolder.eventLoop();
 
-    return 0;
-}
+//     return 0;
+// }
