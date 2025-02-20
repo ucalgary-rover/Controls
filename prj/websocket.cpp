@@ -1,142 +1,139 @@
-#include "websocket.h"
-#include <functional> // For std::bind
-#include <iostream>
-#include <string>
+#include "WebSocket.h"
 
-/* Constructs a WebSocketServer instance */
-WebSocket::WebSocket() { }
+std::mutex clientsMutex; // Mutex to synchronize access to the clients set
+std::set<std::shared_ptr<websocket::stream<tcp::socket>>>
+    clients; // Set to store active WebSocket client connections
 
-/* Destructs a WebSocketServer instance */
-WebSocket::~WebSocket() { }
+// ==================== WebSocket Server Implementation ====================
 
-/* Starts the WebSocket server on the specified port
- *
- * args:
- * port (int) - The port on which to start the server
- *
- * returns:
- * none
+/**
+ * @brief Constructs a WebSocket server that listens on the specified port.
+ * @param context ASIO I/O context for managing asynchronous operations.
+ * @param port Port number on which the server listens for incoming connections.
  */
-void WebSocket::runServer(int port) {
-    try {
-        // Initialize ASIO
-        webSocketServer.init_asio();
+WebSocketServer::WebSocketServer(asio::io_context& context, int port) :
+    ioContext(context), acceptor(context, tcp::endpoint(tcp::v4(), port)) { }
 
-        // Set up open handler
-        webSocketServer.set_open_handler(
-            [this](ConnectionHandle connectionHandle) {
-                activeClient = connectionHandle;
-                std::cout << "Client connected." << std::endl;
-            });
+/**
+ * @brief Starts the WebSocket server, initiating the accept loop.
+ */
+void WebSocketServer::run() { accept(); }
 
-        // Set up close handler
-        webSocketServer.set_close_handler(
-            [this](ConnectionHandle connectionHandle) {
-                if (connectionHandle.lock() == activeClient.lock()) {
-                    activeClient.reset();
-                    std::cout << "Client disconnected." << std::endl;
-                }
-            });
-
-        // Set up message handler
-        webSocketServer.set_message_handler(
-            [this](ConnectionHandle connectionHandle,
-                   WebSocketServer::message_ptr msg) {
-                this->onMessage(&webSocketServer, connectionHandle, msg);
-            });
-
-        // Start the server
-        webSocketServer.listen(port);
-        webSocketServer.start_accept();
-        std::cout << "WebSocket server started on port " << port << std::endl;
-
-        webSocketServer.run();
-    } catch (const std::exception& e) {
-        std::cerr << "WebSocket server error: " << e.what() << std::endl;
-    }
+/**
+ * @brief Asynchronously accepts incoming WebSocket connections.
+ */
+void WebSocketServer::accept() {
+    acceptor.async_accept(
+        [this](boost::system::error_code ec, tcp::socket socket) {
+            if (!ec) {
+                std::cout << "[Server] Client connected!\n";
+                // Create a new thread to handle the client session
+                std::thread(&WebSocketServer::handleSession, this,
+                            std::move(socket))
+                    .detach();
+            }
+            accept(); // Continue accepting new connections
+        });
 }
 
-/* Handles incoming messages from the client
- *
- * args:
- * serverInstance (WebSocketServer*) - Pointer to the WebSocket server instance
- * connectionHandle (ConnectionHandle) - Connection handle for the client
- * msg (WebSocketServer::message_ptr) - The message received from the client
- *
- * returns:
- * none
+/**
+ * @brief Handles an individual WebSocket client session.
+ * @param socket TCP socket for the connected client.
  */
-void WebSocket::onMessage(WebSocketServer* serverInstance,
-                          ConnectionHandle connectionHandle,
-                          WebSocketServer::message_ptr msg) {
+void WebSocketServer::handleSession(tcp::socket socket) {
     try {
-        std::string payload = msg->get_payload();
-        std::cout << "Message received from client: " << payload << std::endl;
+        // Create a WebSocket stream from the socket
+        auto ws = std::make_shared<websocket::stream<tcp::socket>>(
+            std::move(socket));
+        ws->accept(); // Perform the WebSocket handshake
 
-        // Simulate converting payload to a Message object
-        WebSocketMessage receivedMessage(
-            0, 0, { 1, 2, 3 }); // Decoy value please replace
-        messageQueue.push(receivedMessage);
-
-        // Create a response message
-        WebSocketMessage responseMessage(
-            1, 1, { 4, 5, 6 }); // Decoy value please replace
-        sendMessageToClient(responseMessage);
-    } catch (const std::exception& e) {
-        std::cerr << "Error processing message: " << e.what() << std::endl;
-    }
-}
-
-/* Sends a message to the connected client
- *
- * args:
- * message (const WebSocketMessage&) - The message to send to the client
- *
- * returns:
- * none
- */
-void WebSocket::sendMessageToClient(const WebSocketMessage& message) {
-    try {
-        if (!activeClient.expired()) {
-            auto connection = activeClient.lock();
-            std::string serializedMessage
-                = "Priority:" + std::to_string(message.isPriority());
-
-            webSocketServer.send(connection, serializedMessage,
-                                 websocketpp::frame::opcode::text);
-            std::cout << "Message sent to client: " << serializedMessage
-                      << std::endl;
-        } else {
-            std::cerr << "No active client connection to send the message."
-                      << std::endl;
+        // Add the WebSocket connection to the clients set
+        {
+            std::lock_guard<std::mutex> lock(clientsMutex);
+            clients.insert(ws);
         }
-    } catch (const websocketpp::exception& e) {
-        std::cerr << "WebSocket error while sending message: " << e.what()
-                  << std::endl;
-    } catch (const std::exception& e) {
-        std::cerr << "General error while sending message: " << e.what()
-                  << std::endl;
+
+        beast::flat_buffer buffer; // Buffer to hold incoming messages
+        while (true) {
+            ws->read(buffer); // Read a message from the client
+            std::string received = beast::buffers_to_string(buffer.data());
+
+            // Deserialize the received message
+            Message msg = Message::deserialize(received);
+            std::cout << "[Server] Received Message:\n";
+            msg.printMessage();
+
+            // Echo the message back to the client
+            ws->text(true);
+            ws->write(asio::buffer(msg.serialize()));
+            buffer.consume(
+                buffer.size()); // Clear the buffer for the next message
+        }
+    } catch (std::exception& e) {
+        std::cerr << "[Server] Session error: " << e.what() << std::endl;
     }
 }
 
-/* Sends a message to the server (placeholder for client-side functionality)
- *
- * args:
- * message (const WebSocketMessage&) - The message to send to the server
- *
- * returns:
- * none
+// ==================== WebSocket Client Implementation ====================
+
+/**
+ * @brief Constructs a WebSocket client and connects to the specified server.
+ * @param context ASIO I/O context for managing asynchronous operations.
+ * @param host The server's hostname or IP address.
+ * @param port The port number to connect to.
  */
-void WebSocket::sendMessageToServer(const WebSocketMessage& message) {
+WebSocketClient::WebSocketClient(asio::io_context& context,
+                                 const std::string& host, int port) :
+    ioContext(context), ws(context) {
+
+    // Resolve the server address and connect
+    tcp::resolver resolver(context);
+    auto results = resolver.resolve(host, std::to_string(port));
+    asio::connect(ws.next_layer(), results.begin(), results.end());
+
+    // Perform WebSocket handshake
+    ws.handshake(host, "/");
+
+    // Start a separate thread to listen for incoming messages
+    receiveThread = std::thread(&WebSocketClient::receiveMessages, this);
+}
+
+/**
+ * @brief Sends a message to the WebSocket server.
+ * @param msg The message to send.
+ */
+void WebSocketClient::sendMessage(const Message& msg) {
+    ws.write(asio::buffer(msg.serialize()));
+}
+
+/**
+ * @brief Runs the client, ensuring the receive thread is properly joined.
+ */
+void WebSocketClient::run() {
+    if (receiveThread.joinable()) {
+        receiveThread.join();
+    }
+}
+
+/**
+ * @brief Continuously receives and processes messages from the server.
+ */
+void WebSocketClient::receiveMessages() {
+    beast::flat_buffer buffer; // Buffer to hold received messages
     try {
-        std::string serializedMessage
-            = "Priority:" + std::to_string(message.isPriority());
-        // Logic for client-side WebSocket to send messages to the server goes
-        // here
-        std::cout << "Sending message to server: " << serializedMessage
-                  << std::endl;
-    } catch (const std::exception& e) {
-        std::cerr << "Error sending message to server: " << e.what()
-                  << std::endl;
+        while (true) {
+            ws.read(buffer); // Read a message from the server
+            std::string received = beast::buffers_to_string(buffer.data());
+
+            // Deserialize the received message
+            Message msg = Message::deserialize(received);
+            std::cout << "[Client] Server response:\n";
+            msg.printMessage();
+
+            buffer.consume(
+                buffer.size()); // Clear the buffer for the next message
+        }
+    } catch (std::exception& e) {
+        std::cerr << "[Client] Receive error: " << e.what() << std::endl;
     }
 }
