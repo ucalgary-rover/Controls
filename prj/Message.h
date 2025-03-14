@@ -56,6 +56,8 @@ public:
      */
     void printMessage() const;
 
+    MessageFormat getFormat() const;
+
 private:
     bool m_isHighPriority;    // Priority of message
     MessagePayload m_payload; // One of the struct messages
