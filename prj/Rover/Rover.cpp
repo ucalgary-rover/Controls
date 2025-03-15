@@ -2,113 +2,134 @@
 
 // Regular Constructor
 Rover::Rover(Arm arm, Drive drive, SciTool sciTool) {
-    instantiateDrivers(arm, drive, sciTool);
+    instantiateSystems(arm, drive, sciTool);
     instantiateQueues();
+    instantiateThreads();
+    instantiateHandlers();
 }
 
 // Temp constructor for websockets
 Rover::Rover(Arm arm, Drive drive, SciTool sciTool, asio::io_context& context,
              const std::string& host, int port) {
-    instantiateDrivers(arm, drive, sciTool);
+
+    // Instantiate all neccasary components
+    instantiateWebsocket(context, host, port);
+    instantiateSystems(arm, drive, sciTool);
     instantiateQueues();
-    instantiateWebsocket();
+    instantiateThreads();
+    instantiateHandlers();
 }
 
-Rover::~Rover() { }
+// Destructor
+Rover::~Rover() {
+    // Join all threads if joinable (destroy threads)
+    if (m_roverQueueThread.joinable())
+        m_roverQueueThread.join();
+    if (m_armQueueThread.joinable())
+        m_armQueueThread.join();
+    if (m_driveQueueThread.joinable())
+        m_driveQueueThread.join();
+    if (m_sciToolQueueThread.joinable())
+        m_sciToolQueueThread.join();
+}
+
+//---------------------- Start/Stop Functions ----------------------//
+
+void Rover::start() {
+    while (true) {
+        // do rover shit
+    }
+}
+
+void Rover::stop() {
+    // stop the rover
+}
+
+//---------------------- Instantiation Functions ----------------------//
+
+// Websocket instantiation
+void Rover::instantiateWebsocket(asio::io_context& context,
+                                 const std::string& host, int port) {
+
+    // Create websocket client object
+    this->m_wsClient = WebSocketClient(context, host, port);
+
+    // Create thread to constantly recieve messages
+    m_wsThread
+        = std::thread(&WebSocketClient::receiveMessages, std::ref(m_wsClient));
+}
 
 // Driver instantiation
-void Rover::instantiateDrivers(Arm arm, Drive drive, SciTool sciTool) {
-    this->armDriver = arm;
-    this->driveDriver = drive;
-    this->sciToolDriver = sciTool;
+void Rover::instantiateSystems(Arm arm, Drive drive, SciTool sciTool) {
+    this->m_armDriver = arm;
+    this->m_driveDriver = drive;
+    this->m_sciToolDriver = sciTool;
 }
 
 // Queue instantiation
 void Rover::instantiateQueues() {
     // Instantiate the message queues
-    this->roverQueue = MessageQueue();
-    this->armQueue = MessageQueue();
-    this->driveQueue = MessageQueue();
-    this->sciToolQueue = MessageQueue();
-
-    // Instantiate pusher and popper threads
-    this->roverThreadPusher = std::thread(&MessageQueue::push, &roverQueue);
-    this->roverThreadPopper = std::thread(&MessageQueue::pop, &roverQueue);
-
-    this->armThreadPusher = std::thread(&MessageQueue::push, &armQueue);
-    this->armThreadPopper = std::thread(&MessageQueue::pop, &armQueue);
-
-    this->driveThreadPusher = std::thread(&MessageQueue::push, &driveQueue);
-    this->driveThreadPopper = std::thread(&MessageQueue::pop, &driveQueue);
-
-    this->sciToolThreadPusher = std::thread(&MessageQueue::push, &sciToolQueue);
-    this->sciToolThreadPopper = std::thread(&MessageQueue::pop, &sciToolQueue);
+    this->m_roverQueue = MessageQueue();
+    this->m_armQueue = MessageQueue();
+    this->m_driveQueue = MessageQueue();
+    this->m_sciToolQueue = MessageQueue();
 }
 
-// Websocket instantiation
-void Rover::instantiateWebsocket(asio::io_context& context,
-                                 const std::string& host, int port) {
-    this->wsClient = WebSocketClient(context, host, port);
+// Thread instantiation
+void Rover::instantiateThreads() {
+    // Instantiate threads for MessageQueues
+    this->m_roverQueueThread = std::thread([queue = m_roverQueue]() {
+        Message m;
+
+        while (true) {
+            // Get message from roverQueue
+            m = queue->pop();
+
+            // Push message to appropriate queue
+            switch (message.getFormat()) {
+            case MessageFormat::ARM:
+                m_armQueue.push(m);
+                break;
+            case MessageFormat::WHEEL:
+                m_driveQueue.push(m);
+                break;
+            case MessageFormat::SCIENCE_TOOL:
+                m_sciToolQueue.push(m);
+                break;
+            default:
+                break;
+            }
+        }
+    });
+
+    this->m_startThread = std::thread(&Rover::start, this);
+
+    // Maybe create these in their handlers?
+    // this->m_armQueueThread = std::thread([queue = &m_armQueue]());
+    // this->m_driveQueueThread = std::thread([queue = &m_driveQueue]());
+    // this->m_sciToolQueueThread = std::thread([queue = &m_sciToolQueue]());
 }
 
-// Getters
-// Arm Rover::getArm() {
-//     return this->armDriver;
-// }
+// Handler instantiation
+void Rover::instantiateHandlers() {
+    this->m_armHandler = ArmHandler(
+        m_arm, m_armQueue); // Pass in arm object and a reference to m_armQueue
 
-// Drive Rover::getDrive() {
-//     return this->driveDriver;
-// }
-
-// SciTool Rover::getSciTool() {
-//     return this->sciToolDriver;
-// }
-
-// MessageQueue Rover::getRoverQueue() {
-//     return this->roverQueue;
-// }
-
-// MessageQueue Rover::getArmQueue() {
-//     return this->armQueue;
-// }
-
-// MessageQueue Rover::getDriveQueue() {
-//     return this->driveQueue;
-// }
-
-// MessageQueue Rover::getSciToolQueue() {
-//     return this->sciToolQueue;
-// }
-
-std::thread Rover::getRoverThreadPusher() { return this->roverThreadPusher; }
-
-std::thread Rover::getRoverThreadPopper() { return this->roverThreadPopper; }
-
-std::thread Rover::getArmThreadPusher() { return this->armThreadPusher; }
-
-std::thread Rover::getArmThreadPopper() { return this->armThreadPopper; }
-
-std::thread Rover::getDriveThreadPusher() { return this->driveThreadPusher; }
-
-std::thread Rover::getDriveThreadPopper() { return this->driveThreadPopper; }
-
-std::thread Rover::getSciToolThreadPusher() {
-    return this->sciToolThreadPusher;
+    // NOTE IMPLEMENTED YET:
+    // this->driveHandler = DriveHandler();
+    // this->sciToolHandler = SciToolHandler();
 }
 
-std::thread Rover::getSciToolThreadPopper() {
-    return this->sciToolThreadPopper;
-}
+//---------------------- Getters ----------------------//
 
-// // Setters (May not need these)
-// void Rover::setArm(Arm arm) {
-//     this->armDriver = arm;
+Arm Rover::getArmHandler() const { return this->m_armHandler; }
+
+// NOT IMPLEMENTED YET
+// Drive Rover::getDriveHandler() {
+//     return this->driveHandler;
 // }
 
-// void Rover::setDrive(Drive drive) {
-//     this->driveDriver = drive;
-// }
-
-// void Rover::setSciTool(SciTool sciTool) {
-//     this->sciToolDriver = sciTool;
+// NOT IMPLEMENTED YET
+// SciTool Rover::getSciToolHandler() {
+//     return this->sciToolHandler;
 // }
