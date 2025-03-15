@@ -40,7 +40,7 @@ ArmHandler::~ArmHandler() {
     // Shut down arm handler threads
     if (m_startThread.joinable())
         m_startThread.join();
-    if (m_armQueueThread..joinable())
+    if (m_armQueueThread.joinable())
         m_armQueueThread.join();
     // if (m_stopThread.joinable())  m_stopThread.join();
 }
