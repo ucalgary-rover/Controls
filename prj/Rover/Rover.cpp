@@ -25,12 +25,10 @@ Rover::~Rover() {
     // Join all threads if joinable (destroy threads)
     if (m_roverQueueThread.joinable())
         m_roverQueueThread.join();
-    if (m_armQueueThread.joinable())
-        m_armQueueThread.join();
-    if (m_driveQueueThread.joinable())
-        m_driveQueueThread.join();
-    if (m_sciToolQueueThread.joinable())
-        m_sciToolQueueThread.join();
+    if (m_startThread.joinable())
+        m_startThread.join();
+    if (m_wsThread.joinable())
+        m_wsThread.join();
 }
 
 //---------------------- Start/Stop Functions ----------------------//
