@@ -26,6 +26,9 @@ Message& Message::operator=(const Message& src) {
 // Check if the message is a priority
 bool Message::isHighPriority() const { return m_isHighPriority; }
 
+// Get the format of the message
+MessageFormat Message::getFormat() const { return m_format; }
+
 // Print Message details
 void Message::printMessage() const {
     std::cout << "Priority: " << m_isHighPriority << ", Payload: ";

@@ -20,7 +20,7 @@ public:
     // Destructor
     ~MessageQueue();
 
-    /* Add message into correct queue depending on priority
+    /** Add message into correct queue depending on priority
      *
      * @param
      * message (Message): the Message object being added to the queue
@@ -30,7 +30,7 @@ public:
      */
     void push(const Message message);
 
-    /* Remove message into correct queue depending on priority
+    /** Remove message into correct queue depending on priority
      *
      * @param
      * none
@@ -41,10 +41,10 @@ public:
     Message pop();
 
     //----------------//
-    /* DATA RETRIEVAL */
+    /** DATA RETRIEVAL */
     //----------------//
 
-    /* Returns the message in the front of the queue
+    /** Returns the message in the front of the queue
      *
      * @param
      * none
@@ -54,7 +54,7 @@ public:
      */
     Message front();
 
-    /* Returns the message in the front of the regular (non-priority) queue
+    /** Returns the message in the front of the regular (non-priority) queue
      *
      * @param
      * none
@@ -64,7 +64,7 @@ public:
      */
     Message frontRegular();
 
-    /* Returns the message in the back of the queue
+    /** Returns the message in the back of the queue
      *
      * @param
      * none
@@ -74,7 +74,7 @@ public:
      */
     Message back();
 
-    /* Returns the message in the front of the priority queue
+    /** Returns the message in the front of the priority queue
      *
      * @param
      * none
@@ -84,7 +84,7 @@ public:
      */
     Message backPriority();
 
-    /* Returns how many elements are in the queue
+    /** Returns how many elements are in the queue
      *
      * @param
      * none
@@ -94,7 +94,7 @@ public:
      */
     size_t size();
 
-    /* Returns how many elements are in the priority queue
+    /** Returns how many elements are in the priority queue
      *
      * @param
      * none
@@ -104,7 +104,7 @@ public:
      */
     size_t sizePriority();
 
-    /* Returns how many elements are in the regular queue
+    /** Returns how many elements are in the regular queue
      *
      * @param
      * none
@@ -114,7 +114,7 @@ public:
      */
     size_t sizeRegular();
 
-    /* Returns if the queue is empty (True) or not (False)
+    /** Returns if the queue is empty (True) or not (False)
      *
      * @param
      * none
@@ -133,7 +133,7 @@ private:
         m_cond_push; // Used to signal when a push has been done on a queue (For
                      // threading purposes)
 
-    /* Returns if queue has reached a maximum capacity
+    /** Returns if queue has reached a maximum capacity
      *
      * @param
      * none

@@ -20,7 +20,7 @@ using MessagePayload
 
 class Message {
 public:
-    /* Constructor for message
+    /** Constructor for message
      *
      * @param
      *  prty: int - The priority of the message
@@ -36,7 +36,7 @@ public:
     ~Message();
     Message& operator=(const Message& src);
 
-    /* Returns if a message has priority
+    /** Returns if a message has priority
      *
      * @param
      * none
@@ -46,7 +46,7 @@ public:
      */
     bool isHighPriority() const;
 
-    /* prints contents of Message
+    /** prints contents of Message
      *
      * @param
      * none
@@ -55,6 +55,8 @@ public:
      * none
      */
     void printMessage() const;
+
+    MessageFormat getFormat() const;
 
 private:
     bool m_isHighPriority;    // Priority of message
