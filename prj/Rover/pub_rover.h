@@ -1,32 +1,32 @@
 #include "phidget22.h"
 
-T setAddressProperties(T* handle, int serialNum, int channel);
+#pragma once
 
-enum MOTOR_TYPE {
-    DC_MOTOR,
-    STEPPER_MOTOR,
-    SERVO_MOTOR,
+enum MotorType {
+    MOTOR_TYPE_DC_MOTOR,
+    MOTOR_TYPE_STEPPER_MOTOR,
+    MOTOR_TYPE_SERVO_MOTOR,
 
     // Additional motor types should be added above this comment
     MOTOR_TYPE_COUNT,
-    INVALID_MOTOR_TYPE = MOTOR_TYPE_COUNT,
+    MOTOR_TYPE_INVALID = MOTOR_TYPE_COUNT,
 };
 
-enum DriveMotorIndex {
-    FRONT_LEFT,
-    FRONT_RIGHT,
-    BACK_LEFT,
-    BACK_RIGHT,
+enum DriveIndex {
+    DRIVE_INDEX_FRONT_LEFT,
+    DRIVE_INDEX_FRONT_RIGHT,
+    DRIVE_INDEX_BACK_LEFT,
+    DRIVE_INDEX_BACK_RIGHT,
 
     // Additional drive motors should be added above this comment
-    WHEEL_COUNT,
+    DRIVE_INDEX_WHEEL_COUNT,
 };
 
 struct MotorHandlerReturn {
-    MOTOR_TYPE type;
+    MotorType type;
     union motorHandle {
-        PhidgetDCMotorHandle dcMotor;
-        PhidgetStepperHandle stepperMotor;
-        PhidgetServoHandle servo_motor;
-    };
+        PhidgetDCMotorHandle* dcMotor;
+        PhidgetStepperHandle* stepperMotor;
+        PhidgetRCServoHandle* servo_motor;
+    } motorHandle;
 };

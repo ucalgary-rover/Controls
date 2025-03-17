@@ -3,12 +3,13 @@
 
 #pragma once
 
-#include "Configs.h"
+#include "Rover/pub_rover.h"
+#include "Rover/systems/pub_systems.h"
+#include "mission_control.h"
 #include "phidget22.h"
-#include "pub_rover.h"
 #include <iostream>
 
-static class Arm {
+class Arm {
 public:
     /**
      * @brief Completes the initialisation for all motors That make up the arm
@@ -17,7 +18,7 @@ public:
      * @param motorTypes Pointer to an array of length degOfFreedom t oknow what
      * type of motor each DOF uses.
      */
-    Arm(int degOfFreedom, MOTOR_TYPE* motorTypes);
+    Arm(int degOfFreedom, MotorType* motorTypes);
 
     /**
      * @brief Completes the deinitialisation for all motors That make up the arm
@@ -52,7 +53,7 @@ public:
 
 private:
     int m_degOfFreedom;
-    MOTOR_TYPE* m_motorTypes;
+    MotorType* m_motorTypes;
     PhidgetDCMotorHandle** m_handlesDC;
     PhidgetStepperHandle** m_handlesStepper;
     PhidgetRCServoHandle* m_handleClaw;

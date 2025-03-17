@@ -3,12 +3,13 @@
 
 #pragma once
 
-#include "Configs.h"
+#include "Rover/pub_rover.h"
+#include "Rover/systems/pub_systems.h"
+#include "mission_control.h"
 #include "phidget22.h"
-#include "pub_rover.h"
 #include <iostream>
 
-static class Drive {
+class Drive {
 public:
     /**
      * @brief Completes the initialisation for all four DC and stepper motors
