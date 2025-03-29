@@ -1,20 +1,22 @@
-#include <SDL2/SDL.h>
+// #include <SDL2/SDL.h>
 
-enum class BuildSide {
-    BASE,
-    ROVER,
+#pragma once
+
+enum BuildSide {
+    BUILD_SIDE_BASE,
+    BUILD_SIDE_ROVER,
 };
 
-enum class ExtentionType {
-    ARM,
-    SCIENCE_TOOL,
-    NONE,
+enum ExtentionType {
+    EXTENTION_TYPE_ARM,
+    EXTENTION_TYPE_SCIENCE_TOOL,
+    EXTENTION_TYPE_NONE,
 };
 
 enum MessageFormat {
-    WHEEL,
-    ARM,
-    SCIENCE_TOOL,
+    MESSAGE_FORMAT_WHEEL,
+    MESSAGE_FORMAT_ARM,
+    MESSAGE_FORMAT_SCIENCE_TOOL,
 };
 
 // extrememly basic test function as default stick function
