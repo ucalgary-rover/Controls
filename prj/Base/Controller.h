@@ -3,9 +3,10 @@
 
 #pragma once
 
-#include "Controls/prj/pub_general.h"
-#include <SDL2/SDL.h>
+#include "pub_general.h"
+#include <SDL.h>
 #include <iostream>
+#include <string>
 
 // class for joysticks (generic and can be applied to any controller)
 class Stick {

@@ -1,4 +1,9 @@
-// #include <SDL2/SDL.h>
+#ifndef PUB_GENERAL_H
+#define PUB_GENERAL_H
+
+#include <SDL.h>
+#include <functional>
+#include <iostream>
 
 #pragma once
 
@@ -18,18 +23,6 @@ enum MessageFormat {
     MESSAGE_FORMAT_ARM,
     MESSAGE_FORMAT_SCIENCE_TOOL,
 };
-
-// extrememly basic test function as default stick function
-void stickTest(int X, int Y) { std::cout << X + Y; }
-// extrememly basic test function as default button function
-void buttonTest(void* args) {
-
-    // must first save as a pointer to a certain data type
-    std::string* buttonName = (std::string*)args;
-
-    // then derefence
-    std::cout << *buttonName;
-}
 
 // Used to streamline the struct (Don't keep in final)<<<<<<<<<<<<<<<<<<<<<<<<<<
 typedef void (*ControllerFunc)(void* args);
@@ -53,12 +46,9 @@ typedef void (*ControllerFunc)(void* args);
 // SDL_CONTROLLER_BUTTON_DPAD_LEFT
 // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
 struct buttonFunctions {
-    ControllerFunc buttonArray[15]
-        = { &buttonTest, &buttonTest, &buttonTest, &buttonTest, &buttonTest,
-            &buttonTest, &buttonTest, &buttonTest, &buttonTest, &buttonTest,
-            &buttonTest, &buttonTest, &buttonTest, &buttonTest, &buttonTest };
-    void (*LEFT_JOYSTICK)(int xValue, int yValue) = &stickTest;
-    void (*RIGHT_JOYSTICK)(int xValue, int yValue) = &stickTest;
+    std::array<std::function<void()>, 15> buttonArray = { nullptr };
+    void (*LEFT_JOYSTICK)(int xValue, int yValue) = nullptr;
+    void (*RIGHT_JOYSTICK)(int xValue, int yValue) = nullptr;
 };
 
 // Generic Message Format
@@ -95,3 +85,5 @@ struct ScienceToolMessage {
     int xPos;
     int yPos;
 };
+
+#endif

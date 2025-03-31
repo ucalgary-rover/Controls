@@ -1,8 +1,7 @@
 #include "Controller.h"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <iostream>
 #include <string>
-#include "pub_general.h"
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
@@ -207,8 +206,7 @@ void ControllerHolder::buttonResponse(Uint8 buttonID, int controllerIndex) {
     }
 
     // searches thru the dictionary to execute the appropriate function
-    m_controllerList[controllerIndex].getButtonFuncs().buttonArray[buttonID](
-        &buttonName);
+    m_controllerList[controllerIndex].getButtonFuncs().buttonArray[buttonID]();
 }
 
 void ControllerHolder::stickResponse(Sint16 axisValue, int axisID,

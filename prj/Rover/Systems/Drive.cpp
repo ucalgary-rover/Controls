@@ -1,5 +1,8 @@
 #include "Drive.h"
 
+Drive::m_length = 1;
+Drive::m_width = 0.5;
+
 Drive::Drive(float width, float length) : m_width(width), m_length(length) {
     m_handlesDC = new PhidgetDCMotorHandle*[DRIVE_INDEX_WHEEL_COUNT]();
     m_handlesStepper = new PhidgetStepperHandle*[DRIVE_INDEX_WHEEL_COUNT]();

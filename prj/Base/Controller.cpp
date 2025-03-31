@@ -1,8 +1,10 @@
 #include "Controller.h"
-#include <SDL2/SDL.h>
-#include <iostream>
-#include <string>
-#include "pub_general.h"
+
+// extrememly basic test function as default stick function
+static void stickTest(int X, int Y);
+
+// extrememly basic test function as default button function
+static void buttonTest(void* args);
 
 // Helper function to get button names
 std::string getButtonName(Uint8 button) {
@@ -172,8 +174,7 @@ void ControllerHolder::buttonResponse(Uint8 buttonID, int controllerIndex) {
     }
 
     // searches thru the dictionary to execute the appropriate function
-    m_controllerList[controllerIndex].getButtonFuncs().buttonArray[buttonID](
-        &buttonName);
+    m_controllerList[controllerIndex].getButtonFuncs().buttonArray[buttonID]();
 }
 
 void ControllerHolder::stickResponse(Sint16 axisValue, int axisID,
@@ -270,6 +271,7 @@ void ControllerHolder::eventLoop() {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
         fprintf(stderr, "could not initialize sdl2: %s\n", SDL_GetError());
         SDL_Quit();
+        quit = true;
     }
 
     // Check for game controllers
@@ -277,6 +279,7 @@ void ControllerHolder::eventLoop() {
         std::cerr << "No controllers connected!" << std::endl
                   << SDL_NumJoysticks();
         SDL_Quit();
+        quit = true;
     }
 
     SDL_Event event;
@@ -358,3 +361,5 @@ void ControllerHolder::eventLoop() {
 
 //     return 0;
 // }
+
+static void stickTest(int X, int Y) { std::cout << X + Y; }

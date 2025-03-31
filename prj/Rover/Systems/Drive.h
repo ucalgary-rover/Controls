@@ -69,8 +69,8 @@ private:
 
     // Length and widht in meters for now, can change once we get dimentions
     // from Mech Rover
-    float m_length = 1;
-    float m_width = 0.5;
+    float m_length;
+    float m_width;
 };
 
 #endif
