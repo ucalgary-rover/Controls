@@ -24,6 +24,11 @@ enum MessageFormat {
     MESSAGE_FORMAT_SCIENCE_TOOL,
 };
 
+enum MessagePriority {
+    MESSAGE_PRIORITY_LOW,
+    MESSAGE_PRIORITY_HIGH,
+};
+
 // Used to streamline the struct (Don't keep in final)<<<<<<<<<<<<<<<<<<<<<<<<<<
 typedef void (*ControllerFunc)(void* args);
 

@@ -3,10 +3,14 @@
 
 #include <initializer_list>
 #include <iostream>
+#include <mutex>
 #include <thread>
 #include <vector>
+#include <windows.h>
 
 #include "Base/Controller.h"
+#include "Message.h"
+#include "MessageQueue.h"
 #include "pub_general.h"
 
 using namespace std;
@@ -18,72 +22,72 @@ public:
     Base();
     ~Base();
 
-    // setter / getter / increment functions for chassis_angle
+    // setter / getter / increment functions for chassisAngle
     int getChassisAngle();
     void setChassisAngle(int n);
     void incrementChassisAngle(int n);
 
-    // setter / getter / increment functions for chassis_speed
+    // setter / getter / increment functions for chassisSpeed
     int getChassisSpeed();
     void setChassisSpeed(int n);
     void incrementChassisSpeed(int n);
 
-    // setter / getter / increment functions for chassis_angular_velocity
+    // setter / getter / increment functions for chassisAngularVelocity
     int getChassisAngularVelocity();
     void setChassisAngularVelocity(int n);
     void incrementChassisAngularVelocity(int n);
 
-    // setter / getter / increment functions for chassis_max_speed
+    // setter / getter / increment functions for chassisMaxSpeed
     int getChassisMaxSpeed();
     void setChassisMaxSpeed(int n);
     void incrementChassisMaxSpeed(int n);
 
-    // setter / getter / increment functions for arm_x
+    // setter / getter / increment functions for armX
     int getArmX();
     void setArmX(int n);
     void incrementArmX(int n);
 
-    // setter / getter / increment functions for arm_y
+    // setter / getter / increment functions for armY
     int getArmY();
     void setArmY(int n);
     void incrementArmY(int n);
 
-    // setter / getter / increment functions for arm_z
+    // setter / getter / increment functions for armZ
     int getArmZ();
     void setArmZ(int n);
     void incrementArmZ(int n);
 
-    // setter / getter / increment functions for claw_open
+    // setter / getter / increment functions for clawOpen
     int getClawOpen();
     void setClawOpen(int n);
     void incrementClawOpen(int n);
 
-    // setter / getter / increment functions for claw_x
+    // setter / getter / increment functions for clawX
     int getClawX();
     void setClawX(int n);
     void incrementClawX(int n);
 
-    // setter / getter / increment functions for claw_y
+    // setter / getter / increment functions for clawY
     int getClawY();
     void setClawY(int n);
     void incrementClawY(int n);
 
-    // setter / getter / increment functions for claw_angle
+    // setter / getter / increment functions for clawAngle
     int getClawAngle();
     void setClawAngle(int n);
     void incrementClawAngle(int n);
 
-    // setter / getter / increment functions for wrist_angle
+    // setter / getter / increment functions for wristAngle
     int getWristAngle();
     void setWristAngle(int n);
     void incrementWristAngle(int n);
 
-    // setter / getter / increment functions for tool_x
+    // setter / getter / increment functions for toolX
     int getToolX();
     void setToolX(int n);
     void incrementToolX(int n);
 
-    // setter / getter / increment functions for tool_y
+    // setter / getter / increment functions for toolY
     int getToolY();
     void setToolY(int n);
     void incrementToolY(int n);
@@ -95,29 +99,34 @@ public:
     void setButtons(buttonFunctions buttons_controller_1,
                     buttonFunctions buttons_controller_2);
 
+    // Start the loops to have Base working
     void start();
+
+    // Exit the loops that base runs through
+    void quit();
 
 private:
     // Constant variables for calculations
     float PI;
 
     // Variables for state of chassis (Rover body)
-    int chassis_angle, chassis_speed, chassis_angular_velocity,
-        chassis_max_speed;
+    int chassisAngle, chassisSpeed, chassisAngularVelocity, chassisMaxSpeed;
 
     // Variables for state of rover arm
-    int arm_x, arm_y, arm_z;
+    int armX, armY, armZ;
 
     // Variables for state of rover claw
     // x = left / right direction, y = up / down direction
-    int claw_open, claw_x, claw_y, claw_angle;
+    int clawOpen, clawX, clawY, clawAngle;
 
     // Variables for state of rover wrist
-    int wrist_angle;
+    int wristAngle;
 
     // Variables for state of rover science tool
     // x = left / right direction, y = up / down direction
-    int tool_x, tool_y;
+    int toolX, toolY;
+
+    int exitLoop;
 
     // List of all controllers in use
     ControllerHolder* controller;
