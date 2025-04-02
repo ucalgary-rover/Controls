@@ -324,8 +324,9 @@ void Base::quit() { this->exitLoop = 1; }
 
 void Base::start() {
     MessageQueue sendQueue;
+    // WebSocketServer server = WebSocketServer(8080);
     thread controllerThread([&]() { controller->eventLoop(); });
-    // thread websocetThread([&]() { ; });
+    // thread websocetThread([&]() { server.run(); });
     std::cout << "Main Thread\n";
 
     WheelMessage wheelMsg;

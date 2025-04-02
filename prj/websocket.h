@@ -8,6 +8,8 @@
 #include <set>
 #include <thread>
 
+#pragma once
+
 namespace asio = boost::asio;
 namespace beast = boost::beast;
 namespace websocket = beast::websocket;
