@@ -123,7 +123,98 @@ private:
     // Threads
     std::thread m_roverQueueThread;
     std::thread m_startThread;
+    std::thread m_stopThread;
     std::thread m_wsThread;
+
+    // Threading variables
+    std::condition_variable m_roverConVar;
+    bool m_roverRunningFlag = false;
+
+    std::condition_variable m_armConVar;
+    bool m_armRunningFlag = false;
+
+    std::condition_variable m_driveConVar;
+    bool m_driveRunningFlag = false;
+
+    /** Stop the all threads for rover and handlers
+     *
+     * @param
+     * none
+     *
+     * @return
+     * none
+     */
+    void stopAll();
+
+    /** Pause the rover thread
+     *
+     * @param
+     * none
+     *
+     * @return
+     * none
+     */
+    void stopRover();
+
+    /** Pause the arm handler thread
+     *
+     * @param
+     * none
+     *
+     * @return
+     * none
+     */
+    void stopArmHandler();
+
+    /** Pause the drive handler thread
+     *
+     * @param
+     * none
+     *
+     * @return
+     * none
+     */
+    void stopDriveHandler();
+
+    /** Stop the all threads for rover and handlers
+     *
+     * @param
+     * none
+     *
+     * @return
+     * none
+     */
+    void resumeAll();
+
+    /** Pause the rover thread
+     *
+     * @param
+     * none
+     *
+     * @return
+     * none
+     */
+    void resumeRover();
+
+    /** Pause the arm handler thread
+     *
+     * @param
+     * none
+     *
+     * @return
+     * none
+     */
+    void resumeArmHandler();
+
+    /** Pause the drive handler thread
+     *
+     * @param
+     * none
+     *
+     * @return
+     * none
+     */
+    void resumeDriveHandler();
 };
 
 #endif
