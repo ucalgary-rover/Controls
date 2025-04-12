@@ -4,9 +4,12 @@
 #pragma once
 
 #include "MessageQueue.h"
+
+#include "pub_general.h"
+#include "pub_rover.h"
+
 #include "Systems/Arm.h"
 #include "Systems/Drive.h"
-#include "Systems/SciTool.h"
 
 #include "Handlers/ArmHandler.h"
 
@@ -15,10 +18,10 @@
 class Rover {
 public:
     // Regular Constructor
-    Rover(Arm arm, Drive drive, SciTool sciTool);
+    Rover(Arm arm, Drive drive);
 
     // Temporary websocket constructor (need feedback on this)
-    Rover(Arm arm, Drive drive, SciTool sciTool, asio::io_context& context,
+    Rover(Arm arm, Drive drive, asio::io_context& context,
           const std::string& host, int port);
 
     ~Rover();
@@ -26,7 +29,6 @@ public:
     // Getters
     Arm getArmHandler() const;
     // NOT IMPLEMENTED YET
-    // SciTool getSciToolHandler();
     // Drive getDriveHandler();
 
     /** Instantiate the systems for the rover
@@ -34,12 +36,11 @@ public:
      * @param
      * arm: Arm - The arm
      * drive: Drive - The drive r
-     * sciTool: SciTool - The science tool
      *
      * @return
      * none
      */
-    void instantiateSystems(Arm arm, Drive drive, SciTool sciTool);
+    void instantiateSystems(Arm arm, Drive drive);
 
     /** Instantiate handlers for each system on the rover
      *
@@ -109,28 +110,20 @@ private:
     // Rover components
     Arm m_arm;
     Drive m_drive;
-    SciTool m_sciTool;
 
     // Rover Handlers
     ArmHandler m_armHandler;
     // DriveHandler driveHandler;
-    // SciToolHandler sciToolHandler;
 
     // Message queues
     MessageQueue m_roverQueue;
     MessageQueue m_armQueue;
     MessageQueue m_driveQueue;
-    MessageQueue m_sciToolQueue;
 
     // Threads
     std::thread m_roverQueueThread;
     std::thread m_startThread;
     std::thread m_wsThread;
-
-    // Don't think I'll need these in Rover
-    // std::thread m_armQueueThread;
-    // std::thread m_driveQueueThread;
-    // std::thread m_sciToolQueueThread;
 };
 
 #endif

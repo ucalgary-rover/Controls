@@ -1,20 +1,20 @@
 #include "Rover.h"
 
 // Regular Constructor
-Rover::Rover(Arm arm, Drive drive, SciTool sciTool) {
-    instantiateSystems(arm, drive, sciTool);
+Rover::Rover(Arm arm, Drive drive) {
+    instantiateSystems(arm, drive);
     instantiateQueues();
     instantiateThreads();
     instantiateHandlers();
 }
 
 // Temp constructor for websockets
-Rover::Rover(Arm arm, Drive drive, SciTool sciTool, asio::io_context& context,
+Rover::Rover(Arm arm, Drive drive, asio::io_context& context,
              const std::string& host, int port) {
 
     // Instantiate all neccasary components
     instantiateWebsocket(context, host, port);
-    instantiateSystems(arm, drive, sciTool);
+    instantiateSystems(arm, drive);
     instantiateQueues();
     instantiateThreads();
     instantiateHandlers();
@@ -58,10 +58,9 @@ void Rover::instantiateWebsocket(asio::io_context& context,
 }
 
 // Driver instantiation
-void Rover::instantiateSystems(Arm arm, Drive drive, SciTool sciTool) {
-    this->m_armDriver = arm;
-    this->m_driveDriver = drive;
-    this->m_sciToolDriver = sciTool;
+void Rover::instantiateSystems(Arm arm, Drive drive) {
+    this->m_arm = arm;
+    this->m_drive = drive;
 }
 
 // Queue instantiation
@@ -70,7 +69,6 @@ void Rover::instantiateQueues() {
     this->m_roverQueue = MessageQueue();
     this->m_armQueue = MessageQueue();
     this->m_driveQueue = MessageQueue();
-    this->m_sciToolQueue = MessageQueue();
 }
 
 // Thread instantiation
@@ -85,15 +83,14 @@ void Rover::instantiateThreads() {
 
             // Push message to appropriate queue
             switch (message.getFormat()) {
-            case MessageFormat::ARM:
+            case MessageFormat::MESSAGE_FORMAT_ARM:
                 m_armQueue.push(m);
                 break;
-            case MessageFormat::WHEEL:
+
+            case MessageFormat::MESSAGE_FORMAT_WHEEL:
                 m_driveQueue.push(m);
                 break;
-            case MessageFormat::SCIENCE_TOOL:
-                m_sciToolQueue.push(m);
-                break;
+
             default:
                 break;
             }
@@ -101,11 +98,6 @@ void Rover::instantiateThreads() {
     });
 
     this->m_startThread = std::thread(&Rover::start, this);
-
-    // Maybe create these in their handlers?
-    // this->m_armQueueThread = std::thread([queue = &m_armQueue]());
-    // this->m_driveQueueThread = std::thread([queue = &m_driveQueue]());
-    // this->m_sciToolQueueThread = std::thread([queue = &m_sciToolQueue]());
 }
 
 // Handler instantiation
@@ -125,9 +117,4 @@ Arm Rover::getArmHandler() const { return this->m_armHandler; }
 // NOT IMPLEMENTED YET
 // Drive Rover::getDriveHandler() {
 //     return this->driveHandler;
-// }
-
-// NOT IMPLEMENTED YET
-// SciTool Rover::getSciToolHandler() {
-//     return this->sciToolHandler;
 // }
