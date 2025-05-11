@@ -58,16 +58,57 @@ public:
 
     /**
      * @brief Gets the length of the rover between motors
-     * @return The width of the rover from the motor on the top to the motor on
-     * the bottom.
+     * @return The length of the rover from the motor on the left to the motor
+     * on the right.
      */
     float getLength();
+
+    /**
+     * @brief Enters spot turn wheel configuration, turns
+     * @param stickAngle Int of angle of joystick to determine direction /
+     * turning speed (angle velocity)
+     * @return None
+     */
+    void spotTurn(int stickAngle);
+
+    /**
+     * @brief Directly moves the rover in a direction without turning the body.
+     * Takes velocity and angle
+     * @param stickAngle Int of angle of joystick by used for direction (theta)
+     * @param stickMagnitude Int of the magnitude of the stick (velocity)
+     * @return None
+     */
+    void strafe(int stickAngle, int stickMagnitude);
+
+    /**
+     * @brief Moves the rover with a radial turn
+     * @param stickAngle Int of angle of joystick by used for direction and
+     * sharpness of turn (angle velocity)
+     * @param stickMagnitude Int of the magnitude of the stick (velocity)
+     * @return None
+     */
+    void radialTurn(int stickAngle, int stickMagnitude);
+
+    /**
+     * @brief Stops all wheel movement
+     * @return None
+     */
+    void stopWheels();
+
+    /**
+     * @brief Stops all wheel spin
+     * @return None
+     */
+    void eventLoop();
 
 private:
     PhidgetDCMotorHandle** m_handlesDC;
     PhidgetStepperHandle** m_handlesStepper;
 
-    // Length and widht in meters for now, can change once we get dimentions
+    // if true, the wheels are in spot turning configuration
+    bool m_spotTurnFlag = false;
+
+    // Length and width in meters for now, can change once we get dimentions
     // from Mech Rover
     float m_length = 1;
     float m_width = 0.5;
