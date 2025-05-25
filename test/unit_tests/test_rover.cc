@@ -1,0 +1,41 @@
+#include <gtest/gtest.h>
+#include <iostream>
+
+using namespace std;
+
+class RoverTest : public testing::Test {
+protected:
+    // You can remove any or all of the following functions if its body
+    // is empty.
+
+    /***********************************************************/
+    /*************** Rover Test Unit Test Set-Up ***************/
+    /***********************************************************/
+
+    RoverTest() {
+        // To run before all tests.
+    }
+
+    void SetUp() {
+        // To run before each test.
+    }
+
+    /***********************************************************/
+    /************* Rover Test Unit Test Tear-Down **************/
+    /***********************************************************/
+
+    void TearDown() {
+        // To run after each test.
+    }
+
+    ~RoverTest() {
+        // To run after all tests.
+    }
+};
+
+/***********************************************************/
+/************** Test Unit Test Infrastructure **************/
+/***********************************************************/
+
+// Basic rover unit test. To be removed when other unit tests are added.
+TEST_F(RoverTest, BasicUnitTest) { ASSERT_TRUE(true); }
