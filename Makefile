@@ -10,7 +10,14 @@ PHIDGETS_ROOT = "tools/Phidgets/Phidget22"
 
 CMPL_BOOST = -I $(BOOST_ROOT)
 CMPL_SDL = -I $(SDL_ROOT)/include/SDL2 -L $(SDL_ROOT)/lib -lmingw32 -lSDL2main -lSDL2
-CMPL_PHIDETS = -I $(PHIDGETS_ROOT) -L tools/Phidgets/Phidgets22/x64/ -lphidget22 
+CMPL_PHIDETS = -I $(PHIDGETS_ROOT) -L tools/Phidgets/Phidget22/x64/ -lphidget22 
+
+NULL_DEVICE := $(if $(filter Windows_NT,$(OS)),NUL,/dev/null)
+
+run_test:
+> cmake -S ./test -B test/build
+> cmake --build test/build
+> cd test/build && ctest
 
 compile:
 > g++  -I"prj" prj/main.cpp -o main
