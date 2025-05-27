@@ -15,5 +15,9 @@ echo "Enabling git commit template..."
 git config commit.template .gitmessage
 echo "git commit template Enabled..."
 
+echo "Installing cmake..."
+pip install cmake
+echo "Finished installing cmake..."
+
 echo Please be sure to setup "make" if you have yet to do so.
 echo "Have a nice day :)"

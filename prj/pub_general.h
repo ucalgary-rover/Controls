@@ -1,4 +1,9 @@
-// #include <SDL2/SDL.h>
+#ifndef PUB_GENERAL_H
+#define PUB_GENERAL_H
+
+#include <SDL.h>
+#include <functional>
+#include <iostream>
 
 #pragma once
 
@@ -17,6 +22,11 @@ enum MessageFormat {
     MESSAGE_FORMAT_WHEEL,
     MESSAGE_FORMAT_ARM,
     MESSAGE_FORMAT_SCIENCE_TOOL,
+};
+
+enum MessagePriority {
+    MESSAGE_PRIORITY_LOW,
+    MESSAGE_PRIORITY_HIGH,
 };
 
 // Used to streamline the struct (Don't keep in final)<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -41,9 +51,9 @@ typedef void (*ControllerFunc)(void* args);
 // SDL_CONTROLLER_BUTTON_DPAD_LEFT
 // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
 struct buttonFunctions {
-    ControllerFunc buttonArray[15];
-    void (*LEFT_JOYSTICK)(int xValue, int yValue);
-    void (*RIGHT_JOYSTICK)(int xValue, int yValue);
+    std::array<std::function<void()>, 15> buttonArray = { nullptr };
+    void (*LEFT_JOYSTICK)(int xValue, int yValue) = nullptr;
+    void (*RIGHT_JOYSTICK)(int xValue, int yValue) = nullptr;
 };
 
 // Generic Message Format
@@ -80,3 +90,5 @@ struct ScienceToolMessage {
     int xPos;
     int yPos;
 };
+
+#endif

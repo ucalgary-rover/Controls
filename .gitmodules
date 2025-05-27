@@ -1,3 +1,14 @@
 [submodule "tools/IK"]
 	path = tools/IK
 	url = https://github.com/ucalgary-rover/SSRT-Inverse-Kinematics.git
+
+[submodule "tools/Phidgets"]
+	path = tools/Phidgets
+	url = https://github.com/ucalgary-rover/Phidgets.git
+
+[submodule "tools/SDL"]
+	path = tools/SDL
+	url = https://github.com/ucalgary-rover/SDL2.git
+[submodule "tools/websocketpp"]
+	path = tools/websocketpp
+	url = https://github.com/zaphoyd/websocketpp.git
