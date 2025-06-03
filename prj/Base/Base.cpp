@@ -8,6 +8,8 @@ using namespace std;
 // Create object for mutex (thread locks)
 mutex mtx;
 
+static void valLimmit(int& value, int min, int max);
+
 Base::Base() {
 
     PI = 3.1415926;
@@ -33,11 +35,6 @@ Base::Base() {
     // Variables for state of rover wrist
     wristAngle = 0;
 
-    // Variables for state of rover science tool
-    // x = left / right direction, y = up / down direction
-    toolX = 0;
-    toolY = 0;
-
     exitLoop = 0;
 }
 
@@ -50,6 +47,7 @@ void Base::setChassisAngle(int n) {
     mtx.lock();
     std::cout << "chassisAngle: " << chassisAngle << " -> ";
     chassisAngle = n;
+    valLimmit(&chassisAngle, 0, 360);
     std::cout << chassisAngle << "\n";
     mtx.unlock();
 }
@@ -58,6 +56,7 @@ void Base::incrementChassisAngle(int n) {
     mtx.lock();
     std::cout << "chassisAngle: " << chassisAngle << " -> ";
     chassisAngle += n;
+    valLimmit(&chassisAngle, 0, 360);
     std::cout << chassisAngle << "\n";
     mtx.unlock();
 }
@@ -69,6 +68,7 @@ void Base::setChassisSpeed(int n) {
     mtx.lock();
     std::cout << "chassisSpeed: " << chassisSpeed << " -> ";
     chassisSpeed = n;
+    valLimmit(&chassisSpeed, 0, chassisMaxSpeed);
     std::cout << chassisSpeed << "\n";
     mtx.unlock();
 }
@@ -77,6 +77,7 @@ void Base::incrementChassisSpeed(int n) {
     mtx.lock();
     std::cout << "chassisSpeed: " << chassisSpeed << " -> ";
     chassisSpeed += n;
+    valLimmit(&chassisSpeed, 0, chassisMaxSpeed);
     std::cout << chassisSpeed << "\n";
     mtx.unlock();
 }
@@ -88,6 +89,7 @@ void Base::setChassisAngularVelocity(int n) {
     mtx.lock();
     std::cout << "chassisAngularVelocity: " << chassisAngularVelocity << " -> ";
     chassisAngularVelocity = n;
+    valLimmit(&chassisAngularVelocity, -100, 100);
     std::cout << chassisAngularVelocity << "\n";
     mtx.unlock();
 }
@@ -96,6 +98,7 @@ void Base::incrementChassisAngularVelocity(int n) {
     mtx.lock();
     std::cout << "chassisAngularVelocity: " << chassisAngularVelocity << " -> ";
     chassisAngularVelocity += n;
+    valLimmit(&chassisAngularVelocity, -100, 100);
     std::cout << chassisAngularVelocity << "\n";
     mtx.unlock();
 }
@@ -107,6 +110,8 @@ void Base::setChassisMaxSpeed(int n) {
     mtx.lock();
     std::cout << "chassisMaxSpeed: " << chassisMaxSpeed << " -> ";
     chassisMaxSpeed = n;
+    valLimmit(&chassisMaxSpeed, 0, 100);
+    valLimmit(&chassisSpeed, 0, chassisMaxSpeed);
     std::cout << chassisMaxSpeed << "\n";
     mtx.unlock();
 }
@@ -115,6 +120,8 @@ void Base::incrementChassisMaxSpeed(int n) {
     mtx.lock();
     std::cout << "chassisMaxSpeed: " << chassisMaxSpeed << " -> ";
     chassisMaxSpeed += n;
+    valLimmit(&chassisMaxSpeed, 0, 100);
+    valLimmit(&chassisSpeed, 0, chassisMaxSpeed);
     std::cout << chassisMaxSpeed << "\n";
     mtx.unlock();
 }
@@ -126,6 +133,7 @@ void Base::setArmX(int n) {
     mtx.lock();
     std::cout << "armX: " << armX << " -> ";
     armX = n;
+    valLimmit(&armX, -100, 100);
     std::cout << armX << "\n";
     mtx.unlock();
 }
@@ -134,6 +142,7 @@ void Base::incrementArmX(int n) {
     mtx.lock();
     std::cout << "armX: " << armX << " -> ";
     armX += n;
+    valLimmit(&armX, -100, 100);
     std::cout << armX << "\n";
     mtx.unlock();
 }
@@ -145,6 +154,7 @@ void Base::setArmY(int n) {
     mtx.lock();
     std::cout << "armY: " << armY << " -> ";
     armY = n;
+    valLimmit(&armY, -100, 100);
     std::cout << armY << "\n";
     mtx.unlock();
 }
@@ -153,6 +163,7 @@ void Base::incrementArmY(int n) {
     mtx.lock();
     std::cout << "armY: " << armY << " -> ";
     armY += n;
+    valLimmit(&armY, -100, 100);
     std::cout << armY << "\n";
     mtx.unlock();
 }
@@ -164,6 +175,7 @@ void Base::setArmZ(int n) {
     mtx.lock();
     std::cout << "armZ: " << armZ << " -> ";
     armZ = n;
+    valLimmit(&armZ, -100, 100);
     std::cout << armZ << "\n";
     mtx.unlock();
 }
@@ -172,6 +184,7 @@ void Base::incrementArmZ(int n) {
     mtx.lock();
     std::cout << "armZ: " << armZ << " -> ";
     armZ += n;
+    valLimmit(&armZ, -100, 100);
     std::cout << armZ << "\n";
     mtx.unlock();
 }
@@ -183,6 +196,7 @@ void Base::setClawOpen(int n) {
     mtx.lock();
     std::cout << "clawOpen: " << clawOpen << " -> ";
     clawOpen = n;
+    valLimmit(&clawOpen, 0, 100);
     std::cout << clawOpen << "\n";
     mtx.unlock();
 }
@@ -191,6 +205,7 @@ void Base::incrementClawOpen(int n) {
     mtx.lock();
     std::cout << "clawOpen: " << clawOpen << " -> ";
     clawOpen += n;
+    valLimmit(&clawOpen, 0, 100);
     std::cout << clawOpen << "\n";
     mtx.unlock();
 }
@@ -202,6 +217,7 @@ void Base::setClawX(int n) {
     mtx.lock();
     std::cout << "clawX: " << clawX << " -> ";
     clawX = n;
+    valLimmit(&clawX, -100, 100);
     std::cout << clawX << "\n";
     mtx.unlock();
 }
@@ -210,6 +226,7 @@ void Base::incrementClawX(int n) {
     mtx.lock();
     std::cout << "clawX: " << clawX << " -> ";
     clawX += n;
+    valLimmit(&clawX, -100, 100);
     std::cout << clawX << "\n";
     mtx.unlock();
 }
@@ -221,6 +238,7 @@ void Base::setClawY(int n) {
     mtx.lock();
     std::cout << "clawY: " << clawY << " -> ";
     clawY = n;
+    valLimmit(&clawY, -100, 100);
     std::cout << clawY << "\n";
     mtx.unlock();
 }
@@ -229,6 +247,7 @@ void Base::incrementClawY(int n) {
     mtx.lock();
     std::cout << "clawY: " << clawY << " -> ";
     clawY += n;
+    valLimmit(&clawY, -100, 100);
     std::cout << clawY << "\n";
     mtx.unlock();
 }
@@ -240,6 +259,7 @@ void Base::setClawAngle(int n) {
     mtx.lock();
     std::cout << "clawAngle: " << clawAngle << " -> ";
     clawAngle = n;
+    valLimmit(&clawAngle, 0, 360);
     std::cout << clawAngle << "\n";
     mtx.unlock();
 }
@@ -248,6 +268,7 @@ void Base::incrementClawAngle(int n) {
     mtx.lock();
     std::cout << "clawAngle: " << clawAngle << " -> ";
     clawAngle += n;
+    valLimmit(&clawAngle, 0, 360);
     std::cout << clawAngle << "\n";
     mtx.unlock();
 }
@@ -259,6 +280,7 @@ void Base::setWristAngle(int n) {
     mtx.lock();
     std::cout << "wristAngle: " << wristAngle << " -> ";
     wristAngle = n;
+    valLimmit(&wristAngle, 0, 360);
     std::cout << wristAngle << "\n";
     mtx.unlock();
 }
@@ -267,45 +289,8 @@ void Base::incrementWristAngle(int n) {
     mtx.lock();
     std::cout << "wristAngle: " << wristAngle << " -> ";
     wristAngle += n;
+    valLimmit(&wristAngle, 0, 360);
     std::cout << wristAngle << "\n";
-    mtx.unlock();
-}
-
-// setter / getter / increment functions for toolX
-int Base::getToolX() { return toolX; }
-
-void Base::setToolX(int n) {
-    mtx.lock();
-    std::cout << "toolX: " << toolX << " -> ";
-    toolX = n;
-    std::cout << toolX << "\n";
-    mtx.unlock();
-}
-
-void Base::incrementToolX(int n) {
-    mtx.lock();
-    std::cout << "toolX: " << toolX << " -> ";
-    toolX += n;
-    std::cout << toolX << "\n";
-    mtx.unlock();
-}
-
-// setter / getter / increment functions for toolY
-int Base::getToolY() { return toolY; }
-
-void Base::setToolY(int n) {
-    mtx.lock();
-    std::cout << "toolY: " << toolY << " -> ";
-    toolY = n;
-    std::cout << toolY << "\n";
-    mtx.unlock();
-}
-
-void Base::incrementToolY(int n) {
-    mtx.lock();
-    std::cout << "toolY: " << toolY << " -> ";
-    toolY += n;
-    std::cout << toolY << "\n";
     mtx.unlock();
 }
 
@@ -366,4 +351,12 @@ void Base::start() {
     }
     controllerThread.join();
     // websocetThread.join();
+}
+
+static void valLimmit(int* value, int min, int max) {
+    if (*value < min) {
+        *value = min;
+    } else if (*value > max) {
+        *value = max;
+    }
 }

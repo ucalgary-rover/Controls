@@ -82,16 +82,6 @@ public:
     void setWristAngle(int n);
     void incrementWristAngle(int n);
 
-    // setter / getter / increment functions for toolX
-    int getToolX();
-    void setToolX(int n);
-    void incrementToolX(int n);
-
-    // setter / getter / increment functions for toolY
-    int getToolY();
-    void setToolY(int n);
-    void incrementToolY(int n);
-
     // Converter functions
     float intToRadian(int n);
 
@@ -121,10 +111,6 @@ private:
 
     // Variables for state of rover wrist
     int wristAngle;
-
-    // Variables for state of rover science tool
-    // x = left / right direction, y = up / down direction
-    int toolX, toolY;
 
     int exitLoop;
 
