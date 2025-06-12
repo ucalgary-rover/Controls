@@ -1,3 +1,7 @@
+### Here's a repo for my testing
+
+https://github.com/damonmaz/rover-websocket-tests
+
 ## To Create:
 
 1. Make sure boost is installed and verify it was installed correctly
@@ -28,7 +32,7 @@ cmake ..
 make
 ```
 
-6. Finally, run the program
+6. Finally, run the program (runs in localhost by default, have to change in Server.cpp and Client.cpp)
 ```bash
 ./server
 ./client
