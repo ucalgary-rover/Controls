@@ -1,7 +1,7 @@
 #ifndef PUB_GENERAL_H
 #define PUB_GENERAL_H
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <functional>
 #include <iostream>
 

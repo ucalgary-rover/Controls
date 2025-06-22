@@ -18,3 +18,8 @@ const int ARM_MOTOR_SERIAL_NUMBER[6] = { 1000, 1000, 1000, 1000, 1000, 1000 };
 const int ARM_MOTOR_CHANNEL[6] = { 1, 1, 1, 1, 1, 1 };
 const int ARM_CLAW_SERIAL_NUMBER = 1000;
 const int ARM_CLAW_CHANNEL = 1;
+
+
+// Websocet Definitions
+const int WEBSOCKET_PORT = 8080;
+// const char* WEBSOCKET_ADDR = "127.0.0.1";

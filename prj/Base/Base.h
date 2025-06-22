@@ -6,12 +6,14 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-#include <windows.h>
+#include <unistd.h>
 
 #include "Base/Controller.h"
 #include "Message.h"
 #include "MessageQueue.h"
+#include "mission_control.h"
 #include "pub_general.h"
+#include "Websocket/WebsocketServer.h"
 
 using namespace std;
 

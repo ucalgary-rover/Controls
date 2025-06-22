@@ -8,7 +8,7 @@ using namespace std;
 // Create object for mutex (thread locks)
 mutex mtx;
 
-static void valLimmit(int& value, int min, int max);
+static void valLimmit(int* value, int min, int max);
 
 Base::Base() {
 
@@ -309,9 +309,11 @@ void Base::quit() { this->exitLoop = 1; }
 
 void Base::start() {
     MessageQueue sendQueue;
-    // WebSocketServer server = WebSocketServer(8080);
+    WebSocketServer server(WEBSOCKET_PORT);
+
     thread controllerThread([&]() { controller->eventLoop(); });
-    // thread websocetThread([&]() { server.run(); });
+    thread websocetServerThread([&]() { server.run(sendQueue); });
+
     std::cout << "Main Thread\n";
 
     WheelMessage wheelMsg;
@@ -347,7 +349,7 @@ void Base::start() {
         // Add Arm Message to queue
         sendQueue.push(armMessage);
 #endif
-        Sleep(500);
+        sleep(500);
     }
     controllerThread.join();
     // websocetThread.join();
