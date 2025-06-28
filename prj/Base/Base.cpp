@@ -352,7 +352,7 @@ void Base::start() {
         sleep(500);
     }
     controllerThread.join();
-    // websocetThread.join();
+    websocetServerThread.join();
 }
 
 static void valLimmit(int* value, int min, int max) {

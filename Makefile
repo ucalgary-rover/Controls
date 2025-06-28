@@ -1,10 +1,17 @@
 .RECIPEPREFIX = >
-SRC_FILES := $(wildcard prj/*.cpp)
-SRC_FILES += $(wildcard prj/Base/*.cpp)
-SRC_FILES += $(wildcard prj/Websocket/*.cpp)
+BASE_SRC_FILES := $(wildcard prj/*.cpp)
+BASE_SRC_FILES += $(wildcard prj/Base/*.cpp)
+BASE_SRC_FILES += $(wildcard prj/Websocket/*.cpp)
 
-SRC_FILES := $(filter-out prj/Websocket/Client.cpp, $(SRC_FILES))
-SRC_FILES := $(filter-out prj/Websocket/Server.cpp, $(SRC_FILES))
+BASE_SRC_FILES := $(filter-out prj/Websocket/Client.cpp, $(BASE_SRC_FILES))
+BASE_SRC_FILES := $(filter-out prj/Websocket/Server.cpp, $(BASE_SRC_FILES))
+
+ROVER_SRC_FILES := $(wildcard prj/*.cpp)
+ROVER_SRC_FILES += $(wildcard prj/Rover/*.cpp)
+ROVER_SRC_FILES += $(wildcard prj/Websocket/*.cpp)
+
+ROVER_SRC_FILES := $(filter-out prj/Websocket/Client.cpp, $(ROVER_SRC_FILES))
+ROVER_SRC_FILES := $(filter-out prj/Websocket/Server.cpp, $(ROVER_SRC_FILES))
 
 BOOST_ROOT = /usr/include
 SDL_ROOT = tools/SDL
@@ -20,18 +27,26 @@ run_test:
 > cmake --build test/build
 > cd test/build && ctest
 
-compile:
-> g++  -I"prj" prj/main.cpp -o main
-
-run: compile
-> ./main
-
 controller_test:
 > g++ -I"prj" prj/Base/ControllerTesting.cpp -o ControllerTesting -I"C:/mingw-dev-lib/include/SDL2" -L"C:/mingw-dev-lib/lib" -lmingw32 -lSDL2main -lSDL2
 > ./ControllerTesting
 
-base:
-> g++ -I"prj" $(SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) -o main
+build_dir:
+> mkdir -p build
+
+base: build_dir
+> g++ -DSIDE_TO_BUILD=1 -I"prj" $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) -o build/base
+
+rover: build_dir
+> g++ -DSIDE_TO_BUILD=2 -I"prj" $(ROVER_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) -o build/rover
 
 run_base: base
-> ./main 
+> ./base 
+
+run_rover: rover
+> ./rover 
+
+clean:
+> rm -f build/ -r
+
+all: build_dir base rover

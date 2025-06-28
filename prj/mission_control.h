@@ -3,7 +3,7 @@
 #pragma once
 
 #define EXTENTION EXTENTION_TYPE_NONE
-#define SIDE_TO_BUILD BUILD_SIDE_ROVER
+// #define SIDE_TO_BUILD BUILD_SIDE_BASE
 
 // Configuration file to set serial numbers and channels for each of the motors
 
@@ -22,4 +22,4 @@ const int ARM_CLAW_CHANNEL = 1;
 
 // Websocet Definitions
 const int WEBSOCKET_PORT = 8080;
-// const char* WEBSOCKET_ADDR = "127.0.0.1";
+const uint8_t WEBSOCKET_ADDR[4] = {127, 0, 0, 1};

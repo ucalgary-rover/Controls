@@ -7,10 +7,8 @@
 
 #pragma once
 
-enum BuildSide {
-    BUILD_SIDE_BASE,
-    BUILD_SIDE_ROVER,
-};
+#define BUILD_SIDE_BASE 1
+#define BUILD_SIDE_ROVER 2
 
 enum ExtentionType {
     EXTENTION_TYPE_ARM,

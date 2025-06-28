@@ -5,3 +5,4 @@
 prj/websocketpp
 prj/boost
 test/build/
+build/
