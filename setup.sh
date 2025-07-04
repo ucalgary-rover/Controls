@@ -20,11 +20,12 @@ pip install cmake
 echo "Finished installing cmake..."
 
 sudo apt install libboost-all-dev
+sudo apt install curl
 curl -fsSL https://www.phidgets.com/downloads/setup_linux | sudo -E bash -
-sudo apt-get update
-sudo apt-get install -y libphidget22
+sudo apt install -y libphidget22
 sudo apt-get install libphidget22-dev
 sudo apt-get install libsdl2-dev
+sudo apt install g++
 
 echo Please be sure to setup "make" if you have yet to do so.
 echo "Have a nice day :)"

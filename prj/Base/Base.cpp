@@ -349,7 +349,7 @@ void Base::start() {
         // Add Arm Message to queue
         sendQueue.push(armMessage);
 #endif
-        sleep(500);
+        usleep(1 * 1000000);
     }
     controllerThread.join();
     websocetServerThread.join();

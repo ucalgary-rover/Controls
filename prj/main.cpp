@@ -23,9 +23,9 @@ int main(int argc, char* argv[]) {
     buttons_controller_1.LEFT_JOYSTICK = &unusedStick;
     buttons_controller_1.RIGHT_JOYSTICK = &unusedStick;
     buttons_controller_1.buttonArray = {
-        [&base]() { base.incrementChassisSpeed(2); }, // SDL_CONTROLLER_BUTTON_A
+        [&base]() { base.incrementClawOpen(2); }, // SDL_CONTROLLER_BUTTON_A
         [&base]() {
-            base.incrementChassisSpeed(-2);
+            base.incrementClawOpen(-2);
         },                          // SDL_CONTROLLER_BUTTON_B
         [&]() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_X
         [&]() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_Y
@@ -60,10 +60,10 @@ int main(int argc, char* argv[]) {
     buttons_controller_2.LEFT_JOYSTICK = &unusedStick;
     buttons_controller_2.RIGHT_JOYSTICK = &unusedStick;
     buttons_controller_2.buttonArray = {
-        [&base]() { base.incrementClawOpen(2); },  // SDL_CONTROLLER_BUTTON_A
-        [&base]() { base.incrementClawOpen(-2); }, // SDL_CONTROLLER_BUTTON_B
-        [&]() { unusedButton(); },                 // SDL_CONTROLLER_BUTTON_X
-        [&]() { unusedButton(); },                 // SDL_CONTROLLER_BUTTON_Y
+        [&base]() { base.incrementChassisSpeed(2); },  // SDL_CONTROLLER_BUTTON_A
+        [&base]() { base.incrementChassisSpeed(-2); }, // SDL_CONTROLLER_BUTTON_B
+        [&base]() { base.incrementChassisMaxSpeed(2); },                 // SDL_CONTROLLER_BUTTON_X
+        [&base]() { base.incrementChassisMaxSpeed(-2); },                 // SDL_CONTROLLER_BUTTON_Y
         [&]() { unusedButton(); },                 // SDL_CONTROLLER_BUTTON_BACK
         [&]() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_GUIDE
         [&base]() { base.quit(); }, // SDL_CONTROLLER_BUTTON_START
