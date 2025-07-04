@@ -7,22 +7,18 @@
 
 #include "pub_general.h"
 #include "pub_rover.h"
-
+#include <thread>
 #include "Systems/Arm.h"
 #include "Systems/Drive.h"
 
-#include "Handlers/ArmHandler.h"
+// #include "Handlers/ArmHandler.h"
 
-#include "websocket.h"
+#include "Websocket/WebsocketClient.h"
 
 class Rover {
 public:
     // Regular Constructor
-    Rover(Arm arm, Drive drive);
-
-    // Temporary websocket constructor (need feedback on this)
-    Rover(Arm arm, Drive drive, asio::io_context& context,
-          const std::string& host, int port);
+    Rover();
 
     ~Rover();
 
@@ -70,18 +66,7 @@ public:
      * @return
      * none
      */
-    void instantiateThreads();
-
-    /** Instantiate the websocket client for the rover
-     *
-     * @param
-     * none
-     *
-     * @return
-     * none
-     */
-    void instantiateWebsocket(asio::io_context& context,
-                              const std::string& host, int port);
+    void startClient(MessageQueue* clientQueue, MessageQueue* armQueue, MessageQueue* driveQueue);
 
     /** Start the rover
      *
@@ -104,27 +89,6 @@ public:
     void stop();
 
 private:
-    // Websocket client
-    WebSocketClient m_wsClient;
-
-    // Rover components
-    Arm m_arm;
-    Drive m_drive;
-
-    // Rover Handlers
-    ArmHandler m_armHandler;
-    // DriveHandler driveHandler;
-
-    // Message queues
-    MessageQueue m_roverQueue;
-    MessageQueue m_armQueue;
-    MessageQueue m_driveQueue;
-
-    // Threads
-    std::thread m_roverQueueThread;
-    std::thread m_startThread;
-    std::thread m_stopThread;
-    std::thread m_wsThread;
 
     // Threading variables
     std::condition_variable m_roverConVar;

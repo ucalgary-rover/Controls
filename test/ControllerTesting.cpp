@@ -1,10 +1,42 @@
 #include "Controller.h"
+#include <SDL2/SDL.h>
+#include <iostream>
+#include <string>
 
-// extrememly basic test function as default stick function
-static void stickTest(int X, int Y);
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
 
-// extrememly basic test function as default button function
-static void buttonTest(void* args);
+SDL_Window* makeWindow() {
+    // Window stuffs (not that important)
+    // -----------------------------------------------------------------------
+    SDL_Window* window = SDL_CreateWindow(
+        "Joystick testing", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+        SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+
+    if (window == nullptr) {
+        std::cerr << "SDL could not initialize! SDL Error: " << SDL_GetError()
+                  << std::endl;
+    }
+
+    return window;
+}
+
+void renderCross1(SDL_Surface* screenSurface, int x, int y, int w,
+                  Uint32 color) {
+    SDL_Rect rect = { x, y - w / 2, 1, w };
+    SDL_FillRect(screenSurface, &rect, color);
+
+    rect = { x - w / 2, y, w, 1 };
+    SDL_FillRect(screenSurface, &rect, color);
+}
+
+void renderCross(SDL_Surface* screenSurface, int x, int y, float x1, float x2) {
+    renderCross1(screenSurface, x, y, 20,
+                 SDL_MapRGB(screenSurface->format, 0x99, 0x99, 0x99));
+    renderCross1(screenSurface, x + x1 * SCREEN_WIDTH * 0.2f,
+                 y + x2 * SCREEN_HEIGHT * 0.2f, 10,
+                 SDL_MapRGB(screenSurface->format, 0xFF, 0xF, 0xAA));
+}
 
 // Helper function to get button names
 std::string getButtonName(Uint8 button) {
@@ -179,6 +211,7 @@ void ControllerHolder::buttonResponse(Uint8 buttonID, int controllerIndex) {
 
 void ControllerHolder::stickResponse(Sint16 axisValue, int axisID,
                                      int controllerIndex) {
+
     // Identifying which stick is in play
     for (int i = 0; i < 2; i++) {
         if ((int)m_controllerList[i].getInstanceID() == controllerIndex) {
@@ -207,7 +240,7 @@ void ControllerHolder::stickResponse(Sint16 axisValue, int axisID,
         leftStick.stickUpdate(axisValue, stickAxisID);
 
         // saving updated stick
-        (*activeController).setLeftStick(rightStick);
+        (*activeController).setLeftStick(leftStick);
 
         // otherwise it is right stick
     } else {
@@ -264,6 +297,8 @@ void ControllerHolder::eventLoop() {
 
     bool quit = false;
 
+    SDL_Window* window = makeWindow();
+
     // initializing SDL sub systems`
     // This combo works, it is a little strange tho
     // -> SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER
@@ -271,7 +306,6 @@ void ControllerHolder::eventLoop() {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
         fprintf(stderr, "could not initialize sdl2: %s\n", SDL_GetError());
         SDL_Quit();
-        quit = true;
     }
 
     // Check for game controllers
@@ -279,7 +313,6 @@ void ControllerHolder::eventLoop() {
         std::cerr << "No controllers connected!" << std::endl
                   << SDL_NumJoysticks();
         SDL_Quit();
-        quit = true;
     }
 
     SDL_Event event;
@@ -312,6 +345,7 @@ void ControllerHolder::eventLoop() {
             // working now!
             // featuring dante from devil may cry! /satire
             case SDL_JOYAXISMOTION:
+
                 // for now, making sure triggers don't cause problems
                 if (event.jaxis.axis < 4) {
                     stickResponse(event.jaxis.value, event.jaxis.axis,
@@ -327,12 +361,31 @@ void ControllerHolder::eventLoop() {
                 //-------------------------------------------------------------
                 // Hardcoding a button that quits the loop
                 if (SDL_CONTROLLER_BUTTON_START == event.cbutton.button) {
+                    std::cout << "Quitting";
                     quit = true;
                 }
 
                 break;
             }
         }
+
+        // Testing code!!!
+        //  --------------------------------------------------------------------------
+        //  rendering the crosses
+
+        SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
+        SDL_FillRect(screenSurface, nullptr,
+                     SDL_MapRGB(screenSurface->format, 0x33, 0x33, 0x33));
+
+        renderCross(screenSurface, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2,
+                    m_controllerList[0].getLeftStick().getPosX() / 255,
+                    m_controllerList[0].getLeftStick().getPosY() / 255);
+        renderCross(screenSurface, 3 * SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2,
+                    m_controllerList[0].getRightStick().getPosX() / 255,
+                    m_controllerList[0].getRightStick().getPosY() / 255);
+
+        // must be used to update window
+        SDL_UpdateWindowSurface(window);
     }
 
     // Clean up >>>>>>>>>>>>>>>>>>>>>> important <<<<<<<<<<<<<<<<<<<<<<
@@ -342,24 +395,24 @@ void ControllerHolder::eventLoop() {
         }
     }
 
+    quit = false;
+
     SDL_Quit();
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 // detecting inital controller and opening it
-// int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 
-//     buttonFunctions example;
+    buttonFunctions example;
 
-//     buttonFunctions example2;
+    buttonFunctions example2;
 
-//     // making the controller holder
-//     ControllerHolder cHolder = ControllerHolder(example, example2);
+    // making the controller holder
+    ControllerHolder cHolder = ControllerHolder(example, example2);
 
-//     cHolder.eventLoop();
+    cHolder.eventLoop();
 
-//     return 0;
-// }
-
-static void stickTest(int X, int Y) { std::cout << X + Y; }
+    return 0;
+}

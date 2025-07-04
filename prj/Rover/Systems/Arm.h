@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Rover/pub_rover.h"
-#include "Rover/systems/pub_systems.h"
+#include "Rover/Systems/pub_systems.h"
 #include "mission_control.h"
 #include "phidget22.h"
 #include <iostream>

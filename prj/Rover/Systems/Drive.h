@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Rover/pub_rover.h"
-#include "Rover/systems/pub_systems.h"
+#include "Rover/Systems/pub_systems.h"
 #include "mission_control.h"
 #include "phidget22.h"
 #include <iostream>
@@ -110,8 +110,8 @@ private:
 
     // Length and width in meters for now, can change once we get dimentions
     // from Mech Rover
-    float m_length = 1;
-    float m_width = 0.5;
+    float m_length;
+    float m_width;
 };
 
 #endif

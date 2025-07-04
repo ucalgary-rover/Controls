@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "./Rover.h"       // This also needs to be fixed
-#include "./Systems/Arm.h" // This needs to be fixed
+#include "Rover/Rover.h"       // This also needs to be fixed
+#include "Rover/Systems/Arm.h" // This needs to be fixed
 #include "HandlerInterface.h"
 #include <mutex>
 
