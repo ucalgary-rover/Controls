@@ -67,17 +67,54 @@ struct WheelMessage {
 };
 
 // Message format for arm
+
+enum MotorID : int {
+    BASE,
+    SHOULDER,
+    ELBOW,
+    WRIST,
+    CLAW_ROLL,
+    CLAW_PITCH,
+    CLAW_OPEN,
+};
+
+enum ArmMessageType : int {
+    MANUAL,
+    FIXED_IK,
+    VARIABLE_IK,
+};
+
+struct ArmManualMessage {
+    MotorID motorId;
+    float angle_change;
+};
+
+struct ArmFixedIKMessage {
+    float wrist_x;
+    float wrist_y;
+    float wrist_z;
+
+    float claw_open;
+};
+
+struct ArmVariableIKMessage {
+    float wrist_x;
+    float wrist_y;
+    float wrist_z;
+
+    float claw_incline;
+    float claw_twist;
+
+    float claw_open;
+};
+
 struct ArmMessage {
-    int armXPos;
-    int armYPos;
-    int armZPos;
-
-    int clawXPos;
-    int clawYPos;
-    int clawOpen;
-    int clawRotation;
-
-    int wristRotation;
+    ArmMessageType type;
+    union {
+        ArmManualMessage manual_message;
+        ArmFixedIKMessage fixed_ik_message;
+        ArmVariableIKMessage variable_ik_message;
+    }
 };
 
 // Message format for science tool
