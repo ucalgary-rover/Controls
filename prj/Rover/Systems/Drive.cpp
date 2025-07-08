@@ -2,7 +2,6 @@
 #include <cmath>
 #include <stdio.h>
 
-
 Drive::m_length = 1;
 Drive::m_width = 0.5;
 
@@ -59,4 +58,3 @@ bool Drive::getDriveStepperHandle(MotorHandlerReturn* retVal, int index) {
 float Drive::getLength() { return m_length; }
 
 float Drive::getWidth() { return m_width; }
-
