@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+static GameControllerAxis covert_stl_axis_to_game_controller(SDL_GameControllerAxis axis);
+
 // Helper function to get button names
 std::string getButtonName(Uint8 button) {
     switch (button) {
@@ -48,7 +50,7 @@ std::string getButtonName(Uint8 button) {
 
 // Stick definitions------------------------------------------------------
 
-Stick::Stick(SDL_GameControllerAxis xID, SDL_GameControllerAxis yID) {
+Stick::Stick(GameControllerAxis xID, GameControllerAxis yID) {
     m_xAxis = xID;
     m_yAxis = yID;
 }
@@ -133,8 +135,8 @@ Controller::Controller(SDL_GameController* identifier) {
         = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(identifier));
 
     m_rightStick
-        = Stick(SDL_CONTROLLER_AXIS_RIGHTX, SDL_CONTROLLER_AXIS_RIGHTY);
-    m_leftStick = Stick(SDL_CONTROLLER_AXIS_LEFTX, SDL_CONTROLLER_AXIS_LEFTY);
+        = Stick(GAME_CONTROLLER_AXIS_RIGHTX, GAME_CONTROLLER_AXIS_RIGHTY);
+    m_leftStick = Stick(GAME_CONTROLLER_AXIS_LEFTX, GAME_CONTROLLER_AXIS_LEFTY);
 }
 
 // ControllerHolder definitions -----------------------------------------
@@ -172,8 +174,7 @@ void ControllerHolder::buttonResponse(Uint8 buttonID, int controllerIndex) {
     }
 
     // searches thru the dictionary to execute the appropriate function
-    m_controllerList[controllerIndex].getButtonFuncs().buttonArray[buttonID](
-        &buttonName);
+    m_controllerList[controllerIndex].getButtonFuncs().buttonArray[buttonID]();
 }
 
 void ControllerHolder::stickResponse(Sint16 axisValue, int axisID,
@@ -206,7 +207,7 @@ void ControllerHolder::stickResponse(Sint16 axisValue, int axisID,
         leftStick.stickUpdate(axisValue, stickAxisID);
 
         // saving updated stick
-        (*activeController).setLeftStick(rightStick);
+        (*activeController).setLeftStick(leftStick);
 
         // otherwise it is right stick
     } else {
@@ -310,12 +311,17 @@ void ControllerHolder::eventLoop() {
             // featuring dante from devil may cry! /satire
             case SDL_JOYAXISMOTION:
                 // for now, making sure triggers don't cause problems
-                if (event.jaxis.axis < 4) {
-                    stickResponse(event.jaxis.value, event.jaxis.axis,
+                {
+                GameControllerAxis axis = covert_stl_axis_to_game_controller((SDL_GameControllerAxis)event.jaxis.axis);
+                std::cout << (int)event.jaxis.axis << " -> " << axis << std::endl;
+
+                if (axis < 4) {
+                    stickResponse(event.jaxis.value, axis,
                                   event.cdevice.which);
                 }
 
                 break;
+                }
 
             case SDL_CONTROLLERBUTTONDOWN:
 
@@ -343,3 +349,22 @@ void ControllerHolder::eventLoop() {
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static GameControllerAxis covert_stl_axis_to_game_controller(SDL_GameControllerAxis axis) {
+    switch (axis) {
+    case SDL_CONTROLLER_AXIS_LEFTX:
+        return GAME_CONTROLLER_AXIS_LEFTX;
+    case SDL_CONTROLLER_AXIS_LEFTY:
+        return GAME_CONTROLLER_AXIS_LEFTY;
+    case SDL_CONTROLLER_AXIS_RIGHTX:
+        return GAME_CONTROLLER_AXIS_TRIGGERLEFT;
+    case SDL_CONTROLLER_AXIS_RIGHTY:
+        return GAME_CONTROLLER_AXIS_RIGHTX;
+    case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+        return GAME_CONTROLLER_AXIS_RIGHTY;
+    case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+        return GAME_CONTROLLER_AXIS_TRIGGERRIGHT;
+    default:
+        return GAME_CONTROLLER_AXIS_INVALID;
+    }
+}

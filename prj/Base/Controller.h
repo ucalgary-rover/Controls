@@ -15,8 +15,8 @@ class Stick {
 private:
     // identifiers for the axes
     // funny enough, triggers also operate with axes
-    SDL_GameControllerAxis m_xAxis;
-    SDL_GameControllerAxis m_yAxis;
+    GameControllerAxis m_xAxis;
+    GameControllerAxis m_yAxis;
 
     // positions values from -255 - 255 (note up and left are negative)
     int m_posX = 0;
@@ -41,7 +41,7 @@ public:
      *@param The IDs for each axis of the controller
      *@return None
      */
-    Stick(SDL_GameControllerAxis xID, SDL_GameControllerAxis yID);
+    Stick(GameControllerAxis xID, GameControllerAxis yID);
 
     // default constructor
     Stick() { }
@@ -49,8 +49,8 @@ public:
     // getters
     float getPosX() { return m_posX; };
     float getPosY() { return m_posY; };
-    SDL_GameControllerAxis getXAxis() { return m_xAxis; };
-    SDL_GameControllerAxis getYAxis() { return m_yAxis; };
+    GameControllerAxis getXAxis() { return m_xAxis; };
+    GameControllerAxis getYAxis() { return m_yAxis; };
 
     // setters
     void setStickFunc(void (*newStickFunc)(int xValue, int yValue)) {
