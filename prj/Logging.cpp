@@ -19,7 +19,10 @@ namespace Logging{
                 << levelStr << ": \t" << msg_prefix << " - " << msg << "\n";
             std::string out = oss.str();
             std::cout << out;
-            if (logFile.is_open()) logFile << out;
+            if (logFile.is_open()){ 
+                logFile << out;
+                logFile.flush(); // Ensure the log is written immediately
+            }
         }
     }
 
@@ -33,7 +36,7 @@ namespace Logging{
         std::string timestamp = oss.str();
         std::string filename;
         #if SIDE_TO_BUILD == BUILD_SIDE_BASE
-        filename = "logs/baselog_" + timestamp + ".log";
+        filename = "logs/base_" + timestamp + ".log";
         logFile.open(filename, std::ios::app);
         std::cout << "Logging initialized for Base side. File: " << filename << std::endl;
         #elif SIDE_TO_BUILD == BUILD_SIDE_ROVER
@@ -43,7 +46,7 @@ namespace Logging{
         #endif
 
         if (!logFile.is_open()) {
-            std::cerr << "Failed to open log file: " << filename << std::endl;
+            std::cout << "Failed to open log file: " << filename << std::endl;
         }
     }
 
@@ -78,6 +81,8 @@ namespace Logging{
     }
 
     void logV(const std::string& msg, const std::string& msg_prefix){
+        std::cout << LOGGING_LEVEL << std::endl;
+        std::cout << LOG_LEVEL_VERBOSE << std::endl;
     #if LOGGING_LEVEL >= LOG_LEVEL_VERBOSE
         logMsg("VERBOSE", msg, msg_prefix);
     #endif

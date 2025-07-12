@@ -11,8 +11,10 @@ mutex mtx;
 static void valLimmit(float* value, int min, int max);
 static void unusedButton();
 static void unusedStick(int X, int Y);
+static std::string file = "Base";
 
 Base::Base() {
+    Logging::logI("Initializing Base", file);
 
     PI = 3.1415926;
 
@@ -39,9 +41,10 @@ Base::Base() {
 
     exitLoop = 0;
 
-    drive_control.LEFT_JOYSTICK = &unusedStick;
-    drive_control.RIGHT_JOYSTICK = &unusedStick;
-    drive_control.buttonArray = {
+    drive_control = new buttonFunctions();
+    drive_control->LEFT_JOYSTICK = &unusedStick;
+    drive_control->RIGHT_JOYSTICK = &unusedStick;
+    drive_control->buttonArray = {
         [this]() {incrementFloat(chassisSpeed, 2, 0, chassisMaxSpeed, "chassisSpeed"); },  // SDL_CONTROLLER_BUTTON_A
         [this]() {incrementFloat(chassisSpeed, -2, 0, chassisMaxSpeed, "chassisSpeed"); }, // SDL_CONTROLLER_BUTTON_B
         [this]() {incrementFloat(chassisMaxSpeed, 2, 0, 100, "chassisMaxSpeed"); }, // SDL_CONTROLLER_BUTTON_X
@@ -59,9 +62,10 @@ Base::Base() {
         []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
-    arm_manulal_control.LEFT_JOYSTICK = &unusedStick;
-    arm_manulal_control.RIGHT_JOYSTICK = &unusedStick;
-    arm_manulal_control.buttonArray = {
+    arm_manulal_control = new buttonFunctions();
+    arm_manulal_control->LEFT_JOYSTICK = &unusedStick;
+    arm_manulal_control->RIGHT_JOYSTICK = &unusedStick;
+    arm_manulal_control->buttonArray = {
         [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);}, // SDL_CONTROLLER_BUTTON_A
         [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK); }, // SDL_CONTROLLER_BUTTON_B
         [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK); },  // SDL_CONTROLLER_BUTTON_X
@@ -79,9 +83,10 @@ Base::Base() {
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
-    arm_fixed_ik_control.LEFT_JOYSTICK = &unusedStick;
-    arm_fixed_ik_control.RIGHT_JOYSTICK = &unusedStick;
-    arm_fixed_ik_control.buttonArray = {
+    arm_fixed_ik_control = new buttonFunctions();
+    arm_fixed_ik_control->LEFT_JOYSTICK = &unusedStick;
+    arm_fixed_ik_control->RIGHT_JOYSTICK = &unusedStick;
+    arm_fixed_ik_control->buttonArray = {
         [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);}, // SDL_CONTROLLER_BUTTON_A
         [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK); }, // SDL_CONTROLLER_BUTTON_B
         [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK); },  // SDL_CONTROLLER_BUTTON_X
@@ -99,9 +104,10 @@ Base::Base() {
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
-    arm_variable_ik_control.LEFT_JOYSTICK = &unusedStick;
-    arm_variable_ik_control.RIGHT_JOYSTICK = &unusedStick;
-    arm_variable_ik_control.buttonArray = {
+    arm_variable_ik_control = new buttonFunctions();
+    arm_variable_ik_control->LEFT_JOYSTICK = &unusedStick;
+    arm_variable_ik_control->RIGHT_JOYSTICK = &unusedStick;
+    arm_variable_ik_control->buttonArray = {
         [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);}, // SDL_CONTROLLER_BUTTON_A
         [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK); }, // SDL_CONTROLLER_BUTTON_B
         [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK); },  // SDL_CONTROLLER_BUTTON_X
@@ -119,7 +125,9 @@ Base::Base() {
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
-    controller = new ControllerHolder(drive_control, arm_manulal_control);
+    controller = new ControllerHolder(*drive_control, *arm_manulal_control);
+
+    Logging::logI("Initializing Base done", file);
 }
 
 Base::~Base() { }
@@ -155,13 +163,13 @@ void Base::changeArmControlType(ArmMessageType type) {
     armControlType = type;
     switch (armControlType) {
         case ARM_MESSAGE_TYPE_MANUAL:
-            controller->setControllerButtonFuncs(0, arm_manulal_control);
+            controller->setControllerButtonFuncs(0, *arm_manulal_control);
             break;
         case ARM_MESSAGE_TYPE_FIXED_IK:
-            controller->setControllerButtonFuncs(0, arm_fixed_ik_control);
+            controller->setControllerButtonFuncs(0, *arm_fixed_ik_control);
             break;
         case ARM_MESSAGE_TYPE_VARIABLE_IK:
-            controller->setControllerButtonFuncs(0, arm_variable_ik_control);
+            controller->setControllerButtonFuncs(0, *arm_variable_ik_control);
             break;
     }
     mtx.unlock();
@@ -205,6 +213,8 @@ void Base::start() {
         Message driveMessage(MESSAGE_PRIORITY_LOW, wheelMsg);
 
         // Add Drive Message to queue
+        // Logging::logV("Adding drive message to queue", file);
+
         sendQueue.push(driveMessage);
 
 #if Extention == EXTENTION_TYPE_ARM
@@ -248,6 +258,8 @@ void Base::start() {
                 break;
         }
         // Add Arm Message to queue
+        // Logging::logV("Adding arm message to queue", file);
+
         sendQueue.push(Message(MESSAGE_PRIORITY_LOW, armMsg));
 
 #endif
@@ -268,5 +280,5 @@ static void valLimmit(float* value, int min, int max) {
 static void unusedButton() { std::cout << "Button Unused\n"; }
 
 static void unusedStick(int X, int Y) {
-    std::cout << "X: " << X << "Y: " << Y << "\n";
+    std::cout << "X: " << X << "\tY: " << Y << "\n";
 }

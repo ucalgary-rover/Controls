@@ -9,7 +9,12 @@
 #include "Rover/Rover.h"
 #endif
 
+static std::string file = "Main";
+
 int main(int argc, char* argv[]) {
+    Logging::logInit();
+
+    Logging::logI("Mission Control started", file);
     std::cout << SIDE_TO_BUILD << " " << EXTENTION << "\n";
 
 #if SIDE_TO_BUILD == BUILD_SIDE_BASE
@@ -27,5 +32,6 @@ int main(int argc, char* argv[]) {
 
 #endif
 
+    Logging::logDeinit();
     return 0;
 }

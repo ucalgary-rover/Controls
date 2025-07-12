@@ -62,8 +62,10 @@ private:
     // List of all controllers in use
     ControllerHolder* controller;
 
-    buttonFunctions drive_control;
-    buttonFunctions arm_manulal_control, arm_fixed_ik_control, arm_variable_ik_control;
+    buttonFunctions* drive_control;
+    buttonFunctions* arm_manulal_control; 
+    buttonFunctions* arm_fixed_ik_control;
+    buttonFunctions* arm_variable_ik_control;
 };
 
 #endif

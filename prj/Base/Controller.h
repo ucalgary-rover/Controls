@@ -5,29 +5,10 @@
 
 #include <SDL2/SDL.h>
 #include <iostream>
+#include "pub_general.h"
 
-// extremely basic test function as default stick function
-void stickTest(int X, int Y) { std::cout << X + Y; }
-// extrememly basic test function as default button function
-void buttonTest(void* args) {
-
-    // must first save as a pointer to a certain data type
-    std::string* buttonName = (std::string*)args;
-
-    // then derefence
-    std::cout << *buttonName;
-}
 // Used to streamline the struct (Don't keep in final)<<<<<<<<<<<<<<<<<<<<<<<<<
 typedef void (*ControllerFunc)(void* args);
-
-struct buttonFunctions {
-    ControllerFunc buttonArray[15]
-        = { &buttonTest, &buttonTest, &buttonTest, &buttonTest, &buttonTest,
-            &buttonTest, &buttonTest, &buttonTest, &buttonTest, &buttonTest,
-            &buttonTest, &buttonTest, &buttonTest, &buttonTest, &buttonTest };
-    void (*LEFT_JOYSTICK)(int xValue, int yValue) = &stickTest;
-    void (*RIGHT_JOYSTICK)(int xValue, int yValue) = &stickTest;
-};
 
 // class for joysticks (generic and can be applied to any controller)
 class Stick {
