@@ -3,7 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <functional>
-#include <iostream>
+#include "Logging.h"
 
 #pragma once
 
@@ -25,6 +25,14 @@ enum MessageFormat {
 enum MessagePriority {
     MESSAGE_PRIORITY_LOW,
     MESSAGE_PRIORITY_HIGH,
+};
+
+enum LogLevel {
+    LOG_LEVEL_ERROR,
+    LOG_LEVEL_WARNING,
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_VERBOSE,
 };
 
 // Used to streamline the struct (Don't keep in final)<<<<<<<<<<<<<<<<<<<<<<<<<<

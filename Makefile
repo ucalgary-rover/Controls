@@ -33,6 +33,7 @@ controller_test:
 
 build_dir:
 > mkdir -p build
+> mkdir -p logs
 
 base: build_dir
 > g++ -DSIDE_TO_BUILD=1 -I"prj" $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) -o build/base
@@ -50,3 +51,6 @@ clean:
 > rm -f build/ -r
 
 all: build_dir base rover
+
+clean_logs:
+> rm -f logs/*.log
