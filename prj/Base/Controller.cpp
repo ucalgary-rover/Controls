@@ -147,6 +147,14 @@ ControllerHolder::ControllerHolder(buttonFunctions functionStruct1,
     m_buttonFuncList[1] = functionStruct2;
 }
 
+void ControllerHolder::setControllerButtonFuncs(
+    int index, buttonFunctions functionStruct) {
+
+    // setting the button functions for each controller
+    m_controllerList[index]
+        .setButtonFuncs(functionStruct);
+}
+
 // Controllerholder eventloop and response
 // functions--------------------------------------
 

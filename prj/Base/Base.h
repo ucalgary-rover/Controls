@@ -24,72 +24,15 @@ public:
     Base();
     ~Base();
 
-    // setter / getter / increment functions for chassisAngle
-    int getChassisAngle();
-    void setChassisAngle(int n);
-    void incrementChassisAngle(int n);
-
-    // setter / getter / increment functions for chassisSpeed
-    int getChassisSpeed();
-    void setChassisSpeed(int n);
-    void incrementChassisSpeed(int n);
-
-    // setter / getter / increment functions for chassisAngularVelocity
-    int getChassisAngularVelocity();
-    void setChassisAngularVelocity(int n);
-    void incrementChassisAngularVelocity(int n);
-
-    // setter / getter / increment functions for chassisMaxSpeed
-    int getChassisMaxSpeed();
-    void setChassisMaxSpeed(int n);
-    void incrementChassisMaxSpeed(int n);
-
-    // setter / getter / increment functions for armX
-    int getArmX();
-    void setArmX(int n);
-    void incrementArmX(int n);
-
-    // setter / getter / increment functions for armY
-    int getArmY();
-    void setArmY(int n);
-    void incrementArmY(int n);
-
-    // setter / getter / increment functions for armZ
-    int getArmZ();
-    void setArmZ(int n);
-    void incrementArmZ(int n);
-
-    // setter / getter / increment functions for clawOpen
-    int getClawOpen();
-    void setClawOpen(int n);
-    void incrementClawOpen(int n);
-
-    // setter / getter / increment functions for clawX
-    int getClawX();
-    void setClawX(int n);
-    void incrementClawX(int n);
-
-    // setter / getter / increment functions for clawY
-    int getClawY();
-    void setClawY(int n);
-    void incrementClawY(int n);
-
-    // setter / getter / increment functions for clawAngle
-    int getClawAngle();
-    void setClawAngle(int n);
-    void incrementClawAngle(int n);
-
-    // setter / getter / increment functions for wristAngle
-    int getWristAngle();
-    void setWristAngle(int n);
-    void incrementWristAngle(int n);
+    // General getter, setter, and incrementor for int member variables
+    int getFloat(const float& member);
+    void setFloat(float& member, int n, int min, int max, const char* name);
+    void incrementFloat(float& member, int n, int min, int max, const char* name);
+    void changeArmControlType(ArmMessageType type);
+    void incrementJoint(int change);
 
     // Converter functions
     float intToRadian(int n);
-
-    // Function which sets up controllers
-    void setButtons(buttonFunctions buttons_controller_1,
-                    buttonFunctions buttons_controller_2);
 
     // Start the loops to have Base working
     void start();
@@ -102,22 +45,25 @@ private:
     float PI;
 
     // Variables for state of chassis (Rover body)
-    int chassisAngle, chassisSpeed, chassisAngularVelocity, chassisMaxSpeed;
+    float chassisAngle, chassisSpeed, chassisAngularVelocity, chassisMaxSpeed;
 
     // Variables for state of rover arm
-    int armX, armY, armZ;
+    ArmMessageType armControlType;
 
-    // Variables for state of rover claw
-    // x = left / right direction, y = up / down direction
-    int clawOpen, clawX, clawY, clawAngle;
+    float manualAngleChange;
+    MotorID joint;
 
-    // Variables for state of rover wrist
-    int wristAngle;
+    float wristX, wristY, wristZ;
+    float clawOpen;
+    float clawIncline, clawTwist;
 
     int exitLoop;
 
     // List of all controllers in use
     ControllerHolder* controller;
+
+    buttonFunctions drive_control;
+    buttonFunctions arm_manulal_control, arm_fixed_ik_control, arm_variable_ik_control;
 };
 
 #endif

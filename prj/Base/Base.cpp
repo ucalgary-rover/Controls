@@ -8,7 +8,9 @@ using namespace std;
 // Create object for mutex (thread locks)
 mutex mtx;
 
-static void valLimmit(int* value, int min, int max);
+static void valLimmit(float* value, int min, int max);
+static void unusedButton();
+static void unusedStick(int X, int Y);
 
 Base::Base() {
 
@@ -20,290 +22,162 @@ Base::Base() {
     chassisAngularVelocity = 0;
     chassisMaxSpeed = 0;
 
+
     // Variables for state of rover arm
-    armX = 0;
-    armY = 0;
-    armZ = 0;
+    armControlType = ARM_MESSAGE_TYPE_MANUAL;
 
-    // Variables for state of rover claw
-    // x = left / right direction, y = up / down direction
+    manualAngleChange = 0;
+    joint = MOTOR_ID_BASE;
+
+    wristX = 0;
+    wristY = 0;
+    wristZ = 0;
+
     clawOpen = 0;
-    clawX = 0;
-    clawY = 0;
-    clawAngle = 0;
-
-    // Variables for state of rover wrist
-    wristAngle = 0;
+    clawIncline = 0;
+    clawTwist = 0;
 
     exitLoop = 0;
+
+    drive_control.LEFT_JOYSTICK = &unusedStick;
+    drive_control.RIGHT_JOYSTICK = &unusedStick;
+    drive_control.buttonArray = {
+        [this]() {incrementFloat(chassisSpeed, 2, 0, chassisMaxSpeed, "chassisSpeed"); },  // SDL_CONTROLLER_BUTTON_A
+        [this]() {incrementFloat(chassisSpeed, -2, 0, chassisMaxSpeed, "chassisSpeed"); }, // SDL_CONTROLLER_BUTTON_B
+        [this]() {incrementFloat(chassisMaxSpeed, 2, 0, 100, "chassisMaxSpeed"); }, // SDL_CONTROLLER_BUTTON_X
+        [this]() {incrementFloat(chassisMaxSpeed, -2, 0, 100, "chassisMaxSpeed"); }, // SDL_CONTROLLER_BUTTON_Y
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_BACK
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() {quit(); },       // SDL_CONTROLLER_BUTTON_START
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_LEFTSTICK
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_RIGHTSTICK
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_DPAD_UP
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_DPAD_DOWN
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_DPAD_LEFT
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+    };
+
+    arm_manulal_control.LEFT_JOYSTICK = &unusedStick;
+    arm_manulal_control.RIGHT_JOYSTICK = &unusedStick;
+    arm_manulal_control.buttonArray = {
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);}, // SDL_CONTROLLER_BUTTON_A
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK); }, // SDL_CONTROLLER_BUTTON_B
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK); },  // SDL_CONTROLLER_BUTTON_X
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_Y
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_BACK
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() {quit(); }, // SDL_CONTROLLER_BUTTON_START
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
+        []() {unusedButton();; }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+    };
+
+    arm_fixed_ik_control.LEFT_JOYSTICK = &unusedStick;
+    arm_fixed_ik_control.RIGHT_JOYSTICK = &unusedStick;
+    arm_fixed_ik_control.buttonArray = {
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);}, // SDL_CONTROLLER_BUTTON_A
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK); }, // SDL_CONTROLLER_BUTTON_B
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK); },  // SDL_CONTROLLER_BUTTON_X
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_Y
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_BACK
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() {quit(); }, // SDL_CONTROLLER_BUTTON_START
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
+        []() {unusedButton();; }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+    };
+
+    arm_variable_ik_control.LEFT_JOYSTICK = &unusedStick;
+    arm_variable_ik_control.RIGHT_JOYSTICK = &unusedStick;
+    arm_variable_ik_control.buttonArray = {
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);}, // SDL_CONTROLLER_BUTTON_A
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK); }, // SDL_CONTROLLER_BUTTON_B
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK); },  // SDL_CONTROLLER_BUTTON_X
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_Y
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_BACK
+        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() {quit(); }, // SDL_CONTROLLER_BUTTON_START
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
+        []() {unusedButton();; }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+    };
+
+    controller = new ControllerHolder(drive_control, arm_manulal_control);
 }
 
 Base::~Base() { }
 
-// setter / getter / increment functions for chassisAngle
-int Base::getChassisAngle() { return chassisAngle; }
+// General getter for int member variables
+int Base::getFloat(const float& member) {
+    return member;
+}
 
-void Base::setChassisAngle(int n) {
+// General setter for int member variables
+void Base::setFloat(float& member, int n, int min, int max, const char* name) {
     mtx.lock();
-    std::cout << "chassisAngle: " << chassisAngle << " -> ";
-    chassisAngle = n;
-    valLimmit(&chassisAngle, 0, 360);
-    std::cout << chassisAngle << "\n";
+    std::cout << name << ": " << member << " -> ";
+    member = n;
+    valLimmit(&member, min, max);
+    std::cout << member << "\n";
     mtx.unlock();
 }
 
-void Base::incrementChassisAngle(int n) {
+// General increment for int member variables
+void Base::incrementFloat(float& member, int n, int min, int max, const char* name) {
     mtx.lock();
-    std::cout << "chassisAngle: " << chassisAngle << " -> ";
-    chassisAngle += n;
-    valLimmit(&chassisAngle, 0, 360);
-    std::cout << chassisAngle << "\n";
+    std::cout << name << ": " << member << " -> ";
+    member += n;
+    valLimmit(&member, min, max);
+    std::cout << member << "\n";
     mtx.unlock();
 }
 
-// setter / getter / increment functions for chassisSpeed
-int Base::getChassisSpeed() { return chassisSpeed; }
-
-void Base::setChassisSpeed(int n) {
+void Base::changeArmControlType(ArmMessageType type) {
     mtx.lock();
-    std::cout << "chassisSpeed: " << chassisSpeed << " -> ";
-    chassisSpeed = n;
-    valLimmit(&chassisSpeed, 0, chassisMaxSpeed);
-    std::cout << chassisSpeed << "\n";
+    std::cout << "Arm Control Type: " << armControlType << " -> " << type << "\n";
+    armControlType = type;
+    switch (armControlType) {
+        case ARM_MESSAGE_TYPE_MANUAL:
+            controller->setControllerButtonFuncs(0, arm_manulal_control);
+            break;
+        case ARM_MESSAGE_TYPE_FIXED_IK:
+            controller->setControllerButtonFuncs(0, arm_fixed_ik_control);
+            break;
+        case ARM_MESSAGE_TYPE_VARIABLE_IK:
+            controller->setControllerButtonFuncs(0, arm_variable_ik_control);
+            break;
+    }
     mtx.unlock();
 }
 
-void Base::incrementChassisSpeed(int n) {
+void Base::incrementJoint(int change) {
     mtx.lock();
-    std::cout << "chassisSpeed: " << chassisSpeed << " -> ";
-    chassisSpeed += n;
-    valLimmit(&chassisSpeed, 0, chassisMaxSpeed);
-    std::cout << chassisSpeed << "\n";
-    mtx.unlock();
-}
-
-// setter / getter / increment functions for chassisAngularVelocity
-int Base::getChassisAngularVelocity() { return chassisAngularVelocity; }
-
-void Base::setChassisAngularVelocity(int n) {
-    mtx.lock();
-    std::cout << "chassisAngularVelocity: " << chassisAngularVelocity << " -> ";
-    chassisAngularVelocity = n;
-    valLimmit(&chassisAngularVelocity, -100, 100);
-    std::cout << chassisAngularVelocity << "\n";
-    mtx.unlock();
-}
-
-void Base::incrementChassisAngularVelocity(int n) {
-    mtx.lock();
-    std::cout << "chassisAngularVelocity: " << chassisAngularVelocity << " -> ";
-    chassisAngularVelocity += n;
-    valLimmit(&chassisAngularVelocity, -100, 100);
-    std::cout << chassisAngularVelocity << "\n";
-    mtx.unlock();
-}
-
-// setter / getter / increment functions for chassisMaxSpeed
-int Base::getChassisMaxSpeed() { return chassisMaxSpeed; }
-
-void Base::setChassisMaxSpeed(int n) {
-    mtx.lock();
-    std::cout << "chassisMaxSpeed: " << chassisMaxSpeed << " -> ";
-    chassisMaxSpeed = n;
-    valLimmit(&chassisMaxSpeed, 0, 100);
-    valLimmit(&chassisSpeed, 0, chassisMaxSpeed);
-    std::cout << chassisMaxSpeed << "\n";
-    mtx.unlock();
-}
-
-void Base::incrementChassisMaxSpeed(int n) {
-    mtx.lock();
-    std::cout << "chassisMaxSpeed: " << chassisMaxSpeed << " -> ";
-    chassisMaxSpeed += n;
-    valLimmit(&chassisMaxSpeed, 0, 100);
-    valLimmit(&chassisSpeed, 0, chassisMaxSpeed);
-    std::cout << chassisMaxSpeed << "\n";
-    mtx.unlock();
-}
-
-// setter / getter / increment functions for armX
-int Base::getArmX() { return armX; }
-
-void Base::setArmX(int n) {
-    mtx.lock();
-    std::cout << "armX: " << armX << " -> ";
-    armX = n;
-    valLimmit(&armX, -100, 100);
-    std::cout << armX << "\n";
-    mtx.unlock();
-}
-
-void Base::incrementArmX(int n) {
-    mtx.lock();
-    std::cout << "armX: " << armX << " -> ";
-    armX += n;
-    valLimmit(&armX, -100, 100);
-    std::cout << armX << "\n";
-    mtx.unlock();
-}
-
-// setter / getter / increment functions for armY
-int Base::getArmY() { return armY; }
-
-void Base::setArmY(int n) {
-    mtx.lock();
-    std::cout << "armY: " << armY << " -> ";
-    armY = n;
-    valLimmit(&armY, -100, 100);
-    std::cout << armY << "\n";
-    mtx.unlock();
-}
-
-void Base::incrementArmY(int n) {
-    mtx.lock();
-    std::cout << "armY: " << armY << " -> ";
-    armY += n;
-    valLimmit(&armY, -100, 100);
-    std::cout << armY << "\n";
-    mtx.unlock();
-}
-
-// setter / getter / increment functions for armZ
-int Base::getArmZ() { return armZ; }
-
-void Base::setArmZ(int n) {
-    mtx.lock();
-    std::cout << "armZ: " << armZ << " -> ";
-    armZ = n;
-    valLimmit(&armZ, -100, 100);
-    std::cout << armZ << "\n";
-    mtx.unlock();
-}
-
-void Base::incrementArmZ(int n) {
-    mtx.lock();
-    std::cout << "armZ: " << armZ << " -> ";
-    armZ += n;
-    valLimmit(&armZ, -100, 100);
-    std::cout << armZ << "\n";
-    mtx.unlock();
-}
-
-// setter / getter / increment functions for clawOpen
-int Base::getClawOpen() { return clawOpen; }
-
-void Base::setClawOpen(int n) {
-    mtx.lock();
-    std::cout << "clawOpen: " << clawOpen << " -> ";
-    clawOpen = n;
-    valLimmit(&clawOpen, 0, 100);
-    std::cout << clawOpen << "\n";
-    mtx.unlock();
-}
-
-void Base::incrementClawOpen(int n) {
-    mtx.lock();
-    std::cout << "clawOpen: " << clawOpen << " -> ";
-    clawOpen += n;
-    valLimmit(&clawOpen, 0, 100);
-    std::cout << clawOpen << "\n";
-    mtx.unlock();
-}
-
-// setter / getter / increment functions for clawX
-int Base::getClawX() { return clawX; }
-
-void Base::setClawX(int n) {
-    mtx.lock();
-    std::cout << "clawX: " << clawX << " -> ";
-    clawX = n;
-    valLimmit(&clawX, -100, 100);
-    std::cout << clawX << "\n";
-    mtx.unlock();
-}
-
-void Base::incrementClawX(int n) {
-    mtx.lock();
-    std::cout << "clawX: " << clawX << " -> ";
-    clawX += n;
-    valLimmit(&clawX, -100, 100);
-    std::cout << clawX << "\n";
-    mtx.unlock();
-}
-
-// setter / getter / increment functions for clawY
-int Base::getClawY() { return clawY; }
-
-void Base::setClawY(int n) {
-    mtx.lock();
-    std::cout << "clawY: " << clawY << " -> ";
-    clawY = n;
-    valLimmit(&clawY, -100, 100);
-    std::cout << clawY << "\n";
-    mtx.unlock();
-}
-
-void Base::incrementClawY(int n) {
-    mtx.lock();
-    std::cout << "clawY: " << clawY << " -> ";
-    clawY += n;
-    valLimmit(&clawY, -100, 100);
-    std::cout << clawY << "\n";
-    mtx.unlock();
-}
-
-// setter / getter / increment functions for clawAngle
-int Base::getClawAngle() { return clawAngle; }
-
-void Base::setClawAngle(int n) {
-    mtx.lock();
-    std::cout << "clawAngle: " << clawAngle << " -> ";
-    clawAngle = n;
-    valLimmit(&clawAngle, 0, 360);
-    std::cout << clawAngle << "\n";
-    mtx.unlock();
-}
-
-void Base::incrementClawAngle(int n) {
-    mtx.lock();
-    std::cout << "clawAngle: " << clawAngle << " -> ";
-    clawAngle += n;
-    valLimmit(&clawAngle, 0, 360);
-    std::cout << clawAngle << "\n";
-    mtx.unlock();
-}
-
-// setter / getter / increment functions for wristAngle
-int Base::getWristAngle() { return wristAngle; }
-
-void Base::setWristAngle(int n) {
-    mtx.lock();
-    std::cout << "wristAngle: " << wristAngle << " -> ";
-    wristAngle = n;
-    valLimmit(&wristAngle, 0, 360);
-    std::cout << wristAngle << "\n";
-    mtx.unlock();
-}
-
-void Base::incrementWristAngle(int n) {
-    mtx.lock();
-    std::cout << "wristAngle: " << wristAngle << " -> ";
-    wristAngle += n;
-    valLimmit(&wristAngle, 0, 360);
-    std::cout << wristAngle << "\n";
+    MotorID next = static_cast<MotorID>((joint + change)%MOTOR_ID_END);
+    std::cout << "Joint: " << joint << " -> " << next << "\n";
+    joint = next;
+    manualAngleChange = 0; // Reset manual angle change when changing joint
     mtx.unlock();
 }
 
 // Converts int (0-255) to radian (0-2pi)
 float Base::intToRadian(int n) { return n / 255.0 * 2 * PI; }
-
-// Sets up controllers
-void Base::setButtons(buttonFunctions buttonsController1,
-                      buttonFunctions buttonsController2) {
-    ControllerHolder* controller
-        = new ControllerHolder(buttonsController1, buttonsController2);
-    this->controller = controller;
-}
 
 void Base::quit() { this->exitLoop = 1; }
 
@@ -324,9 +198,9 @@ void Base::start() {
 
     while (!exitLoop) {
         // Update message for Drive
-        wheelMsg.angle_velocity = this->getChassisAngularVelocity();
-        wheelMsg.theta = this->getChassisAngle();
-        wheelMsg.velocity = this->getChassisAngle();
+        wheelMsg.angleVelocity = getFloat(chassisAngularVelocity);
+        wheelMsg.theta = getFloat(chassisAngle);
+        wheelMsg.velocity = getFloat(chassisAngle);
 
         Message driveMessage(MESSAGE_PRIORITY_LOW, wheelMsg);
 
@@ -335,19 +209,47 @@ void Base::start() {
 
 #if Extention == EXTENTION_TYPE_ARM
         // Update messgae for Arm
-        armMsg.armXPos = this->getArmX();
-        armMsg.armYPos = this->getArmY();
-        armMsg.armZPos = this->getArmZ();
-        armMsg.clawOpen = this->getClawOpen();
-        armMsg.clawRotation = this->getClawAngle();
-        armMsg.clawXPos = this->getClawX();
-        armMsg.clawYPos = this->getClawY();
-        armMsg.wristRotation = this->getWristAngle();
+        switch(armControlType) {
+            case ARM_MESSAGE_TYPE_MANUAL:
+                // Manual Control
+                ArmManualMessage manualMsg;
+                manualMsg.motorId = joint;
+                manualMsg.angleChange = getFloat(manualAngleChange);
+                armMsg.type = ARM_MESSAGE_TYPE_MANUAL;
+                armMsg.manual_message = manualMsg;
+                manualAngleChange = 0; // Reset manual angle change after sending
 
-        Message armMessage(MESSAGE_PRIORITY_LOW, armMsg);
+                break;
 
+            case ARM_MESSAGE_TYPE_FIXED_IK:
+                // Fixed Inverse Kinematics Control
+                ArmFixedIKMessage fixedIKMsg;
+                fixedIKMsg.wristX = getFloat(wristX);
+                fixedIKMsg.wristY = getFloat(wristY);
+                fixedIKMsg.wristZ = getFloat(wristZ);
+                fixedIKMsg.clawOpen = getFloat(clawOpen);
+                armMsg.type = ARM_MESSAGE_TYPE_FIXED_IK;
+                armMsg.fixed_ik_message = fixedIKMsg;
+
+                break;
+
+            case ARM_MESSAGE_TYPE_VARIABLE_IK:
+                // Variable Inverse Kinematics Control
+                ArmVariableIKMessage variableIKMsg;
+                variableIKMsg.wristX = getFloat(wristX);
+                variableIKMsg.wristY = getFloat(wristY);
+                variableIKMsg.wristZ = getFloat(wristZ);
+                variableIKMsg.clawIncline = getFloat(clawIncline);
+                variableIKMsg.clawTwist = getFloat(clawTwist);
+                variableIKMsg.clawOpen = getFloat(clawOpen);
+                armMsg.type = ARM_MESSAGE_TYPE_VARIABLE_IK;
+                armMsg.variable_ik_message = variableIKMsg;
+
+                break;
+        }
         // Add Arm Message to queue
-        sendQueue.push(armMessage);
+        sendQueue.push(Message(MESSAGE_PRIORITY_LOW, armMsg));
+
 #endif
         usleep(1 * 1000000);
     }
@@ -355,10 +257,16 @@ void Base::start() {
     websocetServerThread.join();
 }
 
-static void valLimmit(int* value, int min, int max) {
+static void valLimmit(float* value, int min, int max) {
     if (*value < min) {
         *value = min;
     } else if (*value > max) {
         *value = max;
     }
+}
+
+static void unusedButton() { std::cout << "Button Unused\n"; }
+
+static void unusedStick(int X, int Y) {
+    std::cout << "X: " << X << "Y: " << Y << "\n";
 }

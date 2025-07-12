@@ -61,16 +61,31 @@ void Message::printMessage() const {
             } else if constexpr (std::is_same_v<T, WheelMessage>) {
                 std::cout << "WheelMessage - Velocity: " << payload.velocity
                           << ", Theta: " << payload.theta
-                          << ", Angle Velocity: " << payload.angle_velocity;
+                          << ", Angle Velocity: " << payload.angleVelocity;
             } else if constexpr (std::is_same_v<T, ArmMessage>) {
-                std::cout << "ArmMessage - X: " << payload.armXPos
-                          << ", Y: " << payload.armYPos
-                          << ", Z: " << payload.armZPos
-                          << ", Claw X: " << payload.clawXPos
-                          << ", Claw Y: " << payload.clawYPos
-                          << ", Claw Open: " << payload.clawOpen
-                          << ", Claw Rotation: " << payload.clawRotation
-                          << ", Wrist Rotation: " << payload.wristRotation;
+                std::cout << "ArmMessage - Type: " << payload.type;
+                switch (payload.type) {
+                case ARM_MESSAGE_TYPE_MANUAL:
+                    std::cout << ", MotorID: " << payload.manual_message.motorId
+                              << ", AngleChange: " << payload.manual_message.angleChange;
+                    break;
+                case ARM_MESSAGE_TYPE_FIXED_IK:
+                    std::cout << ", WristX: " << payload.fixed_ik_message.wristX
+                              << ", WristY: " << payload.fixed_ik_message.wristY
+                              << ", WristZ: " << payload.fixed_ik_message.wristZ
+                              << ", ClawOpen: " << payload.fixed_ik_message.clawOpen;
+                    break;
+                case ARM_MESSAGE_TYPE_VARIABLE_IK:
+                    std::cout << ", WristX: " << payload.variable_ik_message.wristX
+                              << ", WristY: " << payload.variable_ik_message.wristY
+                              << ", WristZ: " << payload.variable_ik_message.wristZ
+                              << ", ClawIncline: " << payload.variable_ik_message.clawIncline
+                              << ", ClawTwist: " << payload.variable_ik_message.clawTwist
+                              << ", ClawOpen: " << payload.variable_ik_message.clawOpen;
+                    break;
+                default:
+                    std::cout << ", Unknown ArmMessage type";
+                }
             } else if constexpr (std::is_same_v<T, ScienceToolMessage>) {
                 std::cout << "ScienceToolMessage - Move Up/Down: "
                           << payload.moveUpDown
@@ -85,7 +100,6 @@ void Message::printMessage() const {
 
 // Serialize the Message object to a string
 std::string Message::serialize() const {
-    //
     std::ostringstream oss;
     oss << m_isHighPriority << " " << static_cast<int>(m_format)
         << " "; // Serialize priority and format
@@ -102,16 +116,34 @@ std::string Message::serialize() const {
             // Wheel message
             else if constexpr (std::is_same_v<T, WheelMessage>) {
                 oss << payload.velocity << " " << payload.theta << " "
-                    << payload.angle_velocity;
+                    << payload.angleVelocity;
             }
             // Arm message
             else if constexpr (std::is_same_v<T, ArmMessage>) {
-                oss << payload.armXPos << " " << payload.armYPos << " "
-                    << payload.armZPos << " " << payload.clawXPos << " "
-                    << payload.clawYPos << " " << payload.clawOpen << " "
-                    << payload.clawRotation << " " << payload.wristRotation;
+                oss << static_cast<int>(payload.type) << " ";
+                switch (payload.type) {
+                case ARM_MESSAGE_TYPE_MANUAL:
+                    oss << static_cast<int>(payload.manual_message.motorId) << " "
+                        << payload.manual_message.angleChange;
+                    break;
+                case ARM_MESSAGE_TYPE_FIXED_IK:
+                    oss << payload.fixed_ik_message.wristX << " "
+                        << payload.fixed_ik_message.wristY << " "
+                        << payload.fixed_ik_message.wristZ << " "
+                        << payload.fixed_ik_message.clawOpen;
+                    break;
+                case ARM_MESSAGE_TYPE_VARIABLE_IK:
+                    oss << payload.variable_ik_message.wristX << " "
+                        << payload.variable_ik_message.wristY << " "
+                        << payload.variable_ik_message.wristZ << " "
+                        << payload.variable_ik_message.clawIncline << " "
+                        << payload.variable_ik_message.clawTwist << " "
+                        << payload.variable_ik_message.clawOpen;
+                    break;
+                default:
+                    break;
+                }
             }
-            // Science tool message (Don't think we need this anymore)
             else if constexpr (std::is_same_v<T, ScienceToolMessage>) {
                 oss << payload.moveUpDown << " " << payload.moveLeftRight << " "
                     << payload.xPos << " " << payload.yPos;
@@ -136,15 +168,47 @@ Message Message::deserialize(const std::string& data) {
     switch (format) {
     case MESSAGE_FORMAT_WHEEL: {
         WheelMessage wm;
-        iss >> wm.velocity >> wm.theta >> wm.angle_velocity;
+        iss >> wm.velocity >> wm.theta >> wm.angleVelocity;
         payload = wm;
         break;
     }
     case MESSAGE_FORMAT_ARM: {
         ArmMessage am;
-        iss >> am.armXPos >> am.armYPos >> am.armZPos >> am.clawXPos
-            >> am.clawYPos >> am.clawOpen >> am.clawRotation
-            >> am.wristRotation;
+        int typeInt;
+        iss >> typeInt;
+        am.type = static_cast<ArmMessageType>(typeInt);
+        switch (am.type) {
+        case ARM_MESSAGE_TYPE_MANUAL: {
+            int motorId;
+            float angleChange;
+            iss >> motorId >> angleChange;
+            am.manual_message.motorId = static_cast<MotorID>(motorId);
+            am.manual_message.angleChange = angleChange;
+            break;
+        }
+        case ARM_MESSAGE_TYPE_FIXED_IK: {
+            float wristX, wristY, wristZ, clawOpen;
+            iss >> wristX >> wristY >> wristZ >> clawOpen;
+            am.fixed_ik_message.wristX = wristX;
+            am.fixed_ik_message.wristY = wristY;
+            am.fixed_ik_message.wristZ = wristZ;
+            am.fixed_ik_message.clawOpen = clawOpen;
+            break;
+        }
+        case ARM_MESSAGE_TYPE_VARIABLE_IK: {
+            float wristX, wristY, wristZ, clawIncline, clawTwist, clawOpen;
+            iss >> wristX >> wristY >> wristZ >> clawIncline >> clawTwist >> clawOpen;
+            am.variable_ik_message.wristX = wristX;
+            am.variable_ik_message.wristY = wristY;
+            am.variable_ik_message.wristZ = wristZ;
+            am.variable_ik_message.clawIncline = clawIncline;
+            am.variable_ik_message.clawTwist = clawTwist;
+            am.variable_ik_message.clawOpen = clawOpen;
+            break;
+        }
+        default:
+            break;
+        }
         payload = am;
         break;
     }

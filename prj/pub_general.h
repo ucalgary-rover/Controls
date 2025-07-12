@@ -63,49 +63,50 @@ struct Generic {
 struct WheelMessage {
     int velocity;
     int theta;
-    int angle_velocity;
+    int angleVelocity;
 };
 
 // Message format for arm
 
 enum MotorID : int {
-    BASE,
-    SHOULDER,
-    ELBOW,
-    WRIST,
-    CLAW_ROLL,
-    CLAW_PITCH,
-    CLAW_OPEN,
+    MOTOR_ID_BASE,
+    MOTOR_ID_SHOULDER,
+    MOTOR_ID_ELBOW,
+    MOTOR_ID_WRIST,
+    MOTOR_ID_CLAW_ROLL,
+    MOTOR_ID_CLAW_PITCH,
+    MOTOR_ID_CLAW_OPEN,
+    MOTOR_ID_END,
 };
 
 enum ArmMessageType : int {
-    MANUAL,
-    FIXED_IK,
-    VARIABLE_IK,
+    ARM_MESSAGE_TYPE_MANUAL,
+    ARM_MESSAGE_TYPE_FIXED_IK,
+    ARM_MESSAGE_TYPE_VARIABLE_IK,
 };
 
 struct ArmManualMessage {
     MotorID motorId;
-    float angle_change;
+    float angleChange;
 };
 
 struct ArmFixedIKMessage {
-    float wrist_x;
-    float wrist_y;
-    float wrist_z;
+    float wristX;
+    float wristY;
+    float wristZ;
 
-    float claw_open;
+    float clawOpen;
 };
 
 struct ArmVariableIKMessage {
-    float wrist_x;
-    float wrist_y;
-    float wrist_z;
+    float wristX;
+    float wristY;
+    float wristZ;
 
-    float claw_incline;
-    float claw_twist;
+    float clawIncline;
+    float clawTwist;
 
-    float claw_open;
+    float clawOpen;
 };
 
 struct ArmMessage {
@@ -114,7 +115,7 @@ struct ArmMessage {
         ArmManualMessage manual_message;
         ArmFixedIKMessage fixed_ik_message;
         ArmVariableIKMessage variable_ik_message;
-    }
+    };
 };
 
 // Message format for science tool

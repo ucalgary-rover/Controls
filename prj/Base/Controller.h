@@ -175,6 +175,7 @@ public:
      */
     ControllerHolder(buttonFunctions functionStruct1,
                      buttonFunctions functionStruct2);
+    void setControllerButtonFuncs(int index, buttonFunctions functionStruct);
 
     // getter and setter function
     Controller getControllerFromList(int i) {
