@@ -17,7 +17,7 @@ void MessageQueue::push(const Message message) {
 
     // Check for Queue limit
     if (this->isQueueLimit()) {
-        Logging::logI(file, "Queue limit reached. push discarded");
+        Logging::logW(file, "Queue limit reached. push discarded");
         return;
     }
 

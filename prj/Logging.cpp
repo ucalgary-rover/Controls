@@ -12,20 +12,22 @@ namespace Logging{
     static std::ofstream logFile;
 
     namespace {
-        void logMsg(const char* levelStr, const char* msg, const char* msg_prefix, va_list args) {
+        void logMsg(const char* levelStr, const char* msg_prefix, const char* msg, va_list args) {
             char buf[512];
             vsnprintf(buf, sizeof(buf), msg, args);
 
             auto now = std::chrono::system_clock::now();
             std::time_t now_c = std::chrono::system_clock::to_time_t(now);
             std::tm* tm_ptr = std::localtime(&now_c);
-            std::ostringstream oss;
-            oss << std::put_time(tm_ptr, "%Y-%m-%d %H:%M:%S") << " " 
-                << levelStr << ": \t" << msg_prefix << " - " << buf << "\n";
-            std::string out = oss.str();
-            std::cout << out;
+            std::ostringstream oss_body;
+            std::ostringstream oss_timestamp;
+            oss_body << levelStr << ": \t" << msg_prefix << " - " << buf << "\n";
+            oss_timestamp << std::put_time(tm_ptr, "%Y-%m-%d %H:%M:%S") << " ";
+            std::string out_body = oss_body.str();
+            std::string out_timmestamp = oss_timestamp.str();
+            std::cout << out_body;
             if (logFile.is_open()){ 
-                logFile << out;
+                logFile << out_timmestamp << out_body;
                 logFile.flush(); // Ensure the log is written immediately
             }
         }

@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     Logging::logI(file, "This is Mission Control. %d, %d, you are good for launch", SIDE_TO_BUILD, EXTENTION);
 
 #if SIDE_TO_BUILD == BUILD_SIDE_BASE
-    Logging::logI(file, "Running Base Side: %d");
+    Logging::logI(file, "Running Base Side: %d", EXTENTION);
     Base base;
 
     base.start();

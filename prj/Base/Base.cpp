@@ -151,7 +151,7 @@ void Base::incrementFloat(float& member, int n, int min, int max, const char* na
     mtx.lock();
     member += n;
     valLimmit(&member, min, max);
-    Logging::logI(file, "Incrementing %s to %d", name, member);
+    Logging::logI(file, "Incrementing %s to %f", name, member);
     mtx.unlock();
 }
 
@@ -161,13 +161,13 @@ void Base::changeArmControlType(ArmMessageType type) {
     armControlType = type;
     switch (armControlType) {
         case ARM_MESSAGE_TYPE_MANUAL:
-            controller->setControllerButtonFuncs(0, *arm_manulal_control);
+            controller->setControllerButtonFuncs(1, *arm_manulal_control);
             break;
         case ARM_MESSAGE_TYPE_FIXED_IK:
-            controller->setControllerButtonFuncs(0, *arm_fixed_ik_control);
+            controller->setControllerButtonFuncs(1, *arm_fixed_ik_control);
             break;
         case ARM_MESSAGE_TYPE_VARIABLE_IK:
-            controller->setControllerButtonFuncs(0, *arm_variable_ik_control);
+            controller->setControllerButtonFuncs(1, *arm_variable_ik_control);
             break;
     }
     mtx.unlock();
