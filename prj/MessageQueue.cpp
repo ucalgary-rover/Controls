@@ -1,5 +1,7 @@
 #include "MessageQueue.h"
 
+static const char* file = "MessageQueue";
+
 MessageQueue::MessageQueue() { }
 
 MessageQueue::~MessageQueue() { }
@@ -15,7 +17,7 @@ void MessageQueue::push(const Message message) {
 
     // Check for Queue limit
     if (this->isQueueLimit()) {
-        std::cout << "Queue limit reached. push discarded" << std::endl;
+        Logging::logI(file, "Queue limit reached. push discarded");
         return;
     }
 
@@ -233,48 +235,48 @@ int main()
     queue.push(msg2);
     queue.push(msg3);
     queue.push(msg4);
-    std::cout << "Test 1: Queue size after 4 pushes: " << queue.size() << " (Expected: 4)\n";
+    Logging::logD(file, "Test 1: Queue size after 4 pushes: %d (Expected: 4)", queue.size());
 
     // Test 2: Test front() and printMessage()
-    std::cout << "Test 2: Front message details (Expected: msg1):\n";
+    Logging::logD(file, "Test 2: Front message details (Expected: msg1):");
     queue.front().printMessage();
 
     // Test 3: Test back() and printMessage()
-    std::cout << "Test 3: Back message details (Expected: msg4):\n";
+    Logging::logD(file, "Test 3: Back message details (Expected: msg4):");
     queue.back().printMessage();
 
     // Test 4: Test frontRegular()
-    std::cout << "Test 4: Front regular message details (Expected: msg2):\n";
+    Logging::logD(file, "Test 4: Front regular message details (Expected: msg2):");
     queue.frontRegular().printMessage();
 
     // Test 5: Test backPriority()
-    std::cout << "Test 5: Back priority message details (Expected: msg3):\n";
+    Logging::logD(file, "Test 5: Back priority message details (Expected: msg3):");
     queue.backPriority().printMessage();
 
     // Test 6: Test pop() and size()
     queue.pop(); // Removes msg1 (priority)
-    std::cout << "Test 6: Queue size after 1 pop: " << queue.size() << " (Expected: 3)\n";
-    std::cout << "Front message details after 1 pop (Expected: msg3):\n";
+    Logging::logD(file, "Test 6: Queue size after 1 pop: %d (Expected: 3)", queue.size());
+    Logging::logD(file, "Front message details after 1 pop (Expected: msg3):");
     queue.front().printMessage();
 
     // Test 7: Test empty() on non-empty queue
-    std::cout << "Test 7: Queue empty status (Expected: 0): " << queue.empty() << "\n";
+    Logging::logD(file, "Test 7: Queue empty status (Expected: 0): %d", queue.empty());
 
     // Test 8: Clear the queue and test empty()
     queue.pop(); // Removes msg3
     queue.pop(); // Removes msg2
     queue.pop(); // Removes msg4
-    std::cout << "Test 8: Queue empty status after clearing (Expected: 1): " << queue.empty() << "\n";
+    Logging::logD(file, "Test 8: Queue empty status after clearing (Expected: 1): %d", queue.empty());
 
     // Test 9: Test edge case - front() and back() on empty queue
-    std::cout << "Test 9: Attempting front() and back() on empty queue (Expected: No output, undefined behavior):\n";
+    Logging::logD(file, "Test 9: Attempting front() and back() on empty queue (Expected: No output, undefined behavior):");
     try
     {
         queue.front().printMessage();
     }
     catch (...)
     {
-        std::cout << "Handled empty queue for front()\n";
+        Logging::logD(file, "Handled empty queue for front()");
     }
     try
     {
@@ -282,7 +284,7 @@ int main()
     }
     catch (...)
     {
-        std::cout << "Handled empty queue for back()\n";
+        Logging::logD(file, "Handled empty queue for back()");
     }
 
 

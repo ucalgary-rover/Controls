@@ -1,5 +1,7 @@
 #include "Message.h"
 
+static const char* file = "Message";
+
 // Constructor
 Message::Message(int prty, MessagePayload payload) :
     m_isHighPriority(prty), m_payload(std::move(payload)) {
@@ -52,50 +54,35 @@ MessageFormat Message::getFormat() const { return m_format; }
 
 // Print Message details
 void Message::printMessage() const {
-    std::cout << "Priority: " << m_isHighPriority << ", Payload: ";
+    Logging::logV(file,"Priority: %d", m_isHighPriority);
+    Logging::logV(file,"Payload:");
     std::visit(
         [this](auto&& payload) {
             using T = std::decay_t<decltype(payload)>;
             if constexpr (std::is_same_v<T, Generic>) {
-                std::cout << "Generic - Value: " << payload.value;
+                Logging::logV(file,"Generic - Value: %f" + payload.value);
             } else if constexpr (std::is_same_v<T, WheelMessage>) {
-                std::cout << "WheelMessage - Velocity: " << payload.velocity
-                          << ", Theta: " << payload.theta
-                          << ", Angle Velocity: " << payload.angleVelocity;
+                Logging::logV(file, "WheelMessage - Velocity: %d, Theta: %d, Angle Velocity%d: ", payload.velocity, payload.theta, payload.angleVelocity);
             } else if constexpr (std::is_same_v<T, ArmMessage>) {
-                std::cout << "ArmMessage - Type: " << payload.type;
+                Logging::logV(file, "ArmMessage - Type: %d", payload.type);
                 switch (payload.type) {
                 case ARM_MESSAGE_TYPE_MANUAL:
-                    std::cout << ", MotorID: " << payload.manual_message.motorId
-                              << ", AngleChange: " << payload.manual_message.angleChange;
+                    Logging::logV(file, "MotorID: %f, AngleChange: %f", payload.manual_message.motorId, payload.manual_message.angleChange);
                     break;
                 case ARM_MESSAGE_TYPE_FIXED_IK:
-                    std::cout << ", WristX: " << payload.fixed_ik_message.wristX
-                              << ", WristY: " << payload.fixed_ik_message.wristY
-                              << ", WristZ: " << payload.fixed_ik_message.wristZ
-                              << ", ClawOpen: " << payload.fixed_ik_message.clawOpen;
+                    Logging::logV(file, "WristX: %f, WristY: %f, WristZ: %f, ClawOpen: %f",payload.fixed_ik_message.wristX, payload.fixed_ik_message.wristY, payload.fixed_ik_message.wristZ,payload.fixed_ik_message.clawOpen);
                     break;
                 case ARM_MESSAGE_TYPE_VARIABLE_IK:
-                    std::cout << ", WristX: " << payload.variable_ik_message.wristX
-                              << ", WristY: " << payload.variable_ik_message.wristY
-                              << ", WristZ: " << payload.variable_ik_message.wristZ
-                              << ", ClawIncline: " << payload.variable_ik_message.clawIncline
-                              << ", ClawTwist: " << payload.variable_ik_message.clawTwist
-                              << ", ClawOpen: " << payload.variable_ik_message.clawOpen;
+                    Logging::logV(file, "WristX: %f, WristY: %f, WristZ: %f, ClawIncline: %f, ClawTwist: %f, ClawOpen: %f",payload.variable_ik_message.wristX, payload.variable_ik_message.wristY, payload.variable_ik_message.wristZ, payload.variable_ik_message.clawIncline, payload.variable_ik_message.clawTwist, payload.variable_ik_message.clawOpen);
                     break;
                 default:
-                    std::cout << ", Unknown ArmMessage type";
+                    Logging::logV(file, "Unknown ArmMessage type");
                 }
             } else if constexpr (std::is_same_v<T, ScienceToolMessage>) {
-                std::cout << "ScienceToolMessage - Move Up/Down: "
-                          << payload.moveUpDown
-                          << ", Move Left/Right: " << payload.moveLeftRight
-                          << ", X Pos: " << payload.xPos
-                          << ", Y Pos: " << payload.yPos;
+                Logging::logV(file, "ScienceToolMessage - Move Up/Down: %d, Move Left/Right: %d, X Pos: %d, Y Pos: %d", payload.moveUpDown, payload.moveLeftRight, payload.xPos, payload.yPos);
             }
         },
         m_payload);
-    std::cout << std::endl;
 }
 
 // Serialize the Message object to a string

@@ -7,15 +7,6 @@
 
 #pragma once
 
-#define BUILD_SIDE_BASE 1
-#define BUILD_SIDE_ROVER 2
-
-enum ExtentionType {
-    EXTENTION_TYPE_ARM,
-    EXTENTION_TYPE_SCIENCE_TOOL,
-    EXTENTION_TYPE_NONE,
-};
-
 enum MessageFormat {
     MESSAGE_FORMAT_WHEEL,
     MESSAGE_FORMAT_ARM,
@@ -25,14 +16,6 @@ enum MessageFormat {
 enum MessagePriority {
     MESSAGE_PRIORITY_LOW,
     MESSAGE_PRIORITY_HIGH,
-};
-
-enum LogLevel {
-    LOG_LEVEL_ERROR,
-    LOG_LEVEL_WARNING,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_DEBUG,
-    LOG_LEVEL_VERBOSE,
 };
 
 enum GameControllerAxis

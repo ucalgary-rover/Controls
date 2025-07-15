@@ -32,14 +32,14 @@ controller_test:
 > ./ControllerTesting
 
 build_dir:
-> mkdir -p build
+> mkdir -p out
 > mkdir -p logs
 
 base: build_dir
-> g++ -DSIDE_TO_BUILD=1 -I"prj" $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) -o build/base
+> g++ -DSIDE_TO_BUILD=1 -I"prj" $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) -o out/base
 
 rover: build_dir
-> g++ -DSIDE_TO_BUILD=2 -I"prj" $(ROVER_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) -o build/rover
+> g++ -DSIDE_TO_BUILD=2 -I"prj" $(ROVER_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) -o out/rover
 
 run_base: base
 > ./base 
@@ -48,9 +48,7 @@ run_rover: rover
 > ./rover 
 
 clean:
-> rm -f build/ -r
+> rm -f out/ -r
+> rm -f logs/*.log
 
 all: build_dir base rover
-
-clean_logs:
-> rm -f logs/*.log

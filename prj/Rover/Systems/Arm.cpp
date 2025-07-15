@@ -1,5 +1,6 @@
 #include "Arm.h"
 
+
 Arm::Arm(int degOfFreedom, MotorType* motorTypes) :
     m_degOfFreedom(degOfFreedom), m_motorTypes(motorTypes) {
     m_handlesDC = new PhidgetDCMotorHandle*[degOfFreedom]();
@@ -23,8 +24,7 @@ Arm::Arm(int degOfFreedom, MotorType* motorTypes) :
 
             break;
         default:
-            std::cout << "Can not initialise motor at index: " << motor
-                      << "with motor type: " << motorTypes[motor];
+            Logging::logE(file, "Can not initialise motor at index: %d with motor type: %d", motor, motorTypes[motor]);
 
             break;
         }
@@ -51,8 +51,7 @@ Arm::~Arm() {
             break;
 
         default:
-            std::cout << "Can not deinitialise for motor at index: " << motor
-                      << "with motor type: " << m_motorTypes[motor];
+            Logging::logE(file, "Can not deinitialise for motor at index: %d with motor type: %d", motor, m_motorTypes[motor]);
             break;
         }
     }
@@ -76,8 +75,7 @@ bool Arm::getArmMotorHandle(MotorHandlerReturn* retVal, int index) {
 
     default:
         retVal->type = MOTOR_TYPE_INVALID;
-        std::cout << "Can not get handler for motor at index: " << index
-                  << "with motor type: " << m_motorTypes[index];
+        Logging::logE(file, "Can not get handler for motor at index: %d with motor type: %d", index, m_motorTypes[index]);
         return false;
         break;
     };

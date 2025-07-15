@@ -11,10 +11,10 @@ mutex mtx;
 static void valLimmit(float* value, int min, int max);
 static void unusedButton();
 static void unusedStick(int X, int Y);
-static std::string file = "Base";
+static const char* file = "Base";
 
 Base::Base() {
-    Logging::logI("Initializing Base", file);
+    Logging::logI(file, "Initializing Base");
 
     PI = 3.1415926;
 
@@ -127,39 +127,37 @@ Base::Base() {
 
     controller = new ControllerHolder(*drive_control, *arm_manulal_control);
 
-    Logging::logI("Initializing Base done", file);
+    Logging::logI(file, "Initializing Base done");
 }
 
 Base::~Base() { }
 
-// General getter for int member variables
+// General getter for float member variables
 int Base::getFloat(const float& member) {
     return member;
 }
 
-// General setter for int member variables
+// General setter for float member variables
 void Base::setFloat(float& member, int n, int min, int max, const char* name) {
     mtx.lock();
-    std::cout << name << ": " << member << " -> ";
     member = n;
     valLimmit(&member, min, max);
-    std::cout << member << "\n";
+    Logging::logI(file, "Setting %s to %f", name, member);
     mtx.unlock();
 }
 
-// General increment for int member variables
+// General increment for flaot member variables
 void Base::incrementFloat(float& member, int n, int min, int max, const char* name) {
     mtx.lock();
-    std::cout << name << ": " << member << " -> ";
     member += n;
     valLimmit(&member, min, max);
-    std::cout << member << "\n";
+    Logging::logI(file, "Incrementing %s to %d", name, member);
     mtx.unlock();
 }
 
 void Base::changeArmControlType(ArmMessageType type) {
     mtx.lock();
-    std::cout << "Arm Control Type: " << armControlType << " -> " << type << "\n";
+    Logging::logI(file, "Setting Arm Control Type to %d", type);
     armControlType = type;
     switch (armControlType) {
         case ARM_MESSAGE_TYPE_MANUAL:
@@ -178,7 +176,7 @@ void Base::changeArmControlType(ArmMessageType type) {
 void Base::incrementJoint(int change) {
     mtx.lock();
     MotorID next = static_cast<MotorID>((joint + change)%MOTOR_ID_END);
-    std::cout << "Joint: " << joint << " -> " << next << "\n";
+    Logging::logI(file, "Changing to joint: %d", next);
     joint = next;
     manualAngleChange = 0; // Reset manual angle change when changing joint
     mtx.unlock();
@@ -196,8 +194,6 @@ void Base::start() {
     thread controllerThread([&]() { controller->eventLoop(); });
     thread websocetServerThread([&]() { server.run(sendQueue); });
 
-    std::cout << "Main Thread\n";
-
     WheelMessage wheelMsg;
 
 #if Extention == EXTENTION_TYPE_ARM
@@ -213,7 +209,7 @@ void Base::start() {
         Message driveMessage(MESSAGE_PRIORITY_LOW, wheelMsg);
 
         // Add Drive Message to queue
-        // Logging::logV("Adding drive message to queue", file);
+        Logging::logV(file, "Adding drive message to queue");
 
         sendQueue.push(driveMessage);
 
@@ -258,7 +254,7 @@ void Base::start() {
                 break;
         }
         // Add Arm Message to queue
-        // Logging::logV("Adding arm message to queue", file);
+        Logging::logV(file, "Adding arm message to queue");
 
         sendQueue.push(Message(MESSAGE_PRIORITY_LOW, armMsg));
 
@@ -277,8 +273,8 @@ static void valLimmit(float* value, int min, int max) {
     }
 }
 
-static void unusedButton() { std::cout << "Button Unused\n"; }
+static void unusedButton() { Logging::logV(file, "Button Unused\n"); }
 
 static void unusedStick(int X, int Y) {
-    std::cout << "X: " << X << "\tY: " << Y << "\n";
+    Logging::logV(file, "Unused Stick X: %d, Y: %d", X, Y);
 }

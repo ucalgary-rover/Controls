@@ -1,5 +1,7 @@
 #include "WebsocketServer.h"
 
+static const char* file = "WebsocketServer";
+
 using namespace boost;
 using tcp = asio::ip::tcp;
 namespace websocket = beast::websocket;
@@ -44,7 +46,7 @@ void WebSocketServer::handle_session(tcp::socket socket, MessageQueue& queue) {
             // the client
             ws.text(true);
             ws.write(asio::buffer(serializedMsg));
-            std::cout << "Sent message" << std::endl;
+            Logging::logV(file, "Sent message: %s", serializedMsg.c_str());
         }
     } catch (const std::exception& e) {
         std::cerr << "Session disconnect: " << e.what() << "\n";

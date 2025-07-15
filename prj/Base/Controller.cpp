@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 
+static const char* file = "Controller";
 static GameControllerAxis covert_stl_axis_to_game_controller(SDL_GameControllerAxis axis);
 
 // Helper function to get button names
@@ -163,8 +164,7 @@ void ControllerHolder::setControllerButtonFuncs(
 void ControllerHolder::buttonResponse(Uint8 buttonID, int controllerIndex) {
 
     std::string buttonName = getButtonName(buttonID);
-    std::cout << controllerIndex << std::endl;
-    std::cout << "Button press\n";
+    Logging::logV(file, "Button press", controllerIndex);
 
     for (int i = 0; i < 2; i++) {
         if ((int)m_controllerList[i].getInstanceID() == controllerIndex) {
@@ -234,7 +234,7 @@ void ControllerHolder::controllerAddedResponse(int controllerIndex) {
             // controller is assigned
             m_controllerList[i].setButtonFuncs(m_buttonFuncList[i]);
 
-            std::cout << i << " added" << std::endl;
+            Logging::logV(file, "Controller added", i);
             break;
         }
     }
@@ -276,8 +276,7 @@ void ControllerHolder::eventLoop() {
 
     // Check for game controllers
     if (SDL_NumJoysticks() < 1) {
-        std::cout << "No controllers connected!" << std::endl
-                  << "Number of joysticks: " << SDL_NumJoysticks();
+        Logging::logV(file, "No controllers connected! Number of joysticks: %d", SDL_NumJoysticks());
     }
 
     SDL_Event event;
@@ -313,7 +312,7 @@ void ControllerHolder::eventLoop() {
                 // for now, making sure triggers don't cause problems
                 {
                 GameControllerAxis axis = covert_stl_axis_to_game_controller((SDL_GameControllerAxis)event.jaxis.axis);
-                std::cout << (int)event.jaxis.axis << " -> " << axis << std::endl;
+                Logging::logV(file, "Axis motion", (int)event.jaxis.axis);
 
                 if (axis < 4) {
                     stickResponse(event.jaxis.value, axis,

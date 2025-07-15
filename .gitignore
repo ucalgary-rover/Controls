@@ -6,5 +6,5 @@
 prj/websocketpp
 prj/boost
 test/build/
-build/
+out/
 logs/

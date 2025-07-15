@@ -9,25 +9,24 @@
 #include "Rover/Rover.h"
 #endif
 
-static std::string file = "Main";
+static const char* file = "Main";
 
 int main(int argc, char* argv[]) {
     Logging::logInit();
 
-    Logging::logI("Mission Control started", file);
-    std::cout << SIDE_TO_BUILD << " " << EXTENTION << "\n";
+    Logging::logI(file, "This is Mission Control. %d, %d, you are good for launch", SIDE_TO_BUILD, EXTENTION);
 
 #if SIDE_TO_BUILD == BUILD_SIDE_BASE
-    std::cout << "Running Base Side: " << EXTENTION << "\n";
+    Logging::logI(file, "Running Base Side: %d");
     Base base;
 
     base.start();
-    std::cout << "After Start\n";
 
 #endif
 #if SIDE_TO_BUILD == BUILD_SIDE_ROVER
-    std::cout << "Running Rover Side: " << EXTENTION << "\n";
+    Logging::logI(file, "Running Rover Side: %d", EXTENTION);
     Rover rover;
+
     rover.start();
 
 #endif

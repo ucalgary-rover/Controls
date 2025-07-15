@@ -8,7 +8,7 @@ static void CCONV onAttachHandler(PhidgetHandle ph, void* ctx) {
     // parameter of the event handler
     int deviceSerialNumber;
     Phidget_getDeviceSerialNumber(ph, &deviceSerialNumber);
-    std::cout << "Device: " << deviceSerialNumber << "Has attached";
+    Logging::logI("pub_systems", "Device: %d has attached", deviceSerialNumber);
 };
 
 template <typename T>

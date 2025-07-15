@@ -27,7 +27,7 @@ namespace Logging{
      * @param msg The message to log.
      * @param msg_prefix The prefix for the message.
      */
-    void logE(const std::string& msg, const std::string& msg_prefix="");
+    void logE(const char* msg_prefix, const char* msg, ...);
 
     /**
      * @brief Log an warning message.
@@ -35,7 +35,7 @@ namespace Logging{
      * @param msg The message to log.
      * @param msg_prefix The prefix for the message.
      */
-    void logW(const std::string& msg, const std::string& msg_prefix="");
+    void logW(const char* msg_prefix, const char* msg, ...);
 
     /**
      * @brief Log an info message.
@@ -43,7 +43,7 @@ namespace Logging{
      * @param msg The message to log.
      * @param msg_prefix The prefix for the message.
      */
-    void logI(const std::string& msg, const std::string& msg_prefix="");
+    void logI(const char* msg_prefix, const char* msg, ...);
 
     /**
      * @brief Log a debug message.
@@ -51,7 +51,7 @@ namespace Logging{
      * @param msg The message to log.
      * @param msg_prefix The prefix for the message.
      */
-    void logD(const std::string& msg, const std::string& msg_prefix="");
+    void logD(const char* msg_prefix, const char* msg, ...);
 
     /**
      * @brief Log a verbose message.
@@ -59,7 +59,7 @@ namespace Logging{
      * @param msg The message to log.
      * @param msg_prefix The prefix for the message.
      */
-    void logV(const std::string& msg, const std::string& msg_prefix="");
+    void logV(const char* msg_prefix, const char* msg, ...);
 
 };
 

@@ -1,15 +1,17 @@
 #include "Rover.h"
 
+static const char* file = "Rover";
+
 using namespace std;
 
 // Regular Constructor
 Rover::Rover() {
-    
+
 }
 
 // // Temp constructor for websockets
 // Rover::Rover(Arm arm, Drive drive, asio::io_context& context,
-//              const std::string& host, int port) {
+//              const char* host, int port) {
 
 //     // Instantiate all neccasary components
 //     instantiateWebsocket(context, host, port);
@@ -56,7 +58,7 @@ void Rover::start() {
         Message reply = client.receive();
         reply.printMessage(); // Print the received message
         roverQueue.push(reply);
-        cout << "Message pushed to roverQueue\n";
+        Logging::logV(file, "Message pushed to roverQueue");
     }
 
     websocetClientThread.join();
