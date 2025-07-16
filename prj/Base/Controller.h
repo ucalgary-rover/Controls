@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include "pub_general.h"
 #include <SDL2/SDL.h>
 #include <iostream>
-#include "pub_general.h"
 
 // Used to streamline the struct (Don't keep in final)<<<<<<<<<<<<<<<<<<<<<<<<<
 typedef void (*ControllerFunc)(void* args);
@@ -223,6 +223,17 @@ public:
      *
      */
     void eventLoop();
+
+    /**
+     *Runs the event loop with a testing window that shows joystick positions.
+     *Initializes SDL subsystems and closes them once the loop is terminated.
+     *
+     *@param None
+     *
+     *@return None
+     *
+     */
+    void testingEventLoop();
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

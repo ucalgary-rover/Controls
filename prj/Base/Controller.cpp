@@ -5,7 +5,44 @@
 #include <string>
 
 static const char* file = "Controller";
-static GameControllerAxis covert_stl_axis_to_game_controller(SDL_GameControllerAxis axis);
+static GameControllerAxis
+covert_stl_axis_to_game_controller(SDL_GameControllerAxis axis);
+
+// Code for the testing window for adjusting controller deadzones
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
+
+SDL_Window* makeWindow() {
+    // Window stuffs
+    SDL_Window* window = SDL_CreateWindow(
+        "Joystick testing", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+        SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+
+    if (window == nullptr) {
+        std::cerr << "SDL could not initialize! SDL Error: " << SDL_GetError()
+                  << std::endl;
+    }
+
+    return window;
+}
+
+void renderCross1(SDL_Surface* screenSurface, int x, int y, int w,
+                  Uint32 color) {
+    SDL_Rect rect = { x, y - w / 2, 1, w };
+    SDL_FillRect(screenSurface, &rect, color);
+
+    rect = { x - w / 2, y, w, 1 };
+    SDL_FillRect(screenSurface, &rect, color);
+}
+
+void renderCross(SDL_Surface* screenSurface, int x, int y, float x1, float x2) {
+    renderCross1(screenSurface, x, y, 20,
+                 SDL_MapRGB(screenSurface->format, 0x99, 0x99, 0x99));
+    renderCross1(screenSurface, x + x1 * SCREEN_WIDTH * 0.2f,
+                 y + x2 * SCREEN_HEIGHT * 0.2f, 10,
+                 SDL_MapRGB(screenSurface->format, 0xFF, 0xF, 0xAA));
+}
+//------------------------------------------------------------------
 
 // Helper function to get button names
 std::string getButtonName(Uint8 button) {
@@ -154,8 +191,7 @@ void ControllerHolder::setControllerButtonFuncs(
     int index, buttonFunctions functionStruct) {
 
     // setting the button functions for each controller
-    m_controllerList[index]
-        .setButtonFuncs(functionStruct);
+    m_controllerList[index].setButtonFuncs(functionStruct);
 }
 
 // Controllerholder eventloop and response
@@ -276,7 +312,8 @@ void ControllerHolder::eventLoop() {
 
     // Check for game controllers
     if (SDL_NumJoysticks() < 1) {
-        Logging::logV(file, "No controllers connected! Number of joysticks: %d", SDL_NumJoysticks());
+        Logging::logV(file, "No controllers connected! Number of joysticks: %d",
+                      SDL_NumJoysticks());
     }
 
     SDL_Event event;
@@ -311,15 +348,17 @@ void ControllerHolder::eventLoop() {
             case SDL_JOYAXISMOTION:
                 // for now, making sure triggers don't cause problems
                 {
-                GameControllerAxis axis = covert_stl_axis_to_game_controller((SDL_GameControllerAxis)event.jaxis.axis);
-                Logging::logV(file, "Axis motion", (int)event.jaxis.axis);
+                    GameControllerAxis axis
+                        = covert_stl_axis_to_game_controller(
+                            (SDL_GameControllerAxis)event.jaxis.axis);
+                    Logging::logV(file, "Axis motion", (int)axis);
 
-                if (axis < 4) {
-                    stickResponse(event.jaxis.value, axis,
-                                  event.cdevice.which);
-                }
+                    if (axis < 4) {
+                        stickResponse(event.jaxis.value, axis,
+                                      event.cdevice.which);
+                    }
 
-                break;
+                    break;
                 }
 
             case SDL_CONTROLLERBUTTONDOWN:
@@ -349,7 +388,121 @@ void ControllerHolder::eventLoop() {
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static GameControllerAxis covert_stl_axis_to_game_controller(SDL_GameControllerAxis axis) {
+void ControllerHolder::testingEventLoop() {
+
+    bool quit = false;
+
+    SDL_Window* window = makeWindow();
+
+    // initializing SDL sub systems`
+    // This combo works, it is a little strange tho
+    // -> SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER
+
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
+        fprintf(stderr, "could not initialize sdl2: %s\n", SDL_GetError());
+        SDL_Quit();
+    }
+
+    // Check for game controllers
+    if (SDL_NumJoysticks() < 1) {
+        Logging::logV(file, "No controllers connected! Number of joysticks: %d",
+                      SDL_NumJoysticks());
+    }
+
+    SDL_Event event;
+
+    // the main update loop
+    // reads events and updates accordingly per loop
+    while (!quit) {
+
+        // pulls an event from the queue (crucial for updating literally
+        // anything!) this is the event loop yet to figure out why event loop
+        // has to look like this
+        while (SDL_PollEvent(&event)) {
+
+            // checks what kind of event
+            switch (event.type) {
+            case SDL_QUIT:
+                quit = true;
+                break;
+
+            case SDL_CONTROLLERDEVICEADDED:
+
+                controllerAddedResponse(event.cdevice.which);
+                break;
+
+            case SDL_CONTROLLERDEVICEREMOVED:
+
+                controllerRemovedResponse(event.cdevice.which);
+                break;
+
+            // working now!
+            // featuring dante from devil may cry! /satire
+            case SDL_JOYAXISMOTION:
+
+                // for now, making sure triggers don't cause problems
+
+                GameControllerAxis axis = covert_stl_axis_to_game_controller(
+                    (SDL_GameControllerAxis)event.jaxis.axis);
+                Logging::logV(file, "Axis motion", (int)event.jaxis.axis);
+                Logging::logV(file, "Axis motion", (int)axis);
+
+                if (axis < 4) {
+                    stickResponse(event.jaxis.value, axis, event.cdevice.which);
+                }
+
+                break;
+
+                break;
+
+            case SDL_CONTROLLERBUTTONDOWN:
+
+                buttonResponse(event.cbutton.button, event.cdevice.which);
+
+                //-------------------------------------------------------------
+                // Hardcoding a button that quits the loop
+                if (SDL_CONTROLLER_BUTTON_START == event.cbutton.button) {
+                    std::cout << "Quitting";
+                    quit = true;
+                }
+
+                break;
+            }
+        }
+
+        // Testing code!!!
+        //  --------------------------------------------------------------------------
+        //  rendering the crosses
+
+        SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
+        SDL_FillRect(screenSurface, nullptr,
+                     SDL_MapRGB(screenSurface->format, 0x33, 0x33, 0x33));
+
+        renderCross(screenSurface, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2,
+                    m_controllerList[0].getLeftStick().getPosX() / 255,
+                    m_controllerList[0].getLeftStick().getPosY() / 255);
+        renderCross(screenSurface, 3 * SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2,
+                    m_controllerList[0].getRightStick().getPosX() / 255,
+                    m_controllerList[0].getRightStick().getPosY() / 255);
+
+        // must be used to update window
+        SDL_UpdateWindowSurface(window);
+    }
+
+    // Clean up >>>>>>>>>>>>>>>>>>>>>> important <<<<<<<<<<<<<<<<<<<<<<
+    for (Controller controller : m_controllerList) {
+        if (controller.getPointerID()) {
+            SDL_GameControllerClose(controller.getPointerID());
+        }
+    }
+
+    quit = false;
+
+    SDL_Quit();
+}
+
+static GameControllerAxis
+covert_stl_axis_to_game_controller(SDL_GameControllerAxis axis) {
     switch (axis) {
     case SDL_CONTROLLER_AXIS_LEFTX:
         return GAME_CONTROLLER_AXIS_LEFTX;
