@@ -75,6 +75,49 @@ public:
     float stickUpdate(Sint16 axisValue, int axisID);
 };
 
+// class for triggers (generic and can be applied to any controller)
+class Trigger {
+private:
+    // identifier for the axis
+    GameControllerAxis m_axis;
+
+    // position value from 0 - 255
+    int m_pos = 0;
+
+    // raw value for the use of moving deadzone comparison
+    float m_raw = 0;
+
+    // a function for sending this trigger's data
+    void (*m_triggerFunc)(int xValue);
+public:
+    /**
+     *Assigns a trigger's axis (ex. left trigger has a left axis)
+     *@param The ID for the axis of the controller
+     *@return None
+     */
+    Trigger(GameControllerAxis axisID);
+
+    // default constructor
+    Trigger() { }
+
+    // getters
+    float getPos() { return m_pos; };
+    GameControllerAxis getAxis() { return m_axis; };
+
+    // setters
+    void setTriggerFunc(void (*newTriggerFunc)(int xValue)) {
+        m_triggerFunc = newTriggerFunc;
+    };
+
+    /**
+     *Takes raw trigger data and processes it into an output in line with a
+     *circular joystick. Deadzones also applied. Acts like a setter
+     *
+     *@param axisValue The value of the axis moved
+     */
+    void triggerUpdate(Sint16 axisValue);
+};
+
 // class for controllers
 class Controller {
 
@@ -87,6 +130,9 @@ private:
     // right joystick
     Stick m_leftStick;
     Stick m_rightStick;
+
+    Trigger m_leftTrigger;
+    Trigger m_rightTrigger;
 
     // struct for button functions
     buttonFunctions m_buttonFuncs;
@@ -117,18 +163,26 @@ public:
     // stik setters
     Stick getLeftStick() { return m_leftStick; };
     Stick getRightStick() { return m_rightStick; };
+    Trigger getLeftTrigger() { return m_leftTrigger; };
+    Trigger getRightTrigger() { return m_rightTrigger; };
 
     void setLeftStick(Stick newStick) { m_leftStick = newStick; };
     void setRightStick(Stick newStick) { m_rightStick = newStick; };
+    void setLeftTrigger(Trigger newTrigger) { m_leftTrigger = newTrigger; };
+    void setRightTrigger(Trigger newTrigger) { m_rightTrigger = newTrigger; };
 
     buttonFunctions getButtonFuncs() { return m_buttonFuncs; };
 
     void setButtonFuncs(buttonFunctions funcsStruct) {
         m_buttonFuncs = funcsStruct;
 
-        // also assigns appropriate
+        // Assign appropriate Stick
         m_leftStick.setStickFunc(funcsStruct.LEFT_JOYSTICK);
         m_rightStick.setStickFunc(funcsStruct.RIGHT_JOYSTICK);
+
+        // Assign appropriate Trigger
+        m_leftTrigger.setTriggerFunc(funcsStruct.LEFT_TRIGGER);
+        m_rightTrigger.setTriggerFunc(funcsStruct.RIGHT_TRIGGER);
     };
 };
 
@@ -192,6 +246,20 @@ public:
      *
      */
     void stickResponse(Sint16 axisValue, int axisID, int controllerIndex);
+
+    /**
+     *Identifies which trigger requires an update and pass in variable for the
+     *appropriate trigger update function
+     *
+     *@param axisValue The value of the trigger moved
+     *@param axisID An ID differentiating the left and right triggers
+     *@param controllerIndex The index of the active controller for the event
+     *
+     *@return None.
+     *
+     */
+    void triggerResponse(Sint16 axisValue, int axisID, int controllerIndex);
+
 
     /**
      *Executes a function when a button is pressed

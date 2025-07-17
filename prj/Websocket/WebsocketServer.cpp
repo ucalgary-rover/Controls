@@ -46,7 +46,6 @@ void WebSocketServer::handle_session(tcp::socket socket, MessageQueue& queue) {
             // the client
             ws.text(true);
             ws.write(asio::buffer(serializedMsg));
-            Logging::logV(file, "Sent message: %s", serializedMsg.c_str());
         }
     } catch (const std::exception& e) {
         std::cerr << "Session disconnect: " << e.what() << "\n";

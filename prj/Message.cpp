@@ -73,7 +73,7 @@ void Message::printMessage() const {
                     Logging::logV(file, "WristX: %f, WristY: %f, WristZ: %f, ClawOpen: %f",payload.fixed_ik_message.wristX, payload.fixed_ik_message.wristY, payload.fixed_ik_message.wristZ,payload.fixed_ik_message.clawOpen);
                     break;
                 case ARM_MESSAGE_TYPE_VARIABLE_IK:
-                    Logging::logV(file, "WristX: %f, WristY: %f, WristZ: %f, ClawIncline: %f, ClawTwist: %f, ClawOpen: %f",payload.variable_ik_message.wristX, payload.variable_ik_message.wristY, payload.variable_ik_message.wristZ, payload.variable_ik_message.clawIncline, payload.variable_ik_message.clawTwist, payload.variable_ik_message.clawOpen);
+                    Logging::logV(file, "WristX: %f, WristY: %f, WristZ: %f, clawPitch: %f, clawRoll: %f, ClawOpen: %f",payload.variable_ik_message.wristX, payload.variable_ik_message.wristY, payload.variable_ik_message.wristZ, payload.variable_ik_message.clawPitch, payload.variable_ik_message.clawRoll, payload.variable_ik_message.clawOpen);
                     break;
                 default:
                     Logging::logV(file, "Unknown ArmMessage type");
@@ -123,8 +123,8 @@ std::string Message::serialize() const {
                     oss << payload.variable_ik_message.wristX << " "
                         << payload.variable_ik_message.wristY << " "
                         << payload.variable_ik_message.wristZ << " "
-                        << payload.variable_ik_message.clawIncline << " "
-                        << payload.variable_ik_message.clawTwist << " "
+                        << payload.variable_ik_message.clawPitch << " "
+                        << payload.variable_ik_message.clawRoll << " "
                         << payload.variable_ik_message.clawOpen;
                     break;
                 default:
@@ -183,13 +183,13 @@ Message Message::deserialize(const std::string& data) {
             break;
         }
         case ARM_MESSAGE_TYPE_VARIABLE_IK: {
-            float wristX, wristY, wristZ, clawIncline, clawTwist, clawOpen;
-            iss >> wristX >> wristY >> wristZ >> clawIncline >> clawTwist >> clawOpen;
+            float wristX, wristY, wristZ, clawPitch, clawRoll, clawOpen;
+            iss >> wristX >> wristY >> wristZ >> clawPitch >> clawRoll >> clawOpen;
             am.variable_ik_message.wristX = wristX;
             am.variable_ik_message.wristY = wristY;
             am.variable_ik_message.wristZ = wristZ;
-            am.variable_ik_message.clawIncline = clawIncline;
-            am.variable_ik_message.clawTwist = clawTwist;
+            am.variable_ik_message.clawPitch = clawPitch;
+            am.variable_ik_message.clawRoll = clawRoll;
             am.variable_ik_message.clawOpen = clawOpen;
             break;
         }

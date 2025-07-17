@@ -25,6 +25,7 @@ enum GameControllerAxis
     GAME_CONTROLLER_AXIS_LEFTY,
     GAME_CONTROLLER_AXIS_RIGHTX,
     GAME_CONTROLLER_AXIS_RIGHTY,
+    GAME_CONTROLLER_AXIS_LAST_JOYSTICK = GAME_CONTROLLER_AXIS_RIGHTY,
     GAME_CONTROLLER_AXIS_TRIGGERLEFT,
     GAME_CONTROLLER_AXIS_TRIGGERRIGHT,
     GAME_CONTROLLER_AXIS_MAX
@@ -55,6 +56,8 @@ struct buttonFunctions {
     std::array<std::function<void()>, 15> buttonArray = { nullptr };
     void (*LEFT_JOYSTICK)(int xValue, int yValue) = nullptr;
     void (*RIGHT_JOYSTICK)(int xValue, int yValue) = nullptr;
+    void (*LEFT_TRIGGER)(int xValue) = nullptr;
+    void (*RIGHT_TRIGGER)(int xValue) = nullptr;
 };
 
 // Generic Message Format
@@ -106,8 +109,8 @@ struct ArmVariableIKMessage {
     float wristY;
     float wristZ;
 
-    float clawIncline;
-    float clawTwist;
+    float clawPitch;
+    float clawRoll;
 
     float clawOpen;
 };

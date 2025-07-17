@@ -11,6 +11,7 @@ mutex mtx;
 static void valLimmit(float* value, int min, int max);
 static void unusedButton();
 static void unusedStick(int X, int Y);
+static void unusedTrigger(int X);
 static const char* file = "Base";
 
 Base::Base() {
@@ -36,14 +37,16 @@ Base::Base() {
     wristZ = 0;
 
     clawOpen = 0;
-    clawIncline = 0;
-    clawTwist = 0;
+    clawPitch = 0;
+    clawRoll = 0;
 
     exitLoop = 0;
 
     drive_control = new buttonFunctions();
     drive_control->LEFT_JOYSTICK = &unusedStick;
     drive_control->RIGHT_JOYSTICK = &unusedStick;
+    drive_control->LEFT_TRIGGER = &unusedTrigger;
+    drive_control->RIGHT_TRIGGER = &unusedTrigger;
     drive_control->buttonArray = {
         [this]() {incrementFloat(chassisSpeed, 2, 0, chassisMaxSpeed, "chassisSpeed"); },  // SDL_CONTROLLER_BUTTON_A
         [this]() {incrementFloat(chassisSpeed, -2, 0, chassisMaxSpeed, "chassisSpeed"); }, // SDL_CONTROLLER_BUTTON_B
@@ -65,17 +68,19 @@ Base::Base() {
     arm_manulal_control = new buttonFunctions();
     arm_manulal_control->LEFT_JOYSTICK = &unusedStick;
     arm_manulal_control->RIGHT_JOYSTICK = &unusedStick;
+    arm_manulal_control->LEFT_TRIGGER = &unusedTrigger;
+    arm_manulal_control->RIGHT_TRIGGER = &unusedTrigger;
     arm_manulal_control->buttonArray = {
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);}, // SDL_CONTROLLER_BUTTON_A
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK); }, // SDL_CONTROLLER_BUTTON_B
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK); },  // SDL_CONTROLLER_BUTTON_X
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
+        []() {unusedButton(); },  // SDL_CONTROLLER_BUTTON_X
         []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_Y
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_BACK
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_GUIDE
-        [this]() {quit(); }, // SDL_CONTROLLER_BUTTON_START
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK);},  // SDL_CONTROLLER_BUTTON_BACK
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);},  // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK);}, // SDL_CONTROLLER_BUTTON_START
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
-        []() {unusedButton();; }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
@@ -86,17 +91,19 @@ Base::Base() {
     arm_fixed_ik_control = new buttonFunctions();
     arm_fixed_ik_control->LEFT_JOYSTICK = &unusedStick;
     arm_fixed_ik_control->RIGHT_JOYSTICK = &unusedStick;
+    arm_fixed_ik_control->LEFT_TRIGGER = &unusedTrigger;
+    arm_fixed_ik_control->RIGHT_TRIGGER = &unusedTrigger;
     arm_fixed_ik_control->buttonArray = {
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);}, // SDL_CONTROLLER_BUTTON_A
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK); }, // SDL_CONTROLLER_BUTTON_B
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK); },  // SDL_CONTROLLER_BUTTON_X
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
+        []() {unusedButton(); },  // SDL_CONTROLLER_BUTTON_X
         []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_Y
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_BACK
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_GUIDE
-        [this]() {quit(); }, // SDL_CONTROLLER_BUTTON_START
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK);},  // SDL_CONTROLLER_BUTTON_BACK
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);},  // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK);}, // SDL_CONTROLLER_BUTTON_START
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
-        []() {unusedButton();; }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
@@ -107,17 +114,19 @@ Base::Base() {
     arm_variable_ik_control = new buttonFunctions();
     arm_variable_ik_control->LEFT_JOYSTICK = &unusedStick;
     arm_variable_ik_control->RIGHT_JOYSTICK = &unusedStick;
+    arm_variable_ik_control->LEFT_TRIGGER = &unusedTrigger;
+    arm_variable_ik_control->RIGHT_TRIGGER = &unusedTrigger;
     arm_variable_ik_control->buttonArray = {
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);}, // SDL_CONTROLLER_BUTTON_A
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK); }, // SDL_CONTROLLER_BUTTON_B
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK); },  // SDL_CONTROLLER_BUTTON_X
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
+        []() {unusedButton(); },  // SDL_CONTROLLER_BUTTON_X
         []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_Y
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_BACK
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_GUIDE
-        [this]() {quit(); }, // SDL_CONTROLLER_BUTTON_START
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK);},  // SDL_CONTROLLER_BUTTON_BACK
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);},  // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK);}, // SDL_CONTROLLER_BUTTON_START
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
-        []() {unusedButton();; }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
         []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
@@ -245,8 +254,8 @@ void Base::start() {
                 variableIKMsg.wristX = getFloat(wristX);
                 variableIKMsg.wristY = getFloat(wristY);
                 variableIKMsg.wristZ = getFloat(wristZ);
-                variableIKMsg.clawIncline = getFloat(clawIncline);
-                variableIKMsg.clawTwist = getFloat(clawTwist);
+                variableIKMsg.clawPitch = getFloat(clawPitch);
+                variableIKMsg.clawRoll = getFloat(clawRoll);
                 variableIKMsg.clawOpen = getFloat(clawOpen);
                 armMsg.type = ARM_MESSAGE_TYPE_VARIABLE_IK;
                 armMsg.variable_ik_message = variableIKMsg;
@@ -277,4 +286,8 @@ static void unusedButton() { Logging::logV(file, "Button Unused\n"); }
 
 static void unusedStick(int X, int Y) {
     Logging::logV(file, "Unused Stick X: %d, Y: %d", X, Y);
+}
+
+static void unusedTrigger(int X) {
+    Logging::logV(file, "Unused Trigger X: %d", X);
 }

@@ -55,7 +55,7 @@ private:
 
     float wristX, wristY, wristZ;
     float clawOpen;
-    float clawIncline, clawTwist;
+    float clawPitch, clawRoll;
 
     int exitLoop;
 
