@@ -5,15 +5,15 @@
 #include <iostream>
 #include <mutex>
 #include <thread>
-#include <vector>
 #include <unistd.h>
+#include <vector>
 
 #include "Base/Controller.h"
 #include "Message.h"
 #include "MessageQueue.h"
+#include "Websocket/WebsocketServer.h"
 #include "mission_control.h"
 #include "pub_general.h"
-#include "Websocket/WebsocketServer.h"
 
 using namespace std;
 
@@ -27,7 +27,8 @@ public:
     // General getter, setter, and incrementor for int member variables
     int getFloat(const float& member);
     void setFloat(float& member, int n, int min, int max, const char* name);
-    void incrementFloat(float& member, int n, int min, int max, const char* name);
+    void incrementFloat(float& member, int n, int min, int max,
+                        const char* name);
     void changeArmControlType(ArmMessageType type);
     void incrementJoint(int change);
 
@@ -63,7 +64,7 @@ private:
     ControllerHolder* controller;
 
     buttonFunctions* drive_control;
-    buttonFunctions* arm_manulal_control; 
+    buttonFunctions* arm_manulal_control;
     buttonFunctions* arm_fixed_ik_control;
     buttonFunctions* arm_variable_ik_control;
 };

@@ -89,6 +89,7 @@ private:
 
     // a function for sending this trigger's data
     void (*m_triggerFunc)(int xValue);
+
 public:
     /**
      *Assigns a trigger's axis (ex. left trigger has a left axis)
@@ -259,7 +260,6 @@ public:
      *
      */
     void triggerResponse(Sint16 axisValue, int axisID, int controllerIndex);
-
 
     /**
      *Executes a function when a button is pressed

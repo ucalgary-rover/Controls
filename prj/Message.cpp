@@ -54,32 +54,56 @@ MessageFormat Message::getFormat() const { return m_format; }
 
 // Print Message details
 void Message::printMessage() const {
-    Logging::logV(file,"Priority: %d", m_isHighPriority);
-    Logging::logV(file,"Payload:");
+    Logging::logV(file, "Priority: %d", m_isHighPriority);
+    Logging::logV(file, "Payload:");
     std::visit(
         [this](auto&& payload) {
             using T = std::decay_t<decltype(payload)>;
             if constexpr (std::is_same_v<T, Generic>) {
-                Logging::logV(file,"Generic - Value: %f" + payload.value);
+                Logging::logV(file, "Generic - Value: %f" + payload.value);
             } else if constexpr (std::is_same_v<T, WheelMessage>) {
-                Logging::logV(file, "WheelMessage - Velocity: %d, Theta: %d, Angle Velocity%d: ", payload.velocity, payload.theta, payload.angleVelocity);
+                Logging::logV(file,
+                              "WheelMessage - Velocity: %d, Theta: %d, Angle "
+                              "Velocity%d: ",
+                              payload.velocity, payload.theta,
+                              payload.angleVelocity);
             } else if constexpr (std::is_same_v<T, ArmMessage>) {
                 Logging::logV(file, "ArmMessage - Type: %d", payload.type);
                 switch (payload.type) {
                 case ARM_MESSAGE_TYPE_MANUAL:
-                    Logging::logV(file, "MotorID: %f, AngleChange: %f", payload.manual_message.motorId, payload.manual_message.angleChange);
+                    Logging::logV(file, "MotorID: %f, AngleChange: %f",
+                                  payload.manual_message.motorId,
+                                  payload.manual_message.angleChange);
                     break;
                 case ARM_MESSAGE_TYPE_FIXED_IK:
-                    Logging::logV(file, "WristX: %f, WristY: %f, WristZ: %f, ClawOpen: %f",payload.fixed_ik_message.wristX, payload.fixed_ik_message.wristY, payload.fixed_ik_message.wristZ,payload.fixed_ik_message.clawOpen);
+                    Logging::logV(
+                        file,
+                        "WristX: %f, WristY: %f, WristZ: %f, ClawOpen: %f",
+                        payload.fixed_ik_message.wristX,
+                        payload.fixed_ik_message.wristY,
+                        payload.fixed_ik_message.wristZ,
+                        payload.fixed_ik_message.clawOpen);
                     break;
                 case ARM_MESSAGE_TYPE_VARIABLE_IK:
-                    Logging::logV(file, "WristX: %f, WristY: %f, WristZ: %f, clawPitch: %f, clawRoll: %f, ClawOpen: %f",payload.variable_ik_message.wristX, payload.variable_ik_message.wristY, payload.variable_ik_message.wristZ, payload.variable_ik_message.clawPitch, payload.variable_ik_message.clawRoll, payload.variable_ik_message.clawOpen);
+                    Logging::logV(file,
+                                  "WristX: %f, WristY: %f, WristZ: %f, "
+                                  "clawPitch: %f, clawRoll: %f, ClawOpen: %f",
+                                  payload.variable_ik_message.wristX,
+                                  payload.variable_ik_message.wristY,
+                                  payload.variable_ik_message.wristZ,
+                                  payload.variable_ik_message.clawPitch,
+                                  payload.variable_ik_message.clawRoll,
+                                  payload.variable_ik_message.clawOpen);
                     break;
                 default:
                     Logging::logV(file, "Unknown ArmMessage type");
                 }
             } else if constexpr (std::is_same_v<T, ScienceToolMessage>) {
-                Logging::logV(file, "ScienceToolMessage - Move Up/Down: %d, Move Left/Right: %d, X Pos: %d, Y Pos: %d", payload.moveUpDown, payload.moveLeftRight, payload.xPos, payload.yPos);
+                Logging::logV(file,
+                              "ScienceToolMessage - Move Up/Down: %d, Move "
+                              "Left/Right: %d, X Pos: %d, Y Pos: %d",
+                              payload.moveUpDown, payload.moveLeftRight,
+                              payload.xPos, payload.yPos);
             }
         },
         m_payload);
@@ -110,8 +134,8 @@ std::string Message::serialize() const {
                 oss << static_cast<int>(payload.type) << " ";
                 switch (payload.type) {
                 case ARM_MESSAGE_TYPE_MANUAL:
-                    oss << static_cast<int>(payload.manual_message.motorId) << " "
-                        << payload.manual_message.angleChange;
+                    oss << static_cast<int>(payload.manual_message.motorId)
+                        << " " << payload.manual_message.angleChange;
                     break;
                 case ARM_MESSAGE_TYPE_FIXED_IK:
                     oss << payload.fixed_ik_message.wristX << " "
@@ -130,8 +154,7 @@ std::string Message::serialize() const {
                 default:
                     break;
                 }
-            }
-            else if constexpr (std::is_same_v<T, ScienceToolMessage>) {
+            } else if constexpr (std::is_same_v<T, ScienceToolMessage>) {
                 oss << payload.moveUpDown << " " << payload.moveLeftRight << " "
                     << payload.xPos << " " << payload.yPos;
             }
@@ -184,7 +207,8 @@ Message Message::deserialize(const std::string& data) {
         }
         case ARM_MESSAGE_TYPE_VARIABLE_IK: {
             float wristX, wristY, wristZ, clawPitch, clawRoll, clawOpen;
-            iss >> wristX >> wristY >> wristZ >> clawPitch >> clawRoll >> clawOpen;
+            iss >> wristX >> wristY >> wristZ >> clawPitch >> clawRoll
+                >> clawOpen;
             am.variable_ik_message.wristX = wristX;
             am.variable_ik_message.wristY = wristY;
             am.variable_ik_message.wristZ = wristZ;

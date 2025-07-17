@@ -5,11 +5,11 @@
 
 #include "MessageQueue.h"
 
+#include "Systems/Arm.h"
+#include "Systems/Drive.h"
 #include "pub_general.h"
 #include "pub_rover.h"
 #include <thread>
-#include "Systems/Arm.h"
-#include "Systems/Drive.h"
 
 // #include "Handlers/ArmHandler.h"
 
@@ -66,7 +66,8 @@ public:
      * @return
      * none
      */
-    void startClient(MessageQueue* clientQueue, MessageQueue* armQueue, MessageQueue* driveQueue);
+    void startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
+                     MessageQueue* driveQueue);
 
     /** Start the rover
      *
@@ -89,7 +90,6 @@ public:
     void stop();
 
 private:
-
     // Threading variables
     std::condition_variable m_roverConVar;
     bool m_roverRunningFlag = false;

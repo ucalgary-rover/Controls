@@ -10,7 +10,7 @@ MessageQueue::~MessageQueue() { }
 /* DATA CREATION AND DESTRUCTION */
 //-------------------------------//
 
-/* 
+/*
  * Add message into correct queue depending on priority
  */
 void MessageQueue::push(const Message message) {
@@ -36,7 +36,7 @@ void MessageQueue::push(const Message message) {
     m_cond_push.notify_one();
 }
 
-/* 
+/*
  * Remove message from correct queue depending on priority
  */
 Message MessageQueue::pop() {
@@ -67,7 +67,7 @@ Message MessageQueue::pop() {
 /* DATA RETRIEVAL */
 //----------------//
 
-/* 
+/*
  * Returns the message in the front of the queue
  */
 Message MessageQueue::front() {
@@ -90,7 +90,7 @@ Message MessageQueue::front() {
     throw std::runtime_error("Queue is empty. Cannot retrieve front element.");
 }
 
-/* 
+/*
  * Returns the message in the front of the regular (non-priority) queue
  */
 Message MessageQueue::frontRegular() {
@@ -111,7 +111,7 @@ Message MessageQueue::frontRegular() {
         "Queue is empty. Cannot retrieve frontRegular element.");
 }
 
-/* 
+/*
  * Returns the message in the back of the queue
  */
 Message MessageQueue::back() {
@@ -135,7 +135,7 @@ Message MessageQueue::back() {
     throw std::runtime_error("Queue is empty. Cannot retrieve back element.");
 }
 
-/* 
+/*
  * Returns the message in the front of the priority queue
  */
 Message MessageQueue::backPriority() {
@@ -156,7 +156,7 @@ Message MessageQueue::backPriority() {
         "Queue is empty. Cannot retrieve backPriority element.");
 }
 
-/* 
+/*
  * Returns how many elements are in the queue
  */
 size_t MessageQueue::size() {
@@ -167,7 +167,7 @@ size_t MessageQueue::size() {
     return m_priorityQueue.size() + m_regularQueue.size();
 }
 
-/* 
+/*
  * Returns how many elements are in the priority queue
  */
 size_t MessageQueue::sizePriority() {
@@ -178,7 +178,7 @@ size_t MessageQueue::sizePriority() {
     return m_priorityQueue.size();
 }
 
-/* 
+/*
  * Returns how many elements are in the regular queue
  */
 size_t MessageQueue::sizeRegular() {
@@ -189,7 +189,7 @@ size_t MessageQueue::sizeRegular() {
     return m_regularQueue.size();
 }
 
-/* 
+/*
  * Returns if the queue is empty (True) or not (False)
  */
 bool MessageQueue::empty() {
@@ -200,7 +200,7 @@ bool MessageQueue::empty() {
     return (m_priorityQueue.empty() && m_regularQueue.empty());
 }
 
-/* 
+/*
  * Returns if the queue is empty (True) or not (False)
  */
 bool MessageQueue::isQueueLimit() {

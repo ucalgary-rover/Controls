@@ -1,9 +1,9 @@
 #ifndef PUB_GENERAL_H
 #define PUB_GENERAL_H
 
+#include "Logging.h"
 #include <SDL2/SDL.h>
 #include <functional>
-#include "Logging.h"
 
 #pragma once
 
@@ -18,8 +18,7 @@ enum MessagePriority {
     MESSAGE_PRIORITY_HIGH,
 };
 
-enum GameControllerAxis
-{
+enum GameControllerAxis {
     GAME_CONTROLLER_AXIS_INVALID = -1,
     GAME_CONTROLLER_AXIS_LEFTX,
     GAME_CONTROLLER_AXIS_LEFTY,
@@ -29,7 +28,7 @@ enum GameControllerAxis
     GAME_CONTROLLER_AXIS_TRIGGERLEFT,
     GAME_CONTROLLER_AXIS_TRIGGERRIGHT,
     GAME_CONTROLLER_AXIS_MAX
-} ;
+};
 
 // Used to streamline the struct (Don't keep in final)<<<<<<<<<<<<<<<<<<<<<<<<<<
 typedef void (*ControllerFunc)(void* args);

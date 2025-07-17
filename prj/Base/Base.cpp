@@ -25,7 +25,6 @@ Base::Base() {
     chassisAngularVelocity = 0;
     chassisMaxSpeed = 0;
 
-
     // Variables for state of rover arm
     armControlType = ARM_MESSAGE_TYPE_MANUAL;
 
@@ -48,21 +47,30 @@ Base::Base() {
     drive_control->LEFT_TRIGGER = &unusedTrigger;
     drive_control->RIGHT_TRIGGER = &unusedTrigger;
     drive_control->buttonArray = {
-        [this]() {incrementFloat(chassisSpeed, 2, 0, chassisMaxSpeed, "chassisSpeed"); },  // SDL_CONTROLLER_BUTTON_A
-        [this]() {incrementFloat(chassisSpeed, -2, 0, chassisMaxSpeed, "chassisSpeed"); }, // SDL_CONTROLLER_BUTTON_B
-        [this]() {incrementFloat(chassisMaxSpeed, 2, 0, 100, "chassisMaxSpeed"); }, // SDL_CONTROLLER_BUTTON_X
-        [this]() {incrementFloat(chassisMaxSpeed, -2, 0, 100, "chassisMaxSpeed"); }, // SDL_CONTROLLER_BUTTON_Y
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_BACK
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_GUIDE
-        [this]() {quit(); },       // SDL_CONTROLLER_BUTTON_START
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_LEFTSTICK
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_RIGHTSTICK
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_DPAD_UP
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_DPAD_DOWN
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_DPAD_LEFT
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+        [this]() {
+            incrementFloat(chassisSpeed, 2, 0, chassisMaxSpeed, "chassisSpeed");
+        }, // SDL_CONTROLLER_BUTTON_A
+        [this]() {
+            incrementFloat(chassisSpeed, -2, 0, chassisMaxSpeed,
+                           "chassisSpeed");
+        }, // SDL_CONTROLLER_BUTTON_B
+        [this]() {
+            incrementFloat(chassisMaxSpeed, 2, 0, 100, "chassisMaxSpeed");
+        }, // SDL_CONTROLLER_BUTTON_X
+        [this]() {
+            incrementFloat(chassisMaxSpeed, -2, 0, 100, "chassisMaxSpeed");
+        },                        // SDL_CONTROLLER_BUTTON_Y
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_BACK
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() { quit(); },     // SDL_CONTROLLER_BUTTON_START
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
     arm_manulal_control = new buttonFunctions();
@@ -71,21 +79,27 @@ Base::Base() {
     arm_manulal_control->LEFT_TRIGGER = &unusedTrigger;
     arm_manulal_control->RIGHT_TRIGGER = &unusedTrigger;
     arm_manulal_control->buttonArray = {
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
-        []() {unusedButton(); },  // SDL_CONTROLLER_BUTTON_X
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_Y
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK);},  // SDL_CONTROLLER_BUTTON_BACK
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);},  // SDL_CONTROLLER_BUTTON_GUIDE
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK);}, // SDL_CONTROLLER_BUTTON_START
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_X
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_Y
+        [this]() {
+            changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK);
+        }, // SDL_CONTROLLER_BUTTON_BACK
+        [this]() {
+            changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);
+        }, // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() {
+            changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK);
+        },                        // SDL_CONTROLLER_BUTTON_START
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
     arm_fixed_ik_control = new buttonFunctions();
@@ -94,21 +108,27 @@ Base::Base() {
     arm_fixed_ik_control->LEFT_TRIGGER = &unusedTrigger;
     arm_fixed_ik_control->RIGHT_TRIGGER = &unusedTrigger;
     arm_fixed_ik_control->buttonArray = {
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
-        []() {unusedButton(); },  // SDL_CONTROLLER_BUTTON_X
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_Y
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK);},  // SDL_CONTROLLER_BUTTON_BACK
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);},  // SDL_CONTROLLER_BUTTON_GUIDE
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK);}, // SDL_CONTROLLER_BUTTON_START
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_X
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_Y
+        [this]() {
+            changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK);
+        }, // SDL_CONTROLLER_BUTTON_BACK
+        [this]() {
+            changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);
+        }, // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() {
+            changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK);
+        },                        // SDL_CONTROLLER_BUTTON_START
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
     arm_variable_ik_control = new buttonFunctions();
@@ -117,21 +137,27 @@ Base::Base() {
     arm_variable_ik_control->LEFT_TRIGGER = &unusedTrigger;
     arm_variable_ik_control->RIGHT_TRIGGER = &unusedTrigger;
     arm_variable_ik_control->buttonArray = {
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
-        []() {unusedButton(); },  // SDL_CONTROLLER_BUTTON_X
-        []() { unusedButton(); },  // SDL_CONTROLLER_BUTTON_Y
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK);},  // SDL_CONTROLLER_BUTTON_BACK
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);},  // SDL_CONTROLLER_BUTTON_GUIDE
-        [this]() {changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK);}, // SDL_CONTROLLER_BUTTON_START
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
-        []() {unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_X
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_Y
+        [this]() {
+            changeArmControlType(ARM_MESSAGE_TYPE_FIXED_IK);
+        }, // SDL_CONTROLLER_BUTTON_BACK
+        [this]() {
+            changeArmControlType(ARM_MESSAGE_TYPE_MANUAL);
+        }, // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() {
+            changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK);
+        },                        // SDL_CONTROLLER_BUTTON_START
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
     controller = new ControllerHolder(*drive_control, *arm_manulal_control);
@@ -142,9 +168,7 @@ Base::Base() {
 Base::~Base() { }
 
 // General getter for float member variables
-int Base::getFloat(const float& member) {
-    return member;
-}
+int Base::getFloat(const float& member) { return member; }
 
 // General setter for float member variables
 void Base::setFloat(float& member, int n, int min, int max, const char* name) {
@@ -156,7 +180,8 @@ void Base::setFloat(float& member, int n, int min, int max, const char* name) {
 }
 
 // General increment for flaot member variables
-void Base::incrementFloat(float& member, int n, int min, int max, const char* name) {
+void Base::incrementFloat(float& member, int n, int min, int max,
+                          const char* name) {
     mtx.lock();
     member += n;
     valLimmit(&member, min, max);
@@ -169,22 +194,22 @@ void Base::changeArmControlType(ArmMessageType type) {
     Logging::logI(file, "Setting Arm Control Type to %d", type);
     armControlType = type;
     switch (armControlType) {
-        case ARM_MESSAGE_TYPE_MANUAL:
-            controller->setControllerButtonFuncs(1, *arm_manulal_control);
-            break;
-        case ARM_MESSAGE_TYPE_FIXED_IK:
-            controller->setControllerButtonFuncs(1, *arm_fixed_ik_control);
-            break;
-        case ARM_MESSAGE_TYPE_VARIABLE_IK:
-            controller->setControllerButtonFuncs(1, *arm_variable_ik_control);
-            break;
+    case ARM_MESSAGE_TYPE_MANUAL:
+        controller->setControllerButtonFuncs(1, *arm_manulal_control);
+        break;
+    case ARM_MESSAGE_TYPE_FIXED_IK:
+        controller->setControllerButtonFuncs(1, *arm_fixed_ik_control);
+        break;
+    case ARM_MESSAGE_TYPE_VARIABLE_IK:
+        controller->setControllerButtonFuncs(1, *arm_variable_ik_control);
+        break;
     }
     mtx.unlock();
 }
 
 void Base::incrementJoint(int change) {
     mtx.lock();
-    MotorID next = static_cast<MotorID>((joint + change)%MOTOR_ID_END);
+    MotorID next = static_cast<MotorID>((joint + change) % MOTOR_ID_END);
     Logging::logI(file, "Changing to joint: %d", next);
     joint = next;
     manualAngleChange = 0; // Reset manual angle change when changing joint
@@ -224,43 +249,43 @@ void Base::start() {
 
 #if Extention == EXTENTION_TYPE_ARM
         // Update messgae for Arm
-        switch(armControlType) {
-            case ARM_MESSAGE_TYPE_MANUAL:
-                // Manual Control
-                ArmManualMessage manualMsg;
-                manualMsg.motorId = joint;
-                manualMsg.angleChange = getFloat(manualAngleChange);
-                armMsg.type = ARM_MESSAGE_TYPE_MANUAL;
-                armMsg.manual_message = manualMsg;
-                manualAngleChange = 0; // Reset manual angle change after sending
+        switch (armControlType) {
+        case ARM_MESSAGE_TYPE_MANUAL:
+            // Manual Control
+            ArmManualMessage manualMsg;
+            manualMsg.motorId = joint;
+            manualMsg.angleChange = getFloat(manualAngleChange);
+            armMsg.type = ARM_MESSAGE_TYPE_MANUAL;
+            armMsg.manual_message = manualMsg;
+            manualAngleChange = 0; // Reset manual angle change after sending
 
-                break;
+            break;
 
-            case ARM_MESSAGE_TYPE_FIXED_IK:
-                // Fixed Inverse Kinematics Control
-                ArmFixedIKMessage fixedIKMsg;
-                fixedIKMsg.wristX = getFloat(wristX);
-                fixedIKMsg.wristY = getFloat(wristY);
-                fixedIKMsg.wristZ = getFloat(wristZ);
-                fixedIKMsg.clawOpen = getFloat(clawOpen);
-                armMsg.type = ARM_MESSAGE_TYPE_FIXED_IK;
-                armMsg.fixed_ik_message = fixedIKMsg;
+        case ARM_MESSAGE_TYPE_FIXED_IK:
+            // Fixed Inverse Kinematics Control
+            ArmFixedIKMessage fixedIKMsg;
+            fixedIKMsg.wristX = getFloat(wristX);
+            fixedIKMsg.wristY = getFloat(wristY);
+            fixedIKMsg.wristZ = getFloat(wristZ);
+            fixedIKMsg.clawOpen = getFloat(clawOpen);
+            armMsg.type = ARM_MESSAGE_TYPE_FIXED_IK;
+            armMsg.fixed_ik_message = fixedIKMsg;
 
-                break;
+            break;
 
-            case ARM_MESSAGE_TYPE_VARIABLE_IK:
-                // Variable Inverse Kinematics Control
-                ArmVariableIKMessage variableIKMsg;
-                variableIKMsg.wristX = getFloat(wristX);
-                variableIKMsg.wristY = getFloat(wristY);
-                variableIKMsg.wristZ = getFloat(wristZ);
-                variableIKMsg.clawPitch = getFloat(clawPitch);
-                variableIKMsg.clawRoll = getFloat(clawRoll);
-                variableIKMsg.clawOpen = getFloat(clawOpen);
-                armMsg.type = ARM_MESSAGE_TYPE_VARIABLE_IK;
-                armMsg.variable_ik_message = variableIKMsg;
+        case ARM_MESSAGE_TYPE_VARIABLE_IK:
+            // Variable Inverse Kinematics Control
+            ArmVariableIKMessage variableIKMsg;
+            variableIKMsg.wristX = getFloat(wristX);
+            variableIKMsg.wristY = getFloat(wristY);
+            variableIKMsg.wristZ = getFloat(wristZ);
+            variableIKMsg.clawPitch = getFloat(clawPitch);
+            variableIKMsg.clawRoll = getFloat(clawRoll);
+            variableIKMsg.clawOpen = getFloat(clawOpen);
+            armMsg.type = ARM_MESSAGE_TYPE_VARIABLE_IK;
+            armMsg.variable_ik_message = variableIKMsg;
 
-                break;
+            break;
         }
         // Add Arm Message to queue
         Logging::logV(file, "Adding arm message to queue");

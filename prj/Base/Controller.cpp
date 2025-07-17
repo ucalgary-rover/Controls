@@ -157,9 +157,7 @@ float Stick::stickUpdate(Sint16 axisValue, int axisID) {
 
 // Trigger definitions------------------------------------------------------
 
-Trigger::Trigger(GameControllerAxis axisID) {
-    m_axis = axisID;
-}
+Trigger::Trigger(GameControllerAxis axisID) { m_axis = axisID; }
 
 void Trigger::triggerUpdate(Sint16 axisValue) {
 
@@ -281,7 +279,7 @@ void ControllerHolder::stickResponse(Sint16 axisValue, int axisID,
 }
 
 void ControllerHolder::triggerResponse(Sint16 axisValue, int axisID,
-                                      int controllerIndex) {
+                                       int controllerIndex) {
     // Identifying which trigger is in play
     for (int i = 0; i < 2; i++) {
         if ((int)m_controllerList[i].getInstanceID() == controllerIndex) {
@@ -407,14 +405,19 @@ void ControllerHolder::eventLoop() {
             case SDL_JOYAXISMOTION:
                 // for now, making sure triggers don't cause problems
                 {
-                GameControllerAxis axis = covert_stl_axis_to_game_controller((SDL_GameControllerAxis)event.jaxis.axis);
-                Logging::logV(file, "Axis motion %d", (int)event.jaxis.axis);
+                    GameControllerAxis axis
+                        = covert_stl_axis_to_game_controller(
+                            (SDL_GameControllerAxis)event.jaxis.axis);
+                    Logging::logV(file, "Axis motion %d",
+                                  (int)event.jaxis.axis);
 
-                if (axis < GAME_CONTROLLER_AXIS_LAST_JOYSTICK) {
-                    stickResponse(event.jaxis.value, axis, event.cdevice.which);
-                }else if(axis < GAME_CONTROLLER_AXIS_MAX){
-                    triggerResponse(event.jaxis.value, axis, event.cdevice.which);
-                }
+                    if (axis < GAME_CONTROLLER_AXIS_LAST_JOYSTICK) {
+                        stickResponse(event.jaxis.value, axis,
+                                      event.cdevice.which);
+                    } else if (axis < GAME_CONTROLLER_AXIS_MAX) {
+                        triggerResponse(event.jaxis.value, axis,
+                                        event.cdevice.which);
+                    }
 
                     break;
                 }
@@ -496,7 +499,7 @@ void ControllerHolder::testingEventLoop() {
 
             // working now!
             // featuring dante from devil may cry! /satire
-            case SDL_JOYAXISMOTION:{
+            case SDL_JOYAXISMOTION: {
 
                 // for now, making sure triggers don't cause problems
 

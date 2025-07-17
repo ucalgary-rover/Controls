@@ -21,7 +21,7 @@
 #define SIDE_TO_BUILD BUILD_SIDE_BASE
 #endif // SIDE_TO_BUILD
 #define EXTENTION EXTENTION_TYPE_NONE
-#define LOGGING_LEVEL LOG_LEVEL_INFO
+#define LOGGING_LEVEL LOG_LEVEL_VERBOSE
 
 // Configuration file to set serial numbers and channels for each of the motors
 
@@ -39,6 +39,6 @@ const int ARM_CLAW_CHANNEL = 1;
 
 // Websocet Definitions
 const int WEBSOCKET_PORT = 8080;
-const int WEBSOCKET_ADDR[4] = {127, 0, 0, 1};
+const int WEBSOCKET_ADDR[4] = { 127, 0, 0, 1 };
 
 #endif // MISSION_CONTROL_H

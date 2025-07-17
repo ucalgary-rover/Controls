@@ -1,9 +1,14 @@
 #!/bin/bash
 
-# Install pre-commit using pip:
+# Install pre-commit using sudo apt:
 echo "Installing pre-commit..."
-pip install pre-commit
+sudo apt install pre-commit
 echo "Finished installing pre-commit..."
+
+# Install clang-format using sudo apt:
+echo "Installing clang-format..."
+sudo apt install clang-format
+echo "Finished installing clang-format..."
 
 # install pre-commit into your git hooks:
 echo "Installing pre-commit to git hooks..."
@@ -16,7 +21,7 @@ git config commit.template .gitmessage
 echo "git commit template Enabled..."
 
 echo "Installing cmake..."
-pip install cmake
+sudo apt install cmake
 echo "Finished installing cmake..."
 
 sudo apt install libboost-all-dev

@@ -5,9 +5,7 @@ static const char* file = "Rover";
 using namespace std;
 
 // Regular Constructor
-Rover::Rover() {
-
-}
+Rover::Rover() { }
 
 // // Temp constructor for websockets
 // Rover::Rover(Arm arm, Drive drive, asio::io_context& context,
@@ -39,7 +37,8 @@ Rover::~Rover() {
 
 void Rover::start() {
     char address[16];
-    snprintf(address, sizeof(address), "%d.%d.%d.%d", WEBSOCKET_ADDR[0], WEBSOCKET_ADDR[1], WEBSOCKET_ADDR[2], WEBSOCKET_ADDR[3]);
+    snprintf(address, sizeof(address), "%d.%d.%d.%d", WEBSOCKET_ADDR[0],
+             WEBSOCKET_ADDR[1], WEBSOCKET_ADDR[2], WEBSOCKET_ADDR[3]);
     WebSocketClient client(address, std::to_string(WEBSOCKET_PORT));
 
     // Arm arm(1, MOTOR_TYPE_STEPPER_MOTOR);
@@ -51,7 +50,8 @@ void Rover::start() {
 
     // instantiateThreads();
     // instantiateHandlers();
-    thread websocetClientThread([&]() { startClient(&roverQueue, &armQueue, &driveQueue); });
+    thread websocetClientThread(
+        [&]() { startClient(&roverQueue, &armQueue, &driveQueue); });
 
     client.connect();
     while (true) {
@@ -147,7 +147,8 @@ void Rover::resumeDriveHandler() {
 //---------------------- Instantiation Functions ----------------------//
 
 // Thread instantiation
-void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue, MessageQueue* driveQueue) {
+void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
+                        MessageQueue* driveQueue) {
 
     Message message;
 
