@@ -7,18 +7,18 @@
 
 #pragma once
 
-enum MessageFormat {
+enum MessageFormat : int {
     MESSAGE_FORMAT_WHEEL,
     MESSAGE_FORMAT_ARM,
     MESSAGE_FORMAT_SCIENCE_TOOL,
 };
 
-enum MessagePriority {
+enum MessagePriority : int {
     MESSAGE_PRIORITY_LOW,
     MESSAGE_PRIORITY_HIGH,
 };
 
-enum GameControllerAxis {
+enum GameControllerAxis : int {
     GAME_CONTROLLER_AXIS_INVALID = -1,
     GAME_CONTROLLER_AXIS_LEFTX,
     GAME_CONTROLLER_AXIS_LEFTY,
@@ -53,10 +53,10 @@ typedef void (*ControllerFunc)(void* args);
 // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
 struct buttonFunctions {
     std::array<std::function<void()>, 15> buttonArray = { nullptr };
-    void (*LEFT_JOYSTICK)(int xValue, int yValue) = nullptr;
-    void (*RIGHT_JOYSTICK)(int xValue, int yValue) = nullptr;
-    void (*LEFT_TRIGGER)(int xValue) = nullptr;
-    void (*RIGHT_TRIGGER)(int xValue) = nullptr;
+    std::function<void(int, int)> LEFT_JOYSTICK = nullptr;
+    std::function<void(int, int)> RIGHT_JOYSTICK = nullptr;
+    std::function<void(int)> LEFT_TRIGGER = nullptr;
+    std::function<void(int)> RIGHT_TRIGGER = nullptr;
 };
 
 // Generic Message Format
@@ -92,7 +92,7 @@ enum ArmMessageType : int {
 
 struct ArmManualMessage {
     MotorID motorId;
-    float angleChange;
+    int angleChange;
 };
 
 struct ArmFixedIKMessage {
@@ -100,7 +100,7 @@ struct ArmFixedIKMessage {
     float wristY;
     float wristZ;
 
-    float clawOpen;
+    int clawOpen;
 };
 
 struct ArmVariableIKMessage {
@@ -108,10 +108,10 @@ struct ArmVariableIKMessage {
     float wristY;
     float wristZ;
 
-    float clawPitch;
-    float clawRoll;
+    int clawPitch;
+    int clawRoll;
 
-    float clawOpen;
+    int clawOpen;
 };
 
 struct ArmMessage {

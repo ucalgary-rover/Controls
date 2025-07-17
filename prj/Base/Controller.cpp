@@ -198,6 +198,8 @@ Controller::Controller(SDL_GameController* identifier) {
     m_rightStick
         = Stick(GAME_CONTROLLER_AXIS_RIGHTX, GAME_CONTROLLER_AXIS_RIGHTY);
     m_leftStick = Stick(GAME_CONTROLLER_AXIS_LEFTX, GAME_CONTROLLER_AXIS_LEFTY);
+    m_leftTrigger = Trigger(GAME_CONTROLLER_AXIS_TRIGGERLEFT);
+    m_rightTrigger = Trigger(GAME_CONTROLLER_AXIS_TRIGGERRIGHT);
 }
 
 // ControllerHolder definitions -----------------------------------------
@@ -303,7 +305,7 @@ void ControllerHolder::triggerResponse(Sint16 axisValue, int axisID,
         (*activeController).setLeftTrigger(leftTrigger);
 
         // otherwise it is right trigger
-    } else {
+    } else if (axisID == (int)rightTrigger.getAxis()) {
         // updating temp trigger
         rightTrigger.triggerUpdate(axisValue);
 

@@ -60,7 +60,7 @@ void Message::printMessage() const {
         [this](auto&& payload) {
             using T = std::decay_t<decltype(payload)>;
             if constexpr (std::is_same_v<T, Generic>) {
-                Logging::logV(file, "Generic - Value: %f" + payload.value);
+                Logging::logV(file, "Generic - Value: %d" + payload.value);
             } else if constexpr (std::is_same_v<T, WheelMessage>) {
                 Logging::logV(file,
                               "WheelMessage - Velocity: %d, Theta: %d, Angle "
@@ -71,14 +71,14 @@ void Message::printMessage() const {
                 Logging::logV(file, "ArmMessage - Type: %d", payload.type);
                 switch (payload.type) {
                 case ARM_MESSAGE_TYPE_MANUAL:
-                    Logging::logV(file, "MotorID: %f, AngleChange: %f",
+                    Logging::logV(file, "MotorID: %d, AngleChange: %d",
                                   payload.manual_message.motorId,
                                   payload.manual_message.angleChange);
                     break;
                 case ARM_MESSAGE_TYPE_FIXED_IK:
                     Logging::logV(
                         file,
-                        "WristX: %f, WristY: %f, WristZ: %f, ClawOpen: %f",
+                        "WristX: %f, WristY: %f, WristZ: %f, ClawOpen: %d",
                         payload.fixed_ik_message.wristX,
                         payload.fixed_ik_message.wristY,
                         payload.fixed_ik_message.wristZ,
@@ -87,7 +87,7 @@ void Message::printMessage() const {
                 case ARM_MESSAGE_TYPE_VARIABLE_IK:
                     Logging::logV(file,
                                   "WristX: %f, WristY: %f, WristZ: %f, "
-                                  "clawPitch: %f, clawRoll: %f, ClawOpen: %f",
+                                  "clawPitch: %d, clawRoll: %d, ClawOpen: %d",
                                   payload.variable_ik_message.wristX,
                                   payload.variable_ik_message.wristY,
                                   payload.variable_ik_message.wristZ,

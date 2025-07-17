@@ -25,12 +25,58 @@ public:
     ~Base();
 
     // General getter, setter, and incrementor for int member variables
-    int getFloat(const float& member);
-    void setFloat(float& member, int n, int min, int max, const char* name);
-    void incrementFloat(float& member, int n, int min, int max,
+
+    /**
+     * Sets an int variable to a value within specified limits
+     *
+     * @param var The variable to set
+     * @param n The value to set the variable to
+     * @param min The minimum limit for the variable
+     * @param max The maximum limit for the variable
+     * @param name The name of the variable (for logging)
+     */
+    void setInt(int* var, int n, int min, int max, const char* name);
+
+    /**
+     * Increments an int variable by a value within specified limits
+     * @param var The variable to increment
+     * @param n The value to increment the variable by
+     * @param min The minimum limit for the variable
+     * @param max The maximum limit for the variable
+     * @param name The name of the variable (for logging)
+     */
+    void incrementInt(int* var, int n, int min, int max, const char* name);
+
+    /**
+     * Sets a float variable to a value within specified limits
+     *
+     * @param var The variable to set
+     * @param n The value to set the variable to
+     * @param min The minimum limit for the variable
+     * @param max The maximum limit for the variable
+     * @param name The name of the variable (for logging)
+     */
+    void setFloat(float* var, float n, float min, float max, const char* name);
+
+    /**
+     * Increments a float variable by a value within specified limits
+     *
+     * @param var The variable to increment
+     * @param n The value to increment the variable by
+     * @param min The minimum limit for the variable
+     * @param max The maximum limit for the variable
+     * @param name The name of the variable (for logging)
+     */
+    void incrementFloat(float* var, float n, float min, float max,
                         const char* name);
+
     void changeArmControlType(ArmMessageType type);
     void incrementJoint(int change);
+    void triggerToIncrement(int triggerValue, int* compare, int* var, int n,
+                            int min, int max, const char* name);
+    void stickChangAxise(int axisX, int axisY, float* varX, float* varY,
+                         float maxChangeX, float maxChangeY, float rangeX,
+                         float rangeY, const char* nameX, const char* nameY);
 
     // Converter functions
     float intToRadian(int n);
@@ -46,19 +92,47 @@ private:
     float PI;
 
     // Variables for state of chassis (Rover body)
-    float chassisAngle, chassisSpeed, chassisAngularVelocity, chassisMaxSpeed;
+    int chassisAngle, chassisSpeed, chassisAngularVelocity, chassisMaxSpeed;
 
     // Variables for state of rover arm
     ArmMessageType armControlType;
 
-    float manualAngleChange;
+    int manualAngleChange;
     MotorID joint;
 
     float wristX, wristY, wristZ;
-    float clawOpen;
-    float clawPitch, clawRoll;
+    int clawOpen;
+    int clawPitch, clawRoll;
 
     int exitLoop;
+
+    int lastleftTriggerValue;
+    int lastrightTriggerValue;
+
+    // Template functions for setting and incrementing member variables
+    /**
+     * Sets a member variable to a value within specified limits
+     *
+     * @param member The member variable to set
+     * @param n The value to set the member variable to
+     * @param min The minimum limit for the member variable
+     * @param max The maximum limit for the member variable
+     * @param name The name of the member variable (for logging)
+     */
+    template <typename T>
+    void setVal(T* member, T n, T min, T max, const char* name);
+
+    /**
+     * Increments a member variable by a value within specified limits
+     *
+     * @param member The member variable to increment
+     * @param n The value to increment the member variable by
+     * @param min The minimum limit for the member variable
+     * @param max The maximum limit for the member variable
+     * @param name The name of the member variable (for logging)
+     */
+    template <typename T>
+    void incrementVal(T* member, T n, T min, T max, const char* name);
 
     // List of all controllers in use
     ControllerHolder* controller;

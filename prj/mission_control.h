@@ -21,7 +21,7 @@
 #define SIDE_TO_BUILD BUILD_SIDE_BASE
 #endif // SIDE_TO_BUILD
 #define EXTENTION EXTENTION_TYPE_NONE
-#define LOGGING_LEVEL LOG_LEVEL_VERBOSE
+#define LOGGING_LEVEL LOG_LEVEL_INFO
 
 // Configuration file to set serial numbers and channels for each of the motors
 

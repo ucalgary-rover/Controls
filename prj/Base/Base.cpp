@@ -41,24 +41,26 @@ Base::Base() {
 
     exitLoop = 0;
 
+    lastrightTriggerValue = 0;
+    lastleftTriggerValue = 0;
+
     drive_control = new buttonFunctions();
-    drive_control->LEFT_JOYSTICK = &unusedStick;
-    drive_control->RIGHT_JOYSTICK = &unusedStick;
-    drive_control->LEFT_TRIGGER = &unusedTrigger;
-    drive_control->RIGHT_TRIGGER = &unusedTrigger;
+    drive_control->LEFT_JOYSTICK = [](int X, int Y) { unusedStick(X, Y); };
+    drive_control->RIGHT_JOYSTICK = [](int X, int Y) { unusedStick(X, Y); };
+    drive_control->LEFT_TRIGGER = [](int xValue) { unusedTrigger(xValue); };
+    drive_control->RIGHT_TRIGGER = [](int xValue) { unusedTrigger(xValue); };
     drive_control->buttonArray = {
         [this]() {
-            incrementFloat(chassisSpeed, 2, 0, chassisMaxSpeed, "chassisSpeed");
+            incrementInt(&chassisSpeed, 2, 0, chassisMaxSpeed, "chassisSpeed");
         }, // SDL_CONTROLLER_BUTTON_A
         [this]() {
-            incrementFloat(chassisSpeed, -2, 0, chassisMaxSpeed,
-                           "chassisSpeed");
+            incrementInt(&chassisSpeed, -2, 0, chassisMaxSpeed, "chassisSpeed");
         }, // SDL_CONTROLLER_BUTTON_B
         [this]() {
-            incrementFloat(chassisMaxSpeed, 2, 0, 100, "chassisMaxSpeed");
+            incrementInt(&chassisMaxSpeed, 2, 0, 100, "chassisMaxSpeed");
         }, // SDL_CONTROLLER_BUTTON_X
         [this]() {
-            incrementFloat(chassisMaxSpeed, -2, 0, 100, "chassisMaxSpeed");
+            incrementInt(&chassisMaxSpeed, -2, 0, 100, "chassisMaxSpeed");
         },                        // SDL_CONTROLLER_BUTTON_Y
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_BACK
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_GUIDE
@@ -74,10 +76,18 @@ Base::Base() {
     };
 
     arm_manulal_control = new buttonFunctions();
-    arm_manulal_control->LEFT_JOYSTICK = &unusedStick;
-    arm_manulal_control->RIGHT_JOYSTICK = &unusedStick;
-    arm_manulal_control->LEFT_TRIGGER = &unusedTrigger;
-    arm_manulal_control->RIGHT_TRIGGER = &unusedTrigger;
+    arm_manulal_control->LEFT_JOYSTICK
+        = [](int X, int Y) { unusedStick(X, Y); };
+    arm_manulal_control->RIGHT_JOYSTICK
+        = [](int X, int Y) { unusedStick(X, Y); };
+    arm_manulal_control->LEFT_TRIGGER = [this](int xValue) {
+        triggerToIncrement(xValue, &lastleftTriggerValue, &manualAngleChange,
+                           -5, -20, 20, "manualAngleChange");
+    };
+    arm_manulal_control->RIGHT_TRIGGER = [this](int xValue) {
+        triggerToIncrement(xValue, &lastrightTriggerValue, &manualAngleChange,
+                           5, -20, 20, "manualAngleChange");
+    };
     arm_manulal_control->buttonArray = {
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
@@ -91,22 +101,34 @@ Base::Base() {
         }, // SDL_CONTROLLER_BUTTON_GUIDE
         [this]() {
             changeArmControlType(ARM_MESSAGE_TYPE_VARIABLE_IK);
-        },                        // SDL_CONTROLLER_BUTTON_START
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+        },                                // SDL_CONTROLLER_BUTTON_START
+        []() { unusedButton(); },         // SDL_CONTROLLER_BUTTON_LEFTSTICK
+        []() { unusedButton(); },         // SDL_CONTROLLER_BUTTON_RIGHTSTICK
+        [this]() { incrementJoint(-1); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        [this]() { incrementJoint(1); },  // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
+        []() { unusedButton(); },         // SDL_CONTROLLER_BUTTON_DPAD_UP
+        []() { unusedButton(); },         // SDL_CONTROLLER_BUTTON_DPAD_DOWN
+        []() { unusedButton(); },         // SDL_CONTROLLER_BUTTON_DPAD_LEFT
+        []() { unusedButton(); },         // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
     arm_fixed_ik_control = new buttonFunctions();
-    arm_fixed_ik_control->LEFT_JOYSTICK = &unusedStick;
-    arm_fixed_ik_control->RIGHT_JOYSTICK = &unusedStick;
-    arm_fixed_ik_control->LEFT_TRIGGER = &unusedTrigger;
-    arm_fixed_ik_control->RIGHT_TRIGGER = &unusedTrigger;
+    arm_fixed_ik_control->LEFT_JOYSTICK = [this](int xValue, int yValue) {
+        stickChangAxise(xValue, yValue, &wristX, &wristY, 0.0001, 0.0001, 1, 1,
+                        "wristX", "wristY");
+    };
+    arm_fixed_ik_control->RIGHT_JOYSTICK = [this](int xValue, int yValue) {
+        stickChangAxise(xValue, yValue, &wristZ, nullptr, 0.0001, 0, 1, 0,
+                        "wristZ", "");
+    };
+    arm_fixed_ik_control->LEFT_TRIGGER = [this](int xValue) {
+        triggerToIncrement(xValue, &lastleftTriggerValue, &clawOpen, -5, 0, 100,
+                           "clawOpen");
+    };
+    arm_fixed_ik_control->RIGHT_TRIGGER = [this](int xValue) {
+        triggerToIncrement(xValue, &lastrightTriggerValue, &clawOpen, 5, 0, 100,
+                           "clawOpen");
+    };
     arm_fixed_ik_control->buttonArray = {
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
@@ -132,10 +154,22 @@ Base::Base() {
     };
 
     arm_variable_ik_control = new buttonFunctions();
-    arm_variable_ik_control->LEFT_JOYSTICK = &unusedStick;
-    arm_variable_ik_control->RIGHT_JOYSTICK = &unusedStick;
-    arm_variable_ik_control->LEFT_TRIGGER = &unusedTrigger;
-    arm_variable_ik_control->RIGHT_TRIGGER = &unusedTrigger;
+    arm_variable_ik_control->LEFT_JOYSTICK = [this](int xValue, int yValue) {
+        stickChangAxise(xValue, yValue, &wristX, &wristY, 0.0001, 0.0001, 1, 1,
+                        "wristX", "wristY");
+    };
+    arm_variable_ik_control->RIGHT_JOYSTICK = [this](int xValue, int yValue) {
+        stickChangAxise(xValue, yValue, &wristZ, nullptr, 0.0001, 0, 1, 0,
+                        "wristZ", "");
+    };
+    arm_variable_ik_control->LEFT_TRIGGER = [this](int xValue) {
+        triggerToIncrement(xValue, &lastleftTriggerValue, &clawOpen, -5, 0, 100,
+                           "clawOpen");
+    };
+    arm_variable_ik_control->RIGHT_TRIGGER = [this](int xValue) {
+        triggerToIncrement(xValue, &lastrightTriggerValue, &clawOpen, 5, 0, 100,
+                           "clawOpen");
+    };
     arm_variable_ik_control->buttonArray = {
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
@@ -154,10 +188,18 @@ Base::Base() {
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+        [this]() {
+            incrementInt(&clawPitch, 5, -90, 90, "clawPitch");
+        }, // SDL_CONTROLLER_BUTTON_DPAD_UP
+        [this]() {
+            incrementInt(&clawPitch, -5, -90, 90, "clawPitch");
+        }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
+        [this]() {
+            incrementInt(&clawRoll, -5, -180, 180, "clawRoll");
+        }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
+        [this]() {
+            incrementInt(&clawRoll, 5, -180, 180, "clawRoll");
+        }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
     controller = new ControllerHolder(*drive_control, *arm_manulal_control);
@@ -167,26 +209,22 @@ Base::Base() {
 
 Base::~Base() { }
 
-// General getter for float member variables
-int Base::getFloat(const float& member) { return member; }
-
-// General setter for float member variables
-void Base::setFloat(float& member, int n, int min, int max, const char* name) {
-    mtx.lock();
-    member = n;
-    valLimmit(&member, min, max);
-    Logging::logI(file, "Setting %s to %f", name, member);
-    mtx.unlock();
+void Base::setInt(int* var, int n, int min, int max, const char* name) {
+    return setVal<int>(var, n, min, max, name);
 }
 
-// General increment for flaot member variables
-void Base::incrementFloat(float& member, int n, int min, int max,
+void Base::setFloat(float* var, float n, float min, float max,
+                    const char* name) {
+    return setVal<float>(var, n, min, max, name);
+}
+
+void Base::incrementInt(int* var, int n, int min, int max, const char* name) {
+    return incrementVal<int>(var, n, min, max, name);
+}
+
+void Base::incrementFloat(float* var, float n, float min, float max,
                           const char* name) {
-    mtx.lock();
-    member += n;
-    valLimmit(&member, min, max);
-    Logging::logI(file, "Incrementing %s to %f", name, member);
-    mtx.unlock();
+    return incrementVal<float>(var, n, min, max, name);
 }
 
 void Base::changeArmControlType(ArmMessageType type) {
@@ -209,11 +247,38 @@ void Base::changeArmControlType(ArmMessageType type) {
 
 void Base::incrementJoint(int change) {
     mtx.lock();
-    MotorID next = static_cast<MotorID>((joint + change) % MOTOR_ID_END);
-    Logging::logI(file, "Changing to joint: %d", next);
-    joint = next;
+    joint
+        = static_cast<MotorID>((joint + change + MOTOR_ID_END) % MOTOR_ID_END);
+    Logging::logI(file, "Changing to joint: %d", joint);
     manualAngleChange = 0; // Reset manual angle change when changing joint
     mtx.unlock();
+}
+
+void Base::triggerToIncrement(int triggerValue, int* compare, int* var, int n,
+                              int min, int max, const char* name) {
+    if (triggerValue > 0 && *compare < 0) {
+        incrementInt(var, n, min, max, name);
+    }
+    *compare
+        = triggerValue; // Update the compare value to the current trigger value
+}
+
+void Base::stickChangAxise(int axisX, int axisY, float* varX, float* varY,
+                           float maxChangeX, float maxChangeY, float rangeX,
+                           float rangeY, const char* nameX, const char* nameY) {
+    float changeX = axisX * (maxChangeX / 255.0);
+    float changeY = axisY * (maxChangeY / -255.0);
+
+    if (varX != nullptr) {
+        Logging::logI(file, "change %f = %d * (%f / -255.0)", changeX, axisX,
+                      maxChangeX);
+        incrementFloat(varX, changeX, -rangeX, rangeX, nameX);
+    }
+    if (varY != nullptr) {
+        Logging::logI(file, "change %f = %d * (%f / -255.0)", changeY, axisY,
+                      maxChangeY);
+        incrementFloat(varY, changeY, -rangeY, rangeY, nameY);
+    }
 }
 
 // Converts int (0-255) to radian (0-2pi)
@@ -236,9 +301,9 @@ void Base::start() {
 
     while (!exitLoop) {
         // Update message for Drive
-        wheelMsg.angleVelocity = getFloat(chassisAngularVelocity);
-        wheelMsg.theta = getFloat(chassisAngle);
-        wheelMsg.velocity = getFloat(chassisAngle);
+        wheelMsg.angleVelocity = chassisAngularVelocity;
+        wheelMsg.theta = chassisAngle;
+        wheelMsg.velocity = chassisAngle;
 
         Message driveMessage(MESSAGE_PRIORITY_LOW, wheelMsg);
 
@@ -254,7 +319,7 @@ void Base::start() {
             // Manual Control
             ArmManualMessage manualMsg;
             manualMsg.motorId = joint;
-            manualMsg.angleChange = getFloat(manualAngleChange);
+            manualMsg.angleChange = manualAngleChange;
             armMsg.type = ARM_MESSAGE_TYPE_MANUAL;
             armMsg.manual_message = manualMsg;
             manualAngleChange = 0; // Reset manual angle change after sending
@@ -264,10 +329,10 @@ void Base::start() {
         case ARM_MESSAGE_TYPE_FIXED_IK:
             // Fixed Inverse Kinematics Control
             ArmFixedIKMessage fixedIKMsg;
-            fixedIKMsg.wristX = getFloat(wristX);
-            fixedIKMsg.wristY = getFloat(wristY);
-            fixedIKMsg.wristZ = getFloat(wristZ);
-            fixedIKMsg.clawOpen = getFloat(clawOpen);
+            fixedIKMsg.wristX = wristX;
+            fixedIKMsg.wristY = wristY;
+            fixedIKMsg.wristZ = wristZ;
+            fixedIKMsg.clawOpen = clawOpen;
             armMsg.type = ARM_MESSAGE_TYPE_FIXED_IK;
             armMsg.fixed_ik_message = fixedIKMsg;
 
@@ -276,12 +341,12 @@ void Base::start() {
         case ARM_MESSAGE_TYPE_VARIABLE_IK:
             // Variable Inverse Kinematics Control
             ArmVariableIKMessage variableIKMsg;
-            variableIKMsg.wristX = getFloat(wristX);
-            variableIKMsg.wristY = getFloat(wristY);
-            variableIKMsg.wristZ = getFloat(wristZ);
-            variableIKMsg.clawPitch = getFloat(clawPitch);
-            variableIKMsg.clawRoll = getFloat(clawRoll);
-            variableIKMsg.clawOpen = getFloat(clawOpen);
+            variableIKMsg.wristX = wristX;
+            variableIKMsg.wristY = wristY;
+            variableIKMsg.wristZ = wristZ;
+            variableIKMsg.clawPitch = clawPitch;
+            variableIKMsg.clawRoll = clawRoll;
+            variableIKMsg.clawOpen = clawOpen;
             armMsg.type = ARM_MESSAGE_TYPE_VARIABLE_IK;
             armMsg.variable_ik_message = variableIKMsg;
 
@@ -293,18 +358,47 @@ void Base::start() {
         sendQueue.push(Message(MESSAGE_PRIORITY_LOW, armMsg));
 
 #endif
-        usleep(1 * 1000000);
+        usleep(3 * 1000000);
     }
     controllerThread.join();
     websocetServerThread.join();
 }
 
-static void valLimmit(float* value, int min, int max) {
-    if (*value < min) {
-        *value = min;
-    } else if (*value > max) {
-        *value = max;
+// General setter for float member variables
+template <typename T>
+void Base::setVal(T* val, T n, T min, T max, const char* name) {
+    mtx.lock();
+    *val = n;
+    if (*val < min) {
+        *val = min;
+    } else if (*val > max) {
+        *val = max;
     }
+    if (std::is_same<T, int>::value) {
+        Logging::logI(file, "Setting %s to %d", name, *val);
+    } else if (std::is_same<T, float>::value) {
+        Logging::logI(file, "Setting %s to %f", name, *val);
+    }
+    Logging::logI(file, "Setting %s to %f", name, *val);
+    mtx.unlock();
+}
+
+// General increment for flaot val variables
+template <typename T>
+void Base::incrementVal(T* val, T n, T min, T max, const char* name) {
+    mtx.lock();
+    *val += n;
+    if (*val < min) {
+        *val = min;
+    } else if (*val > max) {
+        *val = max;
+    }
+    if (std::is_same<T, int>::value) {
+        Logging::logI(file, "Setting %s to %d", name, *val);
+    } else if (std::is_same<T, float>::value) {
+        Logging::logI(file, "Setting %s to %f", name, *val);
+    }
+    mtx.unlock();
 }
 
 static void unusedButton() { Logging::logV(file, "Button Unused\n"); }

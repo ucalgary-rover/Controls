@@ -27,7 +27,7 @@ private:
     float m_rawY = 0;
 
     // a function for sending this stick's data
-    void (*m_stickFunc)(int xValue, int yValue);
+    std::function<void(int, int)> m_stickFunc;
 
     // Holds settings for the deadzone sizes
     //  any number less than ~30000
@@ -53,7 +53,7 @@ public:
     GameControllerAxis getYAxis() { return m_yAxis; };
 
     // setters
-    void setStickFunc(void (*newStickFunc)(int xValue, int yValue)) {
+    void setStickFunc(std::function<void(int, int)> newStickFunc) {
         m_stickFunc = newStickFunc;
     };
 
@@ -88,7 +88,7 @@ private:
     float m_raw = 0;
 
     // a function for sending this trigger's data
-    void (*m_triggerFunc)(int xValue);
+    std::function<void(int)> m_triggerFunc;
 
 public:
     /**
@@ -106,7 +106,7 @@ public:
     GameControllerAxis getAxis() { return m_axis; };
 
     // setters
-    void setTriggerFunc(void (*newTriggerFunc)(int xValue)) {
+    void setTriggerFunc(std::function<void(int)> newTriggerFunc) {
         m_triggerFunc = newTriggerFunc;
     };
 
