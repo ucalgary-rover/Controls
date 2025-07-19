@@ -74,12 +74,36 @@ public:
     void incrementJoint(int change);
     void triggerToIncrement(int triggerValue, int* compare, int* var, int n,
                             int min, int max, const char* name);
-    void stickChangAxise(int axisX, int axisY, float* varX, float* varY,
+
+    void stickChangeAxis(int axisX, int axisY, float* varX, float* varY,
                          float maxChangeX, float maxChangeY, float rangeX,
                          float rangeY, const char* nameX, const char* nameY);
 
-    // Converter functions
-    float intToRadian(int n);
+    /**
+     * Calculates the magnitude of the stick's position from the center
+     *
+     * @param axisX The distance along the x axis
+     * @param axisY The distance along the y axis
+     * @param max The maximum limit for the output
+     * @return The magnitude of the stick's position as a percentage of 255 (the
+     * full radius)
+     */
+    int Base::stickMagnitdude(int axisX, int axisY, int speedMax)
+
+        /**
+         * Calculates the angle of the stick's position counterclockwise from
+         * the positive y axis in DEGREES (which is ironically reported with a
+         * negative value by SDL)
+         *
+         * @param axisX The distance along the x axis
+         * @param axisY The distance along the y axis
+         */
+        int Base::stickAngle(int axisX, int axisY)
+
+        // Converter functions
+        float degreeToRadian(int n);
+
+    int Base::radianToDegree(float n);
 
     // Start the loops to have Base working
     void start();

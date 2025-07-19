@@ -10,6 +10,9 @@
 // is maximum wheel speed for a radial turn
 static const float RADIAL_SPEED_MAX = 1;
 
+// is maximum wheel speed for a spot turn
+static const float SPOT_SPEED_MAX = 1;
+
 // is the maximum speed for strafing
 static const float STRAFE_SPEED_MAX = 1;
 
@@ -117,7 +120,7 @@ float DriveHandler::spotTurnSpeed(int stickAngle) {
 
     // calculates speed based on the adjustment with the sign determining the
     // direction
-    float speed = speedAdjust * RADIAL_SPEED_MAX;
+    float speed = speedAdjust * SPOT_SPEED_MAX;
 
     // negative value results in a right turn, otherwise left turn
     return speed;
@@ -285,7 +288,7 @@ void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
         // get the handler
         MotorHandlerReturn motorStuct;
-        m_drive->getDriveStepperHandle(&motorStuct, dc);
+        m_drive->getDriveDCHandle(&motorStuct, dc);
 
         PhidgetDCMotor_setTargetVelocity(*motorStuct.motorHandle.dcMotor,
                                          speed);
@@ -398,7 +401,7 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
         // get the handler
         MotorHandlerReturn motorStuct;
-        m_drive->getDriveStepperHandle(&motorStuct, dc);
+        m_drive->getDriveDCHandle(&motorStuct, dc);
 
         PhidgetDCMotor_setTargetVelocity(*motorStuct.motorHandle.dcMotor,
                                          speed);
@@ -409,7 +412,7 @@ void DriveHandler::stopWheels() {
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
         // get the handler
         MotorHandlerReturn motorStuct;
-        m_drive->getDriveStepperHandle(&motorStuct, dc);
+        m_drive->getDriveDCHandle(&motorStuct, dc);
 
         PhidgetDCMotor_setTargetVelocity(*motorStuct.motorHandle.dcMotor, 0);
     }
