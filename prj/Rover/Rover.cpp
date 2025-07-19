@@ -41,26 +41,33 @@ void Rover::start() {
              WEBSOCKET_ADDR[1], WEBSOCKET_ADDR[2], WEBSOCKET_ADDR[3]);
     WebSocketClient client(address, std::to_string(WEBSOCKET_PORT));
 
+    // Instantiate the systems for the rover
     // Arm arm(1, MOTOR_TYPE_STEPPER_MOTOR);
-    // Drive drive(1,1);
+    Drive drive(ROVER_WIDTH, ROVER_LENGTH);
 
+    // Create queues for rover, arm, and drive
     MessageQueue roverQueue;
     MessageQueue armQueue;
     MessageQueue driveQueue;
 
-    // instantiateThreads();
-    // instantiateHandlers();
+    // instantiate handlers
+    DriveHandler driveHandler(&drive, &driveQueue);
+
+    // Start the client thread
     thread websocetClientThread(
         [&]() { startClient(&roverQueue, &armQueue, &driveQueue); });
+
+    // start thread for drive handler
+    thread driveHandlerThread([&]() { driveHandler.start(); });
 
     client.connect();
     while (true) {
         Message reply = client.receive();
         reply.printMessage(); // Print the received message
         roverQueue.push(reply);
-        Logging::logV(file, "Message pushed to roverQueue");
     }
 
+    driveHandlerThread.join();
     websocetClientThread.join();
 }
 
@@ -158,12 +165,14 @@ void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
 
         // Push message to appropriate queue
         switch (message.getFormat()) {
-        case MessageFormat::MESSAGE_FORMAT_ARM:
+        case MESSAGE_FORMAT_ARM:
             armQueue->push(message);
+            message.printMessage(); // Print the received message
             break;
 
-        case MessageFormat::MESSAGE_FORMAT_WHEEL:
+        case MESSAGE_FORMAT_WHEEL:
             driveQueue->push(message);
+            message.printMessage(); // Print the received message
             break;
 
         default:

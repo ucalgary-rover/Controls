@@ -60,6 +60,16 @@ public:
     void close();
 
 private:
+    /** Deserializes a string to a Message object
+     *
+     * @param
+     *  data: const std::string& - The serialized message string
+     *
+     * @return
+     *  Message - The deserialized Message object
+     */
+    Message deserialize(const std::string& data);
+
     std::string host;
     std::string port;
     boost::asio::io_context ioc; // Boost ASIO IO context

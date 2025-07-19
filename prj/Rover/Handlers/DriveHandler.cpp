@@ -2,10 +2,23 @@
 // Written by Johan Esperida
 
 #include "DriveHandler.h"
-#include "Rover/Systems/pub_systems.h"
-#include "Rover/pub_rover.h"
-#include "phidget22.h"
-#include <cmath>
+
+// Various hardcoded values subject to change for fine tuning some movement
+// functions
+
+// Might make the following values constants in mission control.h
+// is maximum wheel speed for a radial turn
+static const float RADIAL_SPEED_MAX = 1;
+
+// is the maximum speed for strafing
+static const float STRAFE_SPEED_MAX = 1;
+
+// maximum turning angle for radial turning
+static const int RADIAL_ANGLE_MAX = 45;
+
+// the angle at which the spot turn reaches max
+// speed 90 is the smallest possible angle
+static const int MAX_SPEED_ANGLE = 90;
 
 /*
 Notes:
@@ -51,11 +64,8 @@ const float PI = 3.14;
 // two decimal places
 #define TO_DEGREES(value) round(value * 180 / PI * 100) / 100
 
-// Default constructor
-DriveHandler::DriveHandler() { }
-
 // Constructor
-DriveHandler::DriveHandler(Drive& drive, MessageQueue& driveQueue) {
+DriveHandler::DriveHandler(Drive* drive, MessageQueue* driveQueue) {
 
     // Reference to the Arm object in Rover.cpp
     m_drive = drive;
@@ -64,8 +74,6 @@ DriveHandler::DriveHandler(Drive& drive, MessageQueue& driveQueue) {
     // Rover.cpp (NOT A COPY!!!) This allows us to use the same driveQueue in
     // this file without shenanigans
     m_driveQueue = driveQueue;
-
-    instantiateThreads();
 }
 
 void DriveHandler::turnWheel(PhidgetStepperHandle stepper, int angle) {
@@ -102,14 +110,14 @@ float DriveHandler::spotTurnSpeed(int stickAngle) {
     }
 
     // adjusts value up until a maximum (1 = 100%)
-    speedAdjust = reportedAngle / m_maxSpeedAngle;
+    speedAdjust = reportedAngle / MAX_SPEED_ANGLE;
 
     // prevents value from going above maximum by rounding down to 1
     speedAdjust = (std::abs(speedAdjust) > 1) ? (int)speedAdjust : speedAdjust;
 
     // calculates speed based on the adjustment with the sign determining the
     // direction
-    float speed = speedAdjust * m_radialSpeedMax;
+    float speed = speedAdjust * RADIAL_SPEED_MAX;
 
     // negative value results in a right turn, otherwise left turn
     return speed;
@@ -136,13 +144,13 @@ void DriveHandler::spotTurn(int stickAngle) {
 
     // Angle of wheel direction based on length and width
     float wheelAngle
-        = TO_DEGREES(atan(m_drive.getWidth() / m_drive.getLength()));
+        = TO_DEGREES(atan(m_drive->getWidth() / m_drive->getLength()));
 
     for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
 
         // get the handler
         MotorHandlerReturn motorStuct;
-        m_drive.getDriveStepperHandle(&motorStuct, stepper);
+        m_drive->getDriveStepperHandle(&motorStuct, stepper);
 
         // checking for angle to turn each wheel so they rotate properly
 
@@ -158,7 +166,7 @@ void DriveHandler::spotTurn(int stickAngle) {
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
         // get the handler
         MotorHandlerReturn motorStuct;
-        m_drive.getDriveDCHandle(&motorStuct, dc);
+        m_drive->getDriveDCHandle(&motorStuct, dc);
 
         // checking for direction to spin each wheel
 
@@ -206,7 +214,7 @@ int DriveHandler::strafeAngleAdjust(int stickTheta) {
         for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
             // get the handler
             MotorHandlerReturn motorStuct;
-            m_drive.getDriveStepperHandle(&motorStuct, stepper);
+            m_drive->getDriveStepperHandle(&motorStuct, stepper);
 
             PhidgetStepper_getPosition(*motorStuct.motorHandle.stepperMotor,
                                        &currentPos);
@@ -262,13 +270,13 @@ void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
     }
 
     // deriving speed from magnitude (percentage of radius of joystick circle)
-    float speed = stickMagnitude * direction * m_strafeSpeedMax;
+    float speed = stickMagnitude * direction * STRAFE_SPEED_MAX;
 
     // Turn
     for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
         // get the handler
         MotorHandlerReturn motorStuct;
-        m_drive.getDriveStepperHandle(&motorStuct, stepper);
+        m_drive->getDriveStepperHandle(&motorStuct, stepper);
 
         turnWheel(*motorStuct.motorHandle.stepperMotor, wheelAngle);
     }
@@ -277,7 +285,7 @@ void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
         // get the handler
         MotorHandlerReturn motorStuct;
-        m_drive.getDriveStepperHandle(&motorStuct, dc);
+        m_drive->getDriveStepperHandle(&motorStuct, dc);
 
         PhidgetDCMotor_setTargetVelocity(*motorStuct.motorHandle.dcMotor,
                                          speed);
@@ -300,16 +308,16 @@ float DriveHandler::radialTurnHeadingAngle(int stickAngle) {
 
     // corresponding to a left turn
     if (stickAngle < 90) {
-        reportedAngle = (stickAngle / 90) * m_radialAngleMax;
+        reportedAngle = (stickAngle / 90) * RADIAL_ANGLE_MAX;
 
         // corresponding to a right turn (note the negative reported angle
         // value)
     } else if (stickAngle > 90) {
-        reportedAngle = ((stickAngle - 180) / 90) * m_radialAngleMax;
+        reportedAngle = ((stickAngle - 180) / 90) * RADIAL_ANGLE_MAX;
 
         // max positions
     } else if (stickAngle = 90) {
-        reportedAngle = m_radialAngleMax * m_lastRadialOutput;
+        reportedAngle = RADIAL_ANGLE_MAX * m_lastRadialOutput;
 
         // neutral positions
     } else if (stickAngle == 0) {
@@ -322,6 +330,8 @@ float DriveHandler::radialTurnHeadingAngle(int stickAngle) {
 
     // must convert to radians for trig functions
     float headingAngle = TO_RADIANS(std::abs(reportedAngle));
+
+    return headingAngle;
 }
 
 float DriveHandler::radialTurnWheelAngles(int headingAngle, bool innerFlag) {
@@ -330,9 +340,9 @@ float DriveHandler::radialTurnWheelAngles(int headingAngle, bool innerFlag) {
 
     // Finding the angles of the leading wheels
     float wheelAngle
-        = atan(2 * m_drive.getLength() * sin(headingAngle)
-               / (2 * m_drive.getLength() * cos(headingAngle)
-                  - wheelInt * m_drive.getWidth() * sin(headingAngle)));
+        = atan(2 * m_drive->getLength() * sin(headingAngle)
+               / (2 * m_drive->getLength() * cos(headingAngle)
+                  - wheelInt * m_drive->getWidth() * sin(headingAngle)));
 
     return TO_DEGREES(wheelAngle);
 }
@@ -372,7 +382,7 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
     for (int i = 0; i < 2; ++i) {
         // get the handler
         MotorHandlerReturn motorStuct;
-        m_drive.getDriveStepperHandle(&motorStuct, i);
+        m_drive->getDriveStepperHandle(&motorStuct, i);
 
         turnWheel(*motorStuct.motorHandle.stepperMotor, wheelAngles[i]);
     }
@@ -383,12 +393,12 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
     int direction = (stickTheta <= 90 || stickTheta >= 270) ? 1 : -1;
 
     // deriving speed from magnitude (percentage of radius of joystick circle)
-    float speed = stickMagnitude * direction * m_radialSpeedMax;
+    float speed = stickMagnitude * direction * RADIAL_SPEED_MAX;
 
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
         // get the handler
         MotorHandlerReturn motorStuct;
-        m_drive.getDriveStepperHandle(&motorStuct, dc);
+        m_drive->getDriveStepperHandle(&motorStuct, dc);
 
         PhidgetDCMotor_setTargetVelocity(*motorStuct.motorHandle.dcMotor,
                                          speed);
@@ -399,23 +409,23 @@ void DriveHandler::stopWheels() {
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
         // get the handler
         MotorHandlerReturn motorStuct;
-        m_drive.getDriveStepperHandle(&motorStuct, dc);
+        m_drive->getDriveStepperHandle(&motorStuct, dc);
 
         PhidgetDCMotor_setTargetVelocity(*motorStuct.motorHandle.dcMotor, 0);
     }
 }
 
-void DriveHandler::eventLoop() {
+void DriveHandler::start() {
 
-    Message message;
+    WheelMessage message;
 
     while (true) {
-        // Get message from armQueue
-        message = m_driveQueue->pop();
+        // Get message from driveQueue
+        message = std::get<WheelMessage>(m_driveQueue->pop().get_payload());
 
         // flags for if the value is non-zero
         bool angleVelocityFlag
-            = message.angle_velocity != 0;         // right joystick angle
+            = message.angleVelocity != 0;          // right joystick angle
         bool velocityFlag = message.velocity != 0; // left joystick magnitude
 
         // for if the movement is forward or backward
@@ -428,11 +438,11 @@ void DriveHandler::eventLoop() {
         // Radial turn (angular velocity and velocity forwards or backwards)
         if (angleVelocityFlag && thetaFlag) {
             m_spotTurnFlag = false;
-            radialTurn(message.angle_velocity, message.velocity, message.theta);
+            radialTurn(message.angleVelocity, message.velocity, message.theta);
 
             // Spot turning (angular velocity)
         } else if (angleVelocityFlag) {
-            spotTurn(message.angle_velocity);
+            spotTurn(message.angleVelocity);
 
             // Strafing (angle and velocity)
         } else if (velocityFlag) {

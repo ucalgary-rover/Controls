@@ -1,3 +1,5 @@
+#include "phidget22.h"
+#include "pub_general.h"
 #include <iostream>
 
 #pragma once

@@ -1,17 +1,21 @@
-#ifndef DRIVE_H
-#define DRIVE_H
+#ifndef DRIVE_HANDLER_H
+#define DRIVE_HANDLER_H
 
 #pragma once
 
-#include "./Drive.h" // This needs to be fixed
-#include "./Rover.h" // This also needs to be fixed
 #include "HandlerInterface.h"
+#include "MessageQueue.h"
+#include "Rover/Systems/Drive.h"
+#include "Rover/Systems/pub_systems.h"
+#include "Rover/pub_rover.h"
+#include "phidget22.h"
+#include <cmath>
 #include <mutex>
 
 class DriveHandler : public HandlerInterface {
 public:
-    DriveHandler(Drive& drive, MessageQueue& driveQueue);
-    ~DriveHandler();
+    DriveHandler(Drive* drive, MessageQueue* driveQueue);
+    ~DriveHandler() { };
 
     /**
      * @brief Changes the target status of a wheel
@@ -97,7 +101,7 @@ public:
      * @brief Pops messages out of the queue and calls other functions
      * @return None
      */
-    void eventLoop();
+    void start();
 
     /**
      * @brief Turns the stepper motor of a wheel to a specified angle
@@ -108,10 +112,10 @@ public:
     void turnWheel(PhidgetStepperHandle stepper, int angle);
 
 private:
-    Drive& m_drive;
+    Drive* m_drive;
 
     // Drive Queue
-    MessageQueue& m_driveQueue; // References the DriveQueue in Rover.cpp
+    MessageQueue* m_driveQueue; // References the DriveQueue in Rover.cpp
 
     // Variables corresponding to conditions during operation
 
@@ -123,21 +127,6 @@ private:
 
     // holds the sign of the direction of the last radial output
     int m_lastRadialOutput = 1;
-
-    //-------------------------------------------------------------------------------------
-    // Various hardcoded values subject to change for fine tuning some movement
-    // functions
-
-    float m_radialSpeedMax = 1; // is maximum wheel speed for a radial turn
-
-    float m_strafeSpeedMax = 1; // is the maximum speed for strafing
-
-    float m_radialSpeedMax = 1; // maximum speed for radial
-
-    int m_radialAngleMax = 45; // maximum turning angle for radial turning
-
-    int m_maxSpeedAngle = 90; // the angle at which the spot turn reaches max
-                              // speed 90 is the smallest possible angle
 };
 
 #endif

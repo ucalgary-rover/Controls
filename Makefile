@@ -8,6 +8,8 @@ BASE_SRC_FILES := $(filter-out prj/Websocket/Server.cpp, $(BASE_SRC_FILES))
 
 ROVER_SRC_FILES := $(wildcard prj/*.cpp)
 ROVER_SRC_FILES += $(wildcard prj/Rover/*.cpp)
+ROVER_SRC_FILES += $(wildcard prj/Rover/Systems/Drive.cpp)
+ROVER_SRC_FILES += $(wildcard prj/Rover/Handlers/DriveHandler.cpp)
 ROVER_SRC_FILES += $(wildcard prj/Websocket/*.cpp)
 
 ROVER_SRC_FILES := $(filter-out prj/Websocket/Client.cpp, $(ROVER_SRC_FILES))

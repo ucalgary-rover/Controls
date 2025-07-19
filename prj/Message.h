@@ -66,15 +66,44 @@ public:
      */
     std::string serialize() const;
 
-    /** Deserializes a string to a Message object
-     *
-     * @param
-     *  data: const std::string& - The serialized message string
+    /** Returns the payload of the message
      *
      * @return
-     *  Message - The deserialized Message object
+     *  MessagePayload - The payload of the message
      */
-    static Message deserialize(const std::string& data);
+    MessagePayload get_payload() { return m_payload; }
+
+    /** Sets isHighPriority of the message
+     *
+     * @param
+     *  isHighPriority: bool - The priority of the message
+     *
+     * @return
+     *  none
+     */
+    void set_is_high_priority(bool isHighPriority) {
+        m_isHighPriority = isHighPriority;
+    }
+
+    /** Sets the format of the message
+     *
+     * @param
+     *  format: MessageFormat - The format of the message
+     *
+     * @return
+     *  none
+     */
+    void set_format(MessageFormat format) { m_format = format; }
+
+    /** Sets the payload of the message
+     *
+     * @param
+     *  payload: MessagePayload - The payload of the message
+     *
+     * @return
+     *  none
+     */
+    void set_payload(MessagePayload payload) { m_payload = payload; }
 
 private:
     bool m_isHighPriority;    // Priority of message

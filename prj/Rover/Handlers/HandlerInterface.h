@@ -6,9 +6,9 @@
 
 class HandlerInterface {
 public:
-    virtual void instantiateThreads() = 0;
+    // virtual void instantiateThreads() = 0;
     virtual void start() = 0;
-    virtual void stop() = 0; // May not need this
+    // virtual void stop() = 0; // May not need this
 };
 
 #endif
