@@ -86,22 +86,22 @@ public:
      * @param axisY The distance along the y axis
      * @param max The maximum limit for the output
      * @return The magnitude of the stick's position as a percentage of 255 (the
-     * full radius)
+     * full radius) (0 - 100%)
      */
-    int Base::stickMagnitdude(int axisX, int axisY, int speedMax)
+    int Base::stickMagnitude(int axisX, int axisY);
 
-        /**
-         * Calculates the angle of the stick's position counterclockwise from
-         * the positive y axis in DEGREES (which is ironically reported with a
-         * negative value by SDL)
-         *
-         * @param axisX The distance along the x axis
-         * @param axisY The distance along the y axis
-         */
-        int Base::stickAngle(int axisX, int axisY)
+    /**
+     * Calculates the angle of the stick's position counterclockwise from
+     * the positive y axis in DEGREES (which is ironically reported with a
+     * negative value by SDL)
+     *
+     * @param axisX The distance along the x axis
+     * @param axisY The distance along the y axis
+     */
+    int Base::stickAngle(int axisX, int axisY);
 
-        // Converter functions
-        float degreeToRadian(int n);
+    // Converter functions
+    float degreeToRadian(int n);
 
     int Base::radianToDegree(float n);
 
@@ -162,7 +162,7 @@ private:
     ControllerHolder* controller;
 
     buttonFunctions* drive_control;
-    buttonFunctions* arm_manulal_control;
+    buttonFunctions* arm_manual_control;
     buttonFunctions* arm_fixed_ik_control;
     buttonFunctions* arm_variable_ik_control;
 };

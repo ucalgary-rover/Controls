@@ -273,7 +273,7 @@ void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
     }
 
     // deriving speed from magnitude (percentage of radius of joystick circle)
-    float speed = stickMagnitude * direction * STRAFE_SPEED_MAX;
+    float speed = stickMagnitude / 100 * direction * STRAFE_SPEED_MAX;
 
     // Turn
     for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
@@ -396,7 +396,7 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
     int direction = (stickTheta <= 90 || stickTheta >= 270) ? 1 : -1;
 
     // deriving speed from magnitude (percentage of radius of joystick circle)
-    float speed = stickMagnitude * direction * RADIAL_SPEED_MAX;
+    float speed = stickMagnitude / 100 * direction * RADIAL_SPEED_MAX;
 
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
         // get the handler

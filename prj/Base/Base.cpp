@@ -25,7 +25,7 @@ Base::Base() {
     chassisSpeed = 0;           // speed for strafing
     chassisAngularVelocity = 0; // speed of spot turn or sharpness of radial
                                 // turn
-    chassisMaxSpeed = 0; // maximum speed of wheels
+    chassisMaxSpeed = 100;      // maximum speed of wheels
 
     // Variables for state of rover arm
     armControlType = ARM_MESSAGE_TYPE_MANUAL;
@@ -47,42 +47,56 @@ Base::Base() {
     lastleftTriggerValue = 0;
 
     drive_control = new buttonFunctions();
-    drive_control->LEFT_JOYSTICK = [](int X, int Y) { unusedStick(X, Y); };
-    drive_control->RIGHT_JOYSTICK = [](int X, int Y) { unusedStick(X, Y); };
+    drive_control->LEFT_JOYSTICK = [](int X, int Y) {
+        // get the speed
+        setInt(&chassisSpeed, stickMagnitude(X, Y), 0, chassisMaxSpeed,
+               "chassisSpeed");
+
+        // get the angle
+        setInt(&chassisAngle, stickAngle(X, Y), 0, 360, "chassisAngle");
+    };
+    drive_control->RIGHT_JOYSTICK = [](int X, int Y) {
+        // get the angular velocity
+        setInt(&chassisAngularVelocity, stickAngle(X, Y), 0, 360,
+               "chassisAngularVelocity");
+    };
     drive_control->LEFT_TRIGGER = [](int xValue) { unusedTrigger(xValue); };
     drive_control->RIGHT_TRIGGER = [](int xValue) { unusedTrigger(xValue); };
     drive_control->buttonArray = {
-        [this]() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
-        [this]() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
-        [this]() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_X
-        [this]() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_Y
-        []() { unusedButton(); },     // SDL_CONTROLLER_BUTTON_BACK
-        []() { unusedButton(); },     // SDL_CONTROLLER_BUTTON_GUIDE
-        [this]() { quit(); },         // SDL_CONTROLLER_BUTTON_START
-        []() { unusedButton(); },     // SDL_CONTROLLER_BUTTON_LEFTSTICK
-        []() { unusedButton(); },     // SDL_CONTROLLER_BUTTON_RIGHTSTICK
-        []() { unusedButton(); },     // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
-        []() { unusedButton(); },     // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
-        []() { unusedButton(); },     // SDL_CONTROLLER_BUTTON_DPAD_UP
-        []() { unusedButton(); },     // SDL_CONTROLLER_BUTTON_DPAD_DOWN
-        []() { unusedButton(); },     // SDL_CONTROLLER_BUTTON_DPAD_LEFT
-        []() { unusedButton(); },     // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_X
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_Y
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_BACK
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() { quit(); },     // SDL_CONTROLLER_BUTTON_START
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
+        [this]() {
+            incrementInt(&chassisMaxSpeed, -2, 0, 100, "chassisMaxSpeed");
+        }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        [this]() {
+            incrementInt(&chassisMaxSpeed, 2, 0, 100, "chassisMaxSpeed");
+        },                        // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
+        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
-    arm_manulal_control = new buttonFunctions();
-    arm_manulal_control->LEFT_JOYSTICK
+    arm_manual_control = new buttonFunctions();
+    arm_manual_control->LEFT_JOYSTICK = [](int X, int Y) { unusedStick(X, Y); };
+    arm_manual_control->RIGHT_JOYSTICK
         = [](int X, int Y) { unusedStick(X, Y); };
-    arm_manulal_control->RIGHT_JOYSTICK
-        = [](int X, int Y) { unusedStick(X, Y); };
-    arm_manulal_control->LEFT_TRIGGER = [this](int xValue) {
+    arm_manual_control->LEFT_TRIGGER = [this](int xValue) {
         triggerToIncrement(xValue, &lastleftTriggerValue, &manualAngleChange,
                            -5, -20, 20, "manualAngleChange");
     };
-    arm_manulal_control->RIGHT_TRIGGER = [this](int xValue) {
+    arm_manual_control->RIGHT_TRIGGER = [this](int xValue) {
         triggerToIncrement(xValue, &lastrightTriggerValue, &manualAngleChange,
                            5, -20, 20, "manualAngleChange");
     };
-    arm_manulal_control->buttonArray = {
+    arm_manual_control->buttonArray = {
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_X
@@ -196,7 +210,7 @@ Base::Base() {
         }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
-    controller = new ControllerHolder(*drive_control, *arm_manulal_control);
+    controller = new ControllerHolder(*drive_control, *arm_manual_control);
 
     Logging::logI(file, "Initializing Base done");
 }
@@ -227,7 +241,7 @@ void Base::changeArmControlType(ArmMessageType type) {
     armControlType = type;
     switch (armControlType) {
     case ARM_MESSAGE_TYPE_MANUAL:
-        controller->setControllerButtonFuncs(1, *arm_manulal_control);
+        controller->setControllerButtonFuncs(1, *arm_manual_control);
         break;
     case ARM_MESSAGE_TYPE_FIXED_IK:
         controller->setControllerButtonFuncs(1, *arm_fixed_ik_control);
@@ -275,10 +289,10 @@ void Base::stickChangeAxis(int axisX, int axisY, float* varX, float* varY,
     }
 }
 
-// influences speed of radial turning and strafing
-int Base::stickMagnitdude(int axisX, int axisY, int chassisMaxSpeed) {
+int Base::stickMagnitude(int axisX, int axisY) {
     // just use pythagorean to find the magnitude
-    return (int)sqrt(pow(axisX, 2) + pow(axisY, 2));
+    // this value influences speed of radial turning and strafing
+    return (int)(sqrt(pow(axisX, 2) + pow(axisY, 2)) / 255 * 100);
 }
 
 int Base::stickAngle(int axisX, int axisY) {
@@ -315,6 +329,7 @@ int Base::stickAngle(int axisX, int axisY) {
 // Converts degrees (0 - 360) to radian (0-2pi)
 float Base::degreeToRadian(int n) { return n * PI / 180; }
 
+// does the opposite
 int Base::radianToDegree(float n) { return n * 180 / PI; }
 
 void Base::quit() { this->exitLoop = 1; }
