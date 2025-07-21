@@ -88,7 +88,7 @@ public:
      * @return The magnitude of the stick's position as a percentage of 255 (the
      * full radius) (0 - 100%)
      */
-    int Base::stickMagnitude(int axisX, int axisY);
+    int stickMagnitude(int axisX, int axisY);
 
     /**
      * Calculates the angle of the stick's position counterclockwise from
@@ -98,12 +98,12 @@ public:
      * @param axisX The distance along the x axis
      * @param axisY The distance along the y axis
      */
-    int Base::stickAngle(int axisX, int axisY);
+    int stickAngle(int axisX, int axisY);
 
     // Converter functions
     float degreeToRadian(int n);
 
-    int Base::radianToDegree(float n);
+    int radianToDegree(float n);
 
     // Start the loops to have Base working
     void start();

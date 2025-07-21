@@ -47,7 +47,7 @@ Base::Base() {
     lastleftTriggerValue = 0;
 
     drive_control = new buttonFunctions();
-    drive_control->LEFT_JOYSTICK = [](int X, int Y) {
+    drive_control->LEFT_JOYSTICK = [this](int X, int Y) {
         // get the speed
         setInt(&chassisSpeed, stickMagnitude(X, Y), 0, chassisMaxSpeed,
                "chassisSpeed");
@@ -55,7 +55,7 @@ Base::Base() {
         // get the angle
         setInt(&chassisAngle, stickAngle(X, Y), 0, 360, "chassisAngle");
     };
-    drive_control->RIGHT_JOYSTICK = [](int X, int Y) {
+    drive_control->RIGHT_JOYSTICK = [this](int X, int Y) {
         // get the angular velocity
         setInt(&chassisAngularVelocity, stickAngle(X, Y), 0, 360,
                "chassisAngularVelocity");
@@ -72,9 +72,11 @@ Base::Base() {
         [this]() { quit(); },     // SDL_CONTROLLER_BUTTON_START
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
+        //left shoulder increments down
         [this]() {
             incrementInt(&chassisMaxSpeed, -2, 0, 100, "chassisMaxSpeed");
         }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
+        //right shoulder increments up
         [this]() {
             incrementInt(&chassisMaxSpeed, 2, 0, 100, "chassisMaxSpeed");
         },                        // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
@@ -85,9 +87,9 @@ Base::Base() {
     };
 
     arm_manual_control = new buttonFunctions();
-    arm_manual_control->LEFT_JOYSTICK = [](int X, int Y) { unusedStick(X, Y); };
+    arm_manual_control->LEFT_JOYSTICK = [this](int X, int Y) { unusedStick(X, Y); };
     arm_manual_control->RIGHT_JOYSTICK
-        = [](int X, int Y) { unusedStick(X, Y); };
+        = [this](int X, int Y) { unusedStick(X, Y); };
     arm_manual_control->LEFT_TRIGGER = [this](int xValue) {
         triggerToIncrement(xValue, &lastleftTriggerValue, &manualAngleChange,
                            -5, -20, 20, "manualAngleChange");
