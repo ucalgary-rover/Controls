@@ -72,11 +72,11 @@ Base::Base() {
         [this]() { quit(); },     // SDL_CONTROLLER_BUTTON_START
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
-        //left shoulder increments down
+        // left shoulder increments down
         [this]() {
             incrementInt(&chassisMaxSpeed, -2, 0, 100, "chassisMaxSpeed");
         }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
-        //right shoulder increments up
+        // right shoulder increments up
         [this]() {
             incrementInt(&chassisMaxSpeed, 2, 0, 100, "chassisMaxSpeed");
         },                        // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
@@ -87,7 +87,8 @@ Base::Base() {
     };
 
     arm_manual_control = new buttonFunctions();
-    arm_manual_control->LEFT_JOYSTICK = [this](int X, int Y) { unusedStick(X, Y); };
+    arm_manual_control->LEFT_JOYSTICK
+        = [this](int X, int Y) { unusedStick(X, Y); };
     arm_manual_control->RIGHT_JOYSTICK
         = [this](int X, int Y) { unusedStick(X, Y); };
     arm_manual_control->LEFT_TRIGGER = [this](int xValue) {
@@ -429,7 +430,6 @@ void Base::setVal(T* val, T n, T min, T max, const char* name) {
     } else if (std::is_same<T, float>::value) {
         Logging::logI(file, "Setting %s to %f", name, *val);
     }
-    Logging::logI(file, "Setting %s to %f", name, *val);
     mtx.unlock();
 }
 

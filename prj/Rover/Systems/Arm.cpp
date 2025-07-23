@@ -9,6 +9,7 @@ Arm::Arm(int degOfFreedom, MotorType* motorTypes) :
     m_handlesEncoder = new PhidgetEncoderHandle*[degOfFreedom]();
 
     // initialise motors in the arm
+    Logging::logD(file, "Initialising Arm Motors");
     for (int motor = 0; motor < degOfFreedom; motor++) {
         switch (motorTypes[motor]) {
         case MOTOR_TYPE_DC_MOTOR:
@@ -35,6 +36,8 @@ Arm::Arm(int degOfFreedom, MotorType* motorTypes) :
         }
     }
 
+    // initialise encoders
+    Logging::logD(file, "Initialising Arm Encoders");
     for (int encoder = 0; encoder < degOfFreedom; encoder++) {
         PhidgetEncoder_create(m_handlesEncoder[encoder]);
         setAddressProperties<PhidgetEncoderHandle>(
@@ -43,6 +46,7 @@ Arm::Arm(int degOfFreedom, MotorType* motorTypes) :
     }
 
     // initialise claw
+    Logging::logD(file, "Initialising Arm Claw");
     PhidgetRCServo_create(m_handleClaw);
     setAddressProperties<PhidgetRCServoHandle>(
         m_handleClaw, ARM_CLAW_SERIAL_NUMBER, ARM_CLAW_CHANNEL);
@@ -50,6 +54,7 @@ Arm::Arm(int degOfFreedom, MotorType* motorTypes) :
 
 Arm::~Arm() {
     // deinitialise motors in the arm
+    Logging::logD(file, "Deinitialising Arm Motors");
     for (int motor = 0; motor < m_degOfFreedom; motor++) {
         switch (m_motorTypes[motor]) {
         case MOTOR_TYPE_DC_MOTOR:
@@ -70,12 +75,16 @@ Arm::~Arm() {
             break;
         }
     }
+
+    // deinitialise encoders
+    Logging::logD(file, "Deinitialising Arm Encoders");
     for (int encoder = 0; encoder < m_degOfFreedom; encoder++) {
         Phidget_close((PhidgetHandle)*m_handlesEncoder[encoder]);
         PhidgetEncoder_delete(m_handlesEncoder[encoder]);
     }
 
     // deinitialise claw
+    Logging::logD(file, "Deinitialising Arm Claw");
     Phidget_close((PhidgetHandle)*m_handleClaw);
     PhidgetRCServo_delete(m_handleClaw);
 }
