@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Rover/pub_rover.h"
 #include "Rover/Systems/pub_systems.h"
+#include "Rover/pub_rover.h"
 #include "mission_control.h"
 #include "phidget22.h"
 #include <iostream>
@@ -38,6 +38,17 @@ public:
     bool getArmMotorHandle(MotorHandlerReturn* retVal, int index);
 
     /**
+     * @brief Function to get the motor handler and motor type for the claw
+     * servo.
+     * @param retVal Pointer to a stuct that will get updated with the motor
+     * handler and motor type.
+     * @param index The index starting from the base motor on the arm to get the
+     * handler for.
+     * @return True is successful, false otherwise
+     */
+    bool getArmEncoderHandle(MotorHandlerReturn* retVal, int index);
+
+    /**
      * @brief Gets the servo handler for the servo initialised as the claw.
      * @param retVal Pointer to a stuct that will get updated with the motor
      * handler and motor type.
@@ -56,6 +67,7 @@ private:
     MotorType* m_motorTypes;
     PhidgetDCMotorHandle** m_handlesDC;
     PhidgetStepperHandle** m_handlesStepper;
+    PhidgetEncoderHandle** m_handlesEncoder;
     PhidgetRCServoHandle* m_handleClaw;
 };
 

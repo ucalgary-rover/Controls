@@ -28,7 +28,7 @@ void WebSocketServer::accept_connections(MessageQueue& queue) {
     }
 }
 
-// Handle a single WebSocket session with a connected client
+// handler a single WebSocket session with a connected client
 void WebSocketServer::handle_session(tcp::socket socket, MessageQueue& queue) {
     try {
         // Create a WebSocket stream from the socket and accept the connection

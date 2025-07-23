@@ -14,9 +14,10 @@ static void CCONV onAttachHandler(PhidgetHandle ph, void* ctx) {
 };
 
 template <typename T>
-void setAddressProperties(T* handle, int serialNum, int channel) {
-    Phidget_setDeviceSerialNumber((PhidgetHandle)*handle, serialNum);
-    Phidget_setHubPort((PhidgetHandle)*handle, channel);
-    Phidget_setOnAttachHandler((PhidgetHandle)*handle, onAttachHandler, NULL);
-    Phidget_openWaitForAttachment((PhidgetHandle)*handle, 5000);
+void setAddressProperties(T* handler, int serialNum, int channel) {
+    Phidget_setDeviceSerialNumber((PhidgetHandle)*handler, serialNum);
+    Phidget_setHubPort((PhidgetHandle)*handler, channel);
+    Phidget_setOnAttachHandler((PhidgetHandle)*handler, onAttachHandler, NULL);
+    Phidget_openWaitForAttachment((PhidgetHandle)*handler,
+                                  PHIDGET_TIMEOUT_DEFAULT);
 };

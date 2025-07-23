@@ -105,7 +105,7 @@ public:
 
     /**
      * @brief Turns the stepper motor of a wheel to a specified angle
-     * @param stepper the handle of a particular stepper motor
+     * @param stepper the handler of a particular stepper motor
      * @param angle the angle to turn the stepper
      * @return None
      */

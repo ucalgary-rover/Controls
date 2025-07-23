@@ -7,6 +7,8 @@ enum MotorType {
     MOTOR_TYPE_DC_MOTOR,
     MOTOR_TYPE_STEPPER_MOTOR,
     MOTOR_TYPE_SERVO_MOTOR,
+    MOTOR_TYPE_DIGITAL_INPUT,
+    MOTOR_TYPE_ENCODER,
 
     // Additional motor types should be added above this comment
     MOTOR_TYPE_COUNT,
@@ -25,9 +27,11 @@ enum DriveIndex {
 
 struct MotorHandlerReturn {
     MotorType type;
-    union motorHandle {
+    union handler {
         PhidgetDCMotorHandle* dcMotor;
         PhidgetStepperHandle* stepperMotor;
         PhidgetRCServoHandle* servo_motor;
-    } motorHandle;
+        PhidgetDigitalInputHandle* digitalInput;
+        PhidgetEncoderHandle* encoder;
+    } handler;
 };

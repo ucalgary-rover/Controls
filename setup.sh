@@ -33,4 +33,5 @@ sudo apt-get install libsdl2-dev
 sudo apt install g++
 
 echo Please be sure to setup "make" if you have yet to do so.
+sudo apt install make
 echo "Have a nice day :)"
