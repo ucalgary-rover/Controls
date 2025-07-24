@@ -27,6 +27,12 @@
 #define ROVER_LENGTH 1.0 // in meters
 #define ROVER_WIDTH 0.5  // in meters
 
+// Configs for the arm
+#define DEGREES_OF_FREEDOM 6
+
+// Encoder configs
+#define MAX_ENCODER_POSITIONS 1000
+
 // Configuration file to set serial numbers and channels for each of the motors
 
 // Following consts should follow the order of

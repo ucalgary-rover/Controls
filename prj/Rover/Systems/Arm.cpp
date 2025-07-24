@@ -126,7 +126,7 @@ bool Arm::getArmEncoderHandle(MotorHandlerReturn* retVal, int index) {
 
 bool Arm::getArmClawHandle(MotorHandlerReturn* retVal) {
     retVal->type = MOTOR_TYPE_SERVO_MOTOR;
-    retVal->handler.servo_motor = m_handleClaw;
+    retVal->handler.servoMotor = m_handleClaw;
 
     return true;
 }

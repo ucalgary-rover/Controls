@@ -30,7 +30,7 @@ struct MotorHandlerReturn {
     union handler {
         PhidgetDCMotorHandle* dcMotor;
         PhidgetStepperHandle* stepperMotor;
-        PhidgetRCServoHandle* servo_motor;
+        PhidgetRCServoHandle* servoMotor;
         PhidgetDigitalInputHandle* digitalInput;
         PhidgetEncoderHandle* encoder;
     } handler;

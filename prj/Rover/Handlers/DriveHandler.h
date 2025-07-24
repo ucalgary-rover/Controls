@@ -109,7 +109,7 @@ public:
      * @param angle the angle to turn the stepper
      * @return None
      */
-    void turnWheel(PhidgetStepperHandle stepper, int angle);
+    void turnWheel(DriveIndex wheel, int angle);
 
 private:
     Drive* m_drive;

@@ -79,18 +79,31 @@ DriveHandler::DriveHandler(Drive* drive, MessageQueue* driveQueue) {
     m_driveQueue = driveQueue;
 }
 
-void DriveHandler::turnWheel(PhidgetStepperHandle stepper, int angle) {
+void DriveHandler::turnWheel(DriveIndex wheel, int angle) {
     // check if the turn is larger than 10 degrees
-    double currentPos;
+    int64_t currentPos;
+    double currentStepperPos;
 
-    PhidgetStepper_getPosition(stepper, &currentPos);
+    // get the handler
+    MotorHandlerReturn motorStuct;
+    m_drive->getDriveEncoderHandle(&motorStuct, wheel);
+
+    PhidgetEncoder_getPosition(*motorStuct.handler.encoder, &currentPos);
+
+    double currentAngle = (currentPos / MAX_ENCODER_POSITIONS) * 360;
 
     if (abs(currentPos - angle) > 10) {
         stopWheels();
     }
 
+    m_drive->getDriveStepperHandle(&motorStuct, wheel);
+    PhidgetStepper_getPosition(*motorStuct.handler.stepperMotor,
+                               &currentStepperPos);
+    PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
+                                     currentStepperPos - currentAngle);
+
     // turn the wheel
-    PhidgetStepper_setTargetPosition(stepper, angle);
+    PhidgetStepper_setTargetPosition(*motorStuct.handler.stepperMotor, angle);
 }
 
 float DriveHandler::spotTurnSpeed(int stickAngle) {
@@ -151,17 +164,13 @@ void DriveHandler::spotTurn(int stickAngle) {
 
     for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
 
-        // get the handler
-        MotorHandlerReturn motorStuct;
-        m_drive->getDriveStepperHandle(&motorStuct, stepper);
-
         // checking for angle to turn each wheel so they rotate properly
 
         if (stepper == 0 || stepper == 3) {
-            turnWheel(*motorStuct.handler.stepperMotor, -wheelAngle);
+            turnWheel((DriveIndex)stepper, -wheelAngle);
 
         } else {
-            turnWheel(*motorStuct.handler.stepperMotor, wheelAngle);
+            turnWheel((DriveIndex)stepper, wheelAngle);
         }
     }
 
@@ -281,7 +290,7 @@ void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
         MotorHandlerReturn motorStuct;
         m_drive->getDriveStepperHandle(&motorStuct, stepper);
 
-        turnWheel(*motorStuct.handler.stepperMotor, wheelAngle);
+        turnWheel((DriveIndex)stepper, wheelAngle);
     }
 
     // Spin
@@ -382,11 +391,7 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
     float wheelAngles[2] = { leftAngle, rightAngle };
 
     for (int i = 0; i < 2; ++i) {
-        // get the handler
-        MotorHandlerReturn motorStuct;
-        m_drive->getDriveStepperHandle(&motorStuct, i);
-
-        turnWheel(*motorStuct.handler.stepperMotor, wheelAngles[i]);
+        turnWheel((DriveIndex)i, wheelAngles[i]);
     }
 
     // Spin wheels

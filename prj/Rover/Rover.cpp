@@ -42,7 +42,13 @@ void Rover::start() {
     WebSocketClient client(address, std::to_string(WEBSOCKET_PORT));
 
     // Instantiate the systems for the rover
-    // Arm arm(1, MOTOR_TYPE_STEPPER_MOTOR);
+#if EXTENTION_TYPE_ARM
+    const MotorType* motorTypes = [
+        MOTOR_TYPE_STEPPER_MOTOR, MOTOR_TYPE_DC_MOTOR, MOTOR_TYPE_DC_MOTOR,
+        MOTOR_TYPE_STEPPER_MOTOR,
+        MOTOR_TYPE_STEPPER_MOTOR
+    ] Arm arm(6, MOTOR_TYPE_STEPPER_MOTOR);
+#endif
     Drive drive(ROVER_WIDTH, ROVER_LENGTH);
 
     // Create queues for rover, arm, and drive
@@ -55,10 +61,13 @@ void Rover::start() {
 
     // Start the client thread
     thread websocetClientThread(
-        [&]() { startClient(&roverQueue, &armQueue, &driveQueue); });
+        [&]() { startClient(&roverQueue, &driveQueue, &armQueue); });
 
-    // start thread for drive handler
+    // start thread for handlers
     thread driveHandlerThread([&]() { driveHandler.start(); });
+#if EXTENTION_TYPE_ARM
+    thread armHandlerThread[&]() { armHandler.start(); });
+#endif
 
     client.connect();
     while (true) {
@@ -69,6 +78,9 @@ void Rover::start() {
 
     driveHandlerThread.join();
     websocetClientThread.join();
+#if EXTENTION_TYPE_ARM
+    armHandlerThread.join();
+#endif
 }
 
 void Rover::stop() {
@@ -165,17 +177,21 @@ void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
 
         // Push message to appropriate queue
         switch (message.getFormat()) {
+#if EXTENTION_TYPE_ARM
         case MESSAGE_FORMAT_ARM:
             armQueue->push(message);
             message.printMessage(); // Print the received message
             break;
-
+#endif
         case MESSAGE_FORMAT_WHEEL:
             driveQueue->push(message);
             message.printMessage(); // Print the received message
             break;
 
         default:
+            Logging::logE(file,
+                          "Recieved message for un-used message format of %d",
+                          message.getFormat());
             break;
         }
     }
