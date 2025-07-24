@@ -31,6 +31,7 @@ sudo apt install -y libphidget22
 sudo apt-get install libphidget22-dev
 sudo apt-get install libsdl2-dev
 sudo apt install g++
+sudo apt-get install libjsoncpp-dev
 
 echo Please be sure to setup "make" if you have yet to do so.
 sudo apt install make

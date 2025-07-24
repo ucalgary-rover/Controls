@@ -21,6 +21,7 @@ SDL_ROOT = tools/SDL
 CMPL_BOOST = -I $(BOOST_ROOT)
 CMPL_SDL = -I$(SDL_ROOT)/include -L$(SDL_ROOT)/lib -lSDL2
 CMPL_PHIDETS = -lphidget22
+CMPL_JSON = -ljsoncpp
 
 NULL_DEVICE := $(if $(filter Windows_NT,$(OS)),NUL,/dev/null)
 
@@ -41,7 +42,7 @@ base: build_dir
 > g++ -DSIDE_TO_BUILD=1 -I"prj" $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) -o out/base
 
 rover: build_dir
-> g++ -DSIDE_TO_BUILD=2 -I"prj" $(ROVER_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) -o out/rover
+> g++ -DSIDE_TO_BUILD=2 -I"prj" $(ROVER_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_JSON) -o out/rover
 
 run_base: base
 > ./base 

@@ -25,6 +25,21 @@ enum DriveIndex {
     DRIVE_INDEX_WHEEL_COUNT,
 };
 
+inline const char* driveIndexToString(DriveIndex index) {
+    switch (index) {
+    case DRIVE_INDEX_FRONT_LEFT:
+        return "Front Left";
+    case DRIVE_INDEX_FRONT_RIGHT:
+        return "Front Right";
+    case DRIVE_INDEX_BACK_LEFT:
+        return "Back Left";
+    case DRIVE_INDEX_BACK_RIGHT:
+        return "Back Right";
+    default:
+        return "Invalid Index";
+    }
+}
+
 struct MotorHandlerReturn {
     MotorType type;
     union handler {

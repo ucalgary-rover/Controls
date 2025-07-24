@@ -3,6 +3,8 @@
 
 #include "DriveHandler.h"
 
+const char* file = "DriveHandler";
+
 // Various hardcoded values subject to change for fine tuning some movement
 // functions
 
@@ -58,6 +60,8 @@ programmed
 - Probably make some function "awaitWheelTargets" that waits until targets hit
 
 */
+static void CCONV onButtonPressedHandler(PhidgetDigitalInputHandle pdih,
+                                         void* ctx, int state);
 
 const float PI = 3.14;
 
@@ -77,15 +81,35 @@ DriveHandler::DriveHandler(Drive* drive, MessageQueue* driveQueue) {
     // Rover.cpp (NOT A COPY!!!) This allows us to use the same driveQueue in
     // this file without shenanigans
     m_driveQueue = driveQueue;
+
+    // Open the file to store angles
+    std::ifstream angleFile(BASE_LAST_KNOWN_POS_FILE, std::ifstream::binary);
+    if (!angleFile.is_open()) {
+        Logging::logE(file, "Failed to open angle storage file.");
+    }
+    Json::CharReaderBuilder readerBuilder;
+    std::string errs;
+    Json::parseFromStream(readerBuilder, angleFile, &m_lastKnownPos, &errs);
+    angleFile.close();
 }
 
 void DriveHandler::turnWheel(DriveIndex wheel, int angle) {
+
+    // Update the last known position of the wheel in the JSON file
+    m_lastKnownPos[driveIndexToString(wheel)] = angle;
+    std::ofstream angleFile(BASE_LAST_KNOWN_POS_FILE);
+    Json::StreamWriterBuilder writerBuilder;
+    std::unique_ptr<Json::StreamWriter> jsonWriter(
+        writerBuilder.newStreamWriter());
+    jsonWriter->write(m_lastKnownPos, &angleFile);
+    angleFile.close();
+
     // check if the turn is larger than 10 degrees
     int64_t currentPos;
     double currentStepperPos;
-
-    // get the handler
     MotorHandlerReturn motorStuct;
+
+    // get the encoder handler
     m_drive->getDriveEncoderHandle(&motorStuct, wheel);
 
     PhidgetEncoder_getPosition(*motorStuct.handler.encoder, &currentPos);
@@ -96,13 +120,16 @@ void DriveHandler::turnWheel(DriveIndex wheel, int angle) {
         stopWheels();
     }
 
+    // get the stepper handler
     m_drive->getDriveStepperHandle(&motorStuct, wheel);
+
     PhidgetStepper_getPosition(*motorStuct.handler.stepperMotor,
                                &currentStepperPos);
     PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
                                      currentStepperPos - currentAngle);
 
     // turn the wheel
+    // can make this async with PhidgetStepper_setTargetPosition_async
     PhidgetStepper_setTargetPosition(*motorStuct.handler.stepperMotor, angle);
 }
 
@@ -460,4 +487,68 @@ void DriveHandler::start() {
             stopWheels();
         }
     }
+}
+
+void DriveHandler::calibrateWheel(DriveIndex wheel) {
+    // This function should be called before the rover is used to ensure
+    // the wheels are facing the correct direction
+
+    // 1 for clockwise, -1 for counterclockwise
+    int direction = 1;
+    MotorHandlerReturn motorStuct;
+    bool buttonPressed = 0;
+    int changes[] = { 10, 4, 1 };
+
+    int lastKnownAngle = m_lastKnownPos[driveIndexToString(wheel)].asInt();
+
+    m_drive->getDriveDigitalInputHandle(&motorStuct, wheel);
+    PhidgetDigitalInput_setOnStateChangeHandler(
+        *motorStuct.handler.digitalInput, onButtonPressedHandler,
+        &buttonPressed);
+
+    // Get the current position of the wheel
+    m_drive->getDriveStepperHandle(&motorStuct, wheel);
+    PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
+                                     -lastKnownAngle);
+    for (int i = 0; i < sizeof(changes) / sizeof(changes[0]); i++) {
+        int angleGoal = 0;
+        while (!buttonPressed) {
+            angleGoal += changes[i] * direction;
+
+            PhidgetStepper_setTargetPosition(*motorStuct.handler.stepperMotor,
+                                             angleGoal);
+
+            if (buttonPressed) {
+                buttonPressed = 0;
+                break;
+            }
+
+            if (abs(angleGoal) > 100) {
+                Logging::logE(file,
+                              "Calibration failed: angle goal exceeded limit.");
+                exit(1);
+            }
+
+            if (i = 0) {
+                direction * -1;
+                angleGoal *= direction;
+            }
+        }
+        direction * -1;
+    }
+
+    double currentStepperPos;
+    PhidgetStepper_getPosition(*motorStuct.handler.stepperMotor,
+                               &currentStepperPos);
+
+    // Reset the position offset to zero
+    PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
+                                     -currentStepperPos);
+}
+
+static void CCONV onButtonPressedHandler(PhidgetDigitalInputHandle pdih,
+                                         void* ctx, int state) {
+
+    int* myIntPtr = (int*)ctx;
+    *myIntPtr = 1;
 }

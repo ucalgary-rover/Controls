@@ -10,7 +10,10 @@
 #include "Rover/pub_rover.h"
 #include "phidget22.h"
 #include <cmath>
+#include <fstream>
+#include <jsoncpp/json/json.h>
 #include <mutex>
+// #include <iostream>
 
 class DriveHandler : public HandlerInterface {
 public:
@@ -111,8 +114,19 @@ public:
      */
     void turnWheel(DriveIndex wheel, int angle);
 
+    /**
+     * @brief Calibrates a wheel to face forward
+     * @note This function should be called before the rover is used to ensure
+     * the wheels are facing the correct direction
+     * @param wheel the index of the wheel to calibrate
+     * @return None
+     */
+    void calibrateWheel(DriveIndex wheel);
+
 private:
     Drive* m_drive;
+
+    Json::Value m_lastKnownPos; // Last known position of the rover
 
     // Drive Queue
     MessageQueue* m_driveQueue; // References the DriveQueue in Rover.cpp

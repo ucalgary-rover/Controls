@@ -33,6 +33,10 @@
 // Encoder configs
 #define MAX_ENCODER_POSITIONS 1000
 
+// Logging past motor positions
+#define BASE_LAST_KNOWN_POS_FILE "Rover/Handlers/LastKnowPosBase.json"
+#define ARM_LAST_KNOWN_POS_FILE "Rover/Handlers/LastKnowPosArm.json"
+
 // Configuration file to set serial numbers and channels for each of the motors
 
 // Following consts should follow the order of
