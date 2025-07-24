@@ -91,6 +91,11 @@ DriveHandler::DriveHandler(Drive* drive, MessageQueue* driveQueue) {
     std::string errs;
     Json::parseFromStream(readerBuilder, angleFile, &m_lastKnownPos, &errs);
     angleFile.close();
+
+    // Calibrate all wheels to face forward
+    for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
+        calibrateWheel((DriveIndex)i);
+    }
 }
 
 void DriveHandler::turnWheel(DriveIndex wheel, int angle) {
@@ -537,13 +542,14 @@ void DriveHandler::calibrateWheel(DriveIndex wheel) {
         direction * -1;
     }
 
+    // Reset the position of the stepper motor to 0
     double currentStepperPos;
     PhidgetStepper_getPosition(*motorStuct.handler.stepperMotor,
                                &currentStepperPos);
-
-    // Reset the position offset to zero
     PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
                                      -currentStepperPos);
+    m_drive->getDriveEncoderHandle(&motorStuct, wheel);
+    PhidgetEncoder_setPosition(*motorStuct.handler.encoder, 0);
 }
 
 static void CCONV onButtonPressedHandler(PhidgetDigitalInputHandle pdih,
