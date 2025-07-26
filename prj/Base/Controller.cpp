@@ -410,10 +410,11 @@ void ControllerHolder::eventLoop() {
                     GameControllerAxis axis
                         = covert_stl_axis_to_game_controller(
                             (SDL_GameControllerAxis)event.jaxis.axis);
-                    Logging::logV(file, "Axis motion %d",
-                                  (int)event.jaxis.axis);
+                    Logging::logV(file,
+                                  "Axis motion. Axis was: %d Axis is now: %d",
+                                  (int)event.jaxis.axis, axis);
 
-                    if (axis < GAME_CONTROLLER_AXIS_LAST_JOYSTICK) {
+                    if (axis <= GAME_CONTROLLER_AXIS_LAST_JOYSTICK) {
                         stickResponse(event.jaxis.value, axis,
                                       event.cdevice.which);
                     } else if (axis < GAME_CONTROLLER_AXIS_MAX) {
