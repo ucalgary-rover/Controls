@@ -65,7 +65,7 @@ void Rover::start() {
 
     // start thread for handlers
     thread driveHandlerThread([&]() { driveHandler.start(); });
-#if EXTENTION_TYPE_ARM
+#if EXTENTION == EXTENTION_TYPE_ARM
     thread armHandlerThread[&]() { armHandler.start(); });
 #endif
 
@@ -177,7 +177,7 @@ void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
 
         // Push message to appropriate queue
         switch (message.getFormat()) {
-#if EXTENTION_TYPE_ARM
+#if EXTENTION == EXTENTION_TYPE_ARM
         case MESSAGE_FORMAT_ARM:
             armQueue->push(message);
             message.printMessage(); // Print the received message

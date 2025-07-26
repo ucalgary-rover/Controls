@@ -1,5 +1,7 @@
 #include "ArmHandler.h"
 
+#include "ArmModel.h"
+
 // Default constructor
 ArmHandler::ArmHandler() { }
 
@@ -10,6 +12,9 @@ ArmHandler::ArmHandler(Arm& arm, MessageQueue& armQueue,
 
     // Reference to the Arm object in Rover.cpp
     m_arm = arm;
+
+    // Initialize static Arm Model Wrapper
+    ArmModel::initialize();
 
     // Create a armQueue object in this file that references the armQueue in
     // Rover.cpp (NOT A COPY!!!) This allows us to use the same armQueue in this
@@ -31,20 +36,57 @@ ArmHandler::ArmHandler(Arm& arm, MessageQueue& armQueue,
     // m_pid = PIDController();
 }
 
-void ArmHandler::instantiateThreads() {
+void handleManualArmMessage(ArmManualMessage message) {
+    auto current_angles = ArmModel::getAngles();
 
+    if (message.motorId > current_angles.max_size()) {
+        return;
+    }
+
+    current_angles[message.motorId] += message.angleChange;
+
+    ArmModel::updateJointAngles(current_angles);
+}
+
+void handleFixedIKMessage(ArmFixedIKMessage message) {
+    std::array<double, 3> desired_wrist_position
+        = { message.wristX, message.wristY, message.wristZ };
+
+    auto new_angles = ArmModel::generateWristPosition(desired_wrist_position);
+    // TODO: Update motors with new_angles
+}
+
+void handleVariableIKMessage(ArmVariableIKMessage message) {
+    std::array<double, 3> desired_wrist_position
+        = { message.wristX, message.wristY, message.wristZ };
+
+    auto new_angles = ArmModel::generateWristPosition(desired_wrist_position);
+    new_angles = ArmModel::generateClawOrientation(
+        new_angles, message.clawPitch, message.clawRoll);
+    // TODO: Update motors with new_angles
+}
+
+void ArmHandler::instantiateThreads() {
     m_armQueueThread = std::thread([queue = &m_armQueue]() {
-        Message m;
+        ArmMessage message;
 
         while (true) {
             // Get message from armQueue
-            m = queue->pop();
+            message = std::get<ArmMessage>(m_driveQueue->pop().get_payload());
 
-            // do armHandler shit
-            // ex:
-            // var1 = m.var1;
-            // var2 = m.var2;
-            // And then we could use var1 and var2 in the start() infinite loop
+            switch (message.type) {
+            case ARM_MESSAGE_TYPE_MANUAL:
+                handleManualArmMessage(message.manual_message);
+                break;
+            case ARM_MESSAGE_TYPE_FIXED_IK:
+                handleFixedIKMessage(message.fixed_ik_message);
+                break;
+            case ARM_MESSAGE_TYPE_VARIABLE_IK:
+                handleVariableIKMessage(message.variable_ik_message);
+                break;
+            default:
+                break;
+            }
         }
     });
 
