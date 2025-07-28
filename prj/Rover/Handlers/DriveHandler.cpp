@@ -2,11 +2,19 @@
 // Written by Johan Esperida
 
 #include "DriveHandler.h"
+#include <unistd.h>
 
 const char* file = "DriveHandler";
 
 // Various hardcoded values subject to change for fine tuning some movement
 // functions
+
+// If a wheel changes angle larger than this threshold all wheel spinning is
+// stopped
+static const int WHEEL_TURN_THRESH = 10;
+
+// The amount of seconds stopWheels() waits to allow the wheels to lose momentum
+static const int STOP_WHEEL_WAIT = 1;
 
 // Might make the following values constants in mission control.h
 // is maximum wheel speed for a radial turn
@@ -55,9 +63,6 @@ since range of motion limited, all angles given to the wheel must be adjusted to
 fit within the range
 
 Stepper motors turn wheels and report when their targets are hit afterwards
------------------> waiting for the wheels to finish turning still needs to be
-programmed
-- Probably make some function "awaitWheelTargets" that waits until targets hit
 
 */
 static void CCONV onButtonPressedHandler(PhidgetDigitalInputHandle pdih,
@@ -121,7 +126,7 @@ void DriveHandler::turnWheel(DriveIndex wheel, int angle) {
 
     double currentAngle = (currentPos / MAX_ENCODER_POSITIONS) * 360;
 
-    if (abs(currentPos - angle) > 10) {
+    if (abs(currentPos - angle) > WHEEL_TURN_THRESH) {
         stopWheels();
     }
 
@@ -194,17 +199,22 @@ void DriveHandler::spotTurn(int stickAngle) {
     float wheelAngle
         = TO_DEGREES(atan(m_drive->getWidth() / m_drive->getLength()));
 
+    // Turn the wheels
     for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
 
         // checking for angle to turn each wheel so they rotate properly
 
-        if (stepper == 0 || stepper == 3) {
+        if (stepper == DRIVE_INDEX_FRONT_LEFT
+            || stepper == DRIVE_INDEX_BACK_RIGHT) {
             turnWheel((DriveIndex)stepper, -wheelAngle);
 
-        } else {
+        } else if (stepper == DRIVE_INDEX_FRONT_RIGHT
+                   || stepper == DRIVE_INDEX_BACK_LEFT) {
             turnWheel((DriveIndex)stepper, wheelAngle);
         }
     }
+
+    awaitWheelTargets();
 
     // spin wheels
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
@@ -220,7 +230,7 @@ void DriveHandler::spotTurn(int stickAngle) {
                                              rightSpeed);
 
             // if index is even the wheel is on the left of chassis
-        } else {
+        } else if (dc % 2 == 0) {
             PhidgetDCMotor_setTargetVelocity(*motorStuct.handler.dcMotor,
                                              leftSpeed);
         }
@@ -299,7 +309,7 @@ void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
     if (stickTheta == 90 || stickTheta == 270) {
 
         // converts to angles within wheel range to compare to the wheel angle
-        stickTheta = (stickTheta = 270) ? -90 : 90;
+        stickTheta = (stickTheta == 270) ? -90 : 90;
 
         // if the angles are the same, move forward, if not move backwards
         direction = (wheelAngle == stickTheta) ? 1 : -1;
@@ -318,12 +328,10 @@ void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
 
     // Turn
     for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
-        // get the handler
-        MotorHandlerReturn motorStuct;
-        m_drive->getDriveStepperHandle(&motorStuct, stepper);
-
         turnWheel((DriveIndex)stepper, wheelAngle);
     }
+
+    awaitWheelTargets();
 
     // Spin
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
@@ -359,7 +367,7 @@ float DriveHandler::radialTurnHeadingAngle(int stickAngle) {
         reportedAngle = ((stickAngle - 180) / 90) * RADIAL_ANGLE_MAX;
 
         // max positions
-    } else if (stickAngle = 90) {
+    } else if (stickAngle == 90) {
         reportedAngle = RADIAL_ANGLE_MAX * m_lastRadialOutput;
 
         // neutral positions
@@ -422,9 +430,16 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
     // list of angles to iterate thru
     float wheelAngles[2] = { leftAngle, rightAngle };
 
-    for (int i = 0; i < 2; ++i) {
-        turnWheel((DriveIndex)i, wheelAngles[i]);
+    for (int stepper = 0; stepper < 2; ++stepper) {
+        turnWheel((DriveIndex)stepper, wheelAngles[stepper]);
     }
+
+    // make sure back wheels are straight
+    for (int stepper = 2; stepper < 4; ++stepper) {
+        turnWheel((DriveIndex)stepper, 0);
+    }
+
+    awaitWheelTargets();
 
     // Spin wheels
 
@@ -444,12 +459,30 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
 }
 
 void DriveHandler::stopWheels() {
+    // sets target velocities of all wheels to zero
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
         // get the handler
         MotorHandlerReturn motorStuct;
         m_drive->getDriveDCHandle(&motorStuct, dc);
 
         PhidgetDCMotor_setTargetVelocity(*motorStuct.handler.dcMotor, 0);
+    }
+
+    // wait for an amount of seconds to let the wheels slow down
+    usleep(STOP_WHEEL_WAIT * 1000000);
+}
+
+void DriveHandler::awaitWheelTargets() {
+    // is true only when all wheel targets are true
+    bool overallStatus = false;
+
+    while (!overallStatus) {
+        // start comparing all the values
+        overallStatus = m_wheelTargetStatuses[0];
+
+        for (int i = 1; i < 4; i++) {
+            overallStatus = overallStatus && m_wheelTargetStatuses[i];
+        }
     }
 }
 
@@ -463,18 +496,19 @@ void DriveHandler::start() {
 
         // flags for if the value is non-zero
         bool angleVelocityFlag
-            = message.angleVelocity != 0;          // right joystick angle
+            = message.angleVelocity > 0;           // right joystick angle
         bool velocityFlag = message.velocity != 0; // left joystick magnitude
 
         // for if the movement is forward or backward
         // left joystick angle
-        bool thetaFlag = (message.theta < 10 && message.theta > 350)
-                         || (message.theta < 190 && message.theta > 170);
+        bool thetaFlag = ((message.theta < 10 && message.theta > 350)
+                          || (message.theta < 190 && message.theta > 170))
+                         && (message.theta > 0);
 
         // Scenarios
 
         // Radial turn (angular velocity and velocity forwards or backwards)
-        if (angleVelocityFlag && thetaFlag) {
+        if (angleVelocityFlag && thetaFlag && velocityFlag) {
             m_spotTurnFlag = false;
             radialTurn(message.angleVelocity, message.velocity, message.theta);
 

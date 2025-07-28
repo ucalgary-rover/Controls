@@ -3,6 +3,7 @@
 
 #include "Base/Base.h"
 #include <cmath>
+#include <unistd.h>
 
 using namespace std;
 
@@ -302,6 +303,11 @@ int Base::stickAngle(int axisX, int axisY) {
     int angle;         // the reference angle
     int reportedAngle; // the actual angle
 
+    // check if magnitude is zero and return a -1 value if so
+    if (axisX == axisY and axisX == 0) {
+        return -1;
+    }
+
     if (axisY != 0) {
         // note how the axes have to be switched since we are measuring from the
         // y axis
@@ -311,9 +317,16 @@ int Base::stickAngle(int axisX, int axisY) {
         if (axisX < 0 && axisY < 0) {
             reportedAngle = angle;
 
-            // only y is negative (negative angle)
+            // only y is negative (negative angle or zero angle)
         } else if (axisY < 0) {
-            reportedAngle = angle + 360;
+
+            // make sure to report zero instead of 360 when possible
+            if (angle == 0) {
+                reportedAngle = 0;
+
+            } else {
+                reportedAngle = angle + 360;
+            }
 
             // y is positive, x is negative or positive (positive or negative
             // angle)

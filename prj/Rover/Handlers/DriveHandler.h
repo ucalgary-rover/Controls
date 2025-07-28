@@ -26,7 +26,7 @@ public:
      * @param value A boolean value signifying if the wheel has hit it's target
      * @return None
      */
-    void setWheelTargetHit(int index, bool value) {
+    void setWheelTargetStatus(int index, bool value) {
         m_wheelTargetStatuses[index] = value;
     }
 
@@ -99,6 +99,12 @@ public:
      * @return None
      */
     void stopWheels();
+
+    /**
+     * @brief Waits until all wheel targets are met
+     * @return None
+     */
+    void awaitWheelTargets();
 
     /**
      * @brief Pops messages out of the queue and calls other functions
