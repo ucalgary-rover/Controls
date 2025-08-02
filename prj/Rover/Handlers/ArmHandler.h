@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include "HandlerInterface.h"
 #include "Rover/Rover.h"       // This also needs to be fixed
 #include "Rover/Systems/Arm.h" // This needs to be fixed
-#include "HandlerInterface.h"
 #include <mutex>
 
 class ArmHandler : public HandlerInterface {
@@ -30,13 +30,15 @@ private:
     std::thread m_startThread;
     // std::thread m_stopThread;
 
-    // Variables for pausing and resuming the start() infinite loop
-    std::condition_variable& m_armConVar;
-    bool& m_armRunningFlag;
-
     // NOT IMPLEMENTED YET
     // InverseKinematics m_ik;
     // PIDController m_pid;
+
+    void handleManualArmMessage(ArmManualMessage message);
+    void handleFixedIKMessage(ArmFixedIKMessage message);
+    void handleVariableIKMessage(ArmVariableIKMessage message);
+
+    template <int T> void updateMotorAngles(std::array<double, T> new_angles);
 };
 
 #endif

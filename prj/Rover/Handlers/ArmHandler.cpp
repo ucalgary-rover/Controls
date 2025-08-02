@@ -21,14 +21,6 @@ ArmHandler::ArmHandler(Arm& arm, MessageQueue& armQueue,
     // file without shenanigans
     m_armQueue = armQueue;
 
-    // Create a condition variable that references the armConVar in Rover.cpp
-    // (NOT A COPY!!!) Used to pause the armHandler start() thread
-    m_armConVar = armConVar;
-
-    // Create a flag that references the armRunningFlag in Rover.cpp (NOT A
-    // COPY!!!) Used as the flag to help armConVar pause the start() thread
-    m_armRunningFlag = armRunningFlag;
-
     instantiateThreads();
 
     // NOTE: NOT IMPLEMENTED YET
@@ -36,7 +28,7 @@ ArmHandler::ArmHandler(Arm& arm, MessageQueue& armQueue,
     // m_pid = PIDController();
 }
 
-void handleManualArmMessage(ArmManualMessage message) {
+void ArmHandler::handleManualArmMessage(ArmManualMessage message) {
     auto current_angles = ArmModel::getAngles();
 
     if (message.motorId > current_angles.max_size()) {
@@ -45,25 +37,63 @@ void handleManualArmMessage(ArmManualMessage message) {
 
     current_angles[message.motorId] += message.angleChange;
 
-    ArmModel::updateJointAngles(current_angles);
+    if (!ArmModel::updateJointAngles(current_angles)) {
+        return;
+    }
 }
 
-void handleFixedIKMessage(ArmFixedIKMessage message) {
+void ArmHandler::handleFixedIKMessage(ArmFixedIKMessage message) {
     std::array<double, 3> desired_wrist_position
         = { message.wristX, message.wristY, message.wristZ };
 
     auto new_angles = ArmModel::generateWristPosition(desired_wrist_position);
-    // TODO: Update motors with new_angles
+
+    if (!ArmModel::updateJointAngles(new_angles)) {
+        return;
+    }
 }
 
-void handleVariableIKMessage(ArmVariableIKMessage message) {
+void ArmHandler::handleVariableIKMessage(ArmVariableIKMessage message) {
     std::array<double, 3> desired_wrist_position
         = { message.wristX, message.wristY, message.wristZ };
 
     auto new_angles = ArmModel::generateWristPosition(desired_wrist_position);
     new_angles = ArmModel::generateClawOrientation(
         new_angles, message.clawPitch, message.clawRoll);
-    // TODO: Update motors with new_angles
+
+    if (!ArmModel::updateJointAngles(new_angles)) {
+        return;
+    }
+}
+
+void updateMotorAngle(MotorHandlerReturn* handler, double angle) {
+    if (handler == nullptr) {
+        return;
+    }
+
+    switch (handler->type) {
+    case MOTOR_TYPE_DC_MOTOR:
+        break;
+    case MOTOR_TYPE_STEPPER_MOTOR:
+        break;
+    case MOTOR_TYPE_SERVO_MOTOR:
+        break;
+    case MOTOR_TYPE_DIGITAL_INPUT:
+        break;
+    case MOTOR_TYPE_ENCODER:
+        break;
+    default:
+        break
+    }
+}
+
+template <int T>
+void ArmHandler::updateMotorAngles(std::array<double, T> new_angles) {
+    for (int i = 0; i < T; i++) {
+        MotorHandlerReturn* handler = nullptr;
+        m_arm.getArmMotorHandle(handler, i);
+        updateMotorAngle(handler, new_angles.at(i));
+    }
 }
 
 void ArmHandler::instantiateThreads() {

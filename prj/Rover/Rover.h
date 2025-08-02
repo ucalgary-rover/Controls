@@ -4,6 +4,7 @@
 #pragma once
 
 #include "MessageQueue.h"
+#include "Rover/Handlers/ArmHandler.h"
 #include "Rover/Handlers/DriveHandler.h"
 #include "Rover/Systems/Arm.h"
 #include "Rover/Systems/Drive.h"
