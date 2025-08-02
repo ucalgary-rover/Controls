@@ -2,15 +2,15 @@
 
 static const char* file = "Arm";
 
-Arm::Arm(int degOfFreedom, MotorType* motorTypes) :
-    m_degOfFreedom(degOfFreedom), m_motorTypes(motorTypes) {
-    m_handlesDC = new PhidgetDCMotorHandle*[degOfFreedom]();
-    m_handlesStepper = new PhidgetStepperHandle*[degOfFreedom]();
-    m_handlesEncoder = new PhidgetEncoderHandle*[degOfFreedom]();
+Arm::Arm(const std::vector<const MotorType> motorTypes) :
+    m_degOfFreedom(motorTypes.size()), m_motorTypes(motorTypes) {
+    m_handlesDC = new PhidgetDCMotorHandle*[m_degOfFreedom]();
+    m_handlesStepper = new PhidgetStepperHandle*[m_degOfFreedom]();
+    m_handlesEncoder = new PhidgetEncoderHandle*[m_degOfFreedom]();
 
     // initialise motors in the arm
     Logging::logD(file, "Initialising Arm Motors");
-    for (int motor = 0; motor < degOfFreedom; motor++) {
+    for (int motor = 0; motor < m_degOfFreedom; motor++) {
         switch (motorTypes[motor]) {
         case MOTOR_TYPE_DC_MOTOR:
             PhidgetDCMotor_create(m_handlesDC[motor]);
@@ -38,7 +38,7 @@ Arm::Arm(int degOfFreedom, MotorType* motorTypes) :
 
     // initialise encoders
     Logging::logD(file, "Initialising Arm Encoders");
-    for (int encoder = 0; encoder < degOfFreedom; encoder++) {
+    for (int encoder = 0; encoder < m_degOfFreedom; encoder++) {
         PhidgetEncoder_create(m_handlesEncoder[encoder]);
         setAddressProperties<PhidgetEncoderHandle>(
             m_handlesEncoder[encoder], ARM_ENCODER_SERIAL_NUMBER[encoder],

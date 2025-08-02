@@ -10,14 +10,10 @@
 
 class ArmHandler : public HandlerInterface {
 public:
-    ArmHandler();
-    ArmHandler(Arm& arm, MessageQueue& armQueue,
-               std::condition_variable& armConVar, bool& armRunningFlag);
+    ArmHandler(Arm& arm, MessageQueue& armQueue);
     ~ArmHandler();
 
-    void instantiateThreads() override;
     void start() override;
-    void stop() override;
 
 private:
     Arm& m_arm;
@@ -39,6 +35,8 @@ private:
     void handleVariableIKMessage(ArmVariableIKMessage message);
 
     template <int T> void updateMotorAngles(std::array<double, T> new_angles);
+
+    void loop();
 };
 
 #endif

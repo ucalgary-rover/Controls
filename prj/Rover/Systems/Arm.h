@@ -8,17 +8,17 @@
 #include "mission_control.h"
 #include "phidget22.h"
 #include <iostream>
+#include <vector>
 
 class Arm {
 public:
     /**
      * @brief Completes the initialisation for all motors That make up the arm
      * and the claw.
-     * @param degOfFreedom Number of degrees of freedom in the arm.
-     * @param motorTypes Pointer to an array of length degOfFreedom t oknow what
-     * type of motor each DOF uses.
+     * @param motorTypes List of motor types  with length equal to the DOF of
+     * the arm
      */
-    Arm(int degOfFreedom, MotorType* motorTypes);
+    Arm(const std::vector<const MotorType> motorTypes);
 
     /**
      * @brief Completes the deinitialisation for all motors That make up the arm
@@ -64,7 +64,7 @@ public:
 
 private:
     int m_degOfFreedom;
-    MotorType* m_motorTypes;
+    const std::vector<const MotorType> m_motorTypes;
     PhidgetDCMotorHandle** m_handlesDC;
     PhidgetStepperHandle** m_handlesStepper;
     PhidgetEncoderHandle** m_handlesEncoder;

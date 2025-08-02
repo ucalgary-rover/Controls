@@ -8,14 +8,14 @@ public:
 
     static std::vector<std::array<double, 3>> getOrientations();
 
-    static std::array<double, 6> getAngles();
+    static std::array<int, 6> getAngles();
 
     static bool updateJointAngles(std::array<int, 6> new_angles);
 
-    static std::array<double, 6>
+    static std::array<int, 6>
     generateWristPosition(std::array<double, 3> desired_wrist_position);
 
-    static std::array<double, 6>
+    static std::array<int, 6>
     generateClawOrientation(std::array<int, 6> current_angles,
                             double claw_pitch, double claw_roll);
 

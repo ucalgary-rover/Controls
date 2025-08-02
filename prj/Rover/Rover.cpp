@@ -43,12 +43,10 @@ void Rover::start() {
 
     // Instantiate the systems for the rover
 #if EXTENTION == EXTENTION_TYPE_ARM
-    const MotorType* motorTypes = [
-        MOTOR_TYPE_STEPPER_MOTOR, MOTOR_TYPE_DC_MOTOR, MOTOR_TYPE_DC_MOTOR,
-        MOTOR_TYPE_STEPPER_MOTOR,
-        MOTOR_TYPE_STEPPER_MOTOR
-    ];
-    Arm arm(6, MOTOR_TYPE_STEPPER_MOTOR);
+    const std::vector<const MotorType> motorTypes
+        = { MOTOR_TYPE_STEPPER_MOTOR, MOTOR_TYPE_DC_MOTOR, MOTOR_TYPE_DC_MOTOR,
+            MOTOR_TYPE_STEPPER_MOTOR, MOTOR_TYPE_STEPPER_MOTOR };
+    Arm arm(motorTypes);
 #endif
 
     Drive drive(ROVER_WIDTH, ROVER_LENGTH);
@@ -61,7 +59,7 @@ void Rover::start() {
     // instantiate handlers
     DriveHandler driveHandler(&drive, &driveQueue);
 
-    ArmHandler armHandler(&arm, &armQueue);
+    ArmHandler armHandler(arm, armQueue);
 
     // Start the client thread
     thread websocetClientThread(
@@ -70,7 +68,7 @@ void Rover::start() {
     // start thread for handlers
     thread driveHandlerThread([&]() { driveHandler.start(); });
 #if EXTENTION == EXTENTION_TYPE_ARM
-    thread armHandlerThread[&]() { armHandler.start(); });
+    thread armHandlerThread([&]() { armHandler.start(); });
 #endif
 
     client.connect();

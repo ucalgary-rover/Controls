@@ -6,13 +6,29 @@
 static SSRTArm2025Analytical armModel;
 bool ArmModel::is_initialized = false;
 
-std::array<double, 3> vector3d2array(Eigen::Vector3d vector) {
+std::array<double, 3> vector3d2array(const Eigen::Vector3d& vector) {
     std::array<double, 3> array = {};
     for (int i = 0; i < vector.SizeAtCompileTime; i++) {
         array[i] = vector(i);
     }
 
     return array;
+}
+
+std::array<double, 6> int2DoubleArray(const std::array<int, 6>& intArray) {
+    std::array<double, 6> doubleArray = {};
+
+    for (int i = 0; i < intArray.max_size(); i++) {
+        doubleArray[i] = (double)intArray[i];
+    }
+}
+
+std::array<int, 6> double2IntArray(const std::array<double, 6>& doubleArray) {
+    std::array<int, 6> intArray = {};
+
+    for (int i = 0; i < doubleArray.max_size(); i++) {
+        intArray[i] = (int)doubleArray[i];
+    }
 }
 
 void ArmModel::initialize() {
@@ -63,12 +79,12 @@ std::vector<std::array<double, 3>> ArmModel::getOrientations() {
     return orientations;
 }
 
-std::array<double, 6> ArmModel::getAngles() {
+std::array<int, 6> ArmModel::getAngles() {
     if (!is_initialized) {
         return {};
     }
 
-    return armModel.GetAngles();
+    return double2IntArray(armModel.GetAngles());
 }
 
 bool ArmModel::updateJointAngles(std::array<int, 6> new_angles) {
@@ -76,15 +92,12 @@ bool ArmModel::updateJointAngles(std::array<int, 6> new_angles) {
         return false;
     }
 
-    std::array<double, 6> doubleArray = {};
-    for (int i = 0; i < new_angles.size(); i++) {
-        doubleArray[i] = new_angles[i];
-    }
+    auto doubleArray = int2DoubleArray(new_angles);
 
     return armModel.UpdateJointAngles(doubleArray);
 }
 
-std::array<double, 6>
+std::array<int, 6>
 ArmModel::generateWristPosition(std::array<double, 3> desired_wrist_position) {
     if (!is_initialized) {
         return {};
@@ -96,20 +109,16 @@ ArmModel::generateWristPosition(std::array<double, 3> desired_wrist_position) {
         vector(i) = desired_wrist_position[i];
     }
 
-    return armModel.GenerateWristPosition(vector);
+    return double2IntArray(armModel.GenerateWristPosition(vector));
 }
 
-std::array<double, 6>
+std::array<int, 6>
 ArmModel::generateClawOrientation(std::array<int, 6> current_angles,
                                   double claw_pitch, double claw_roll) {
     if (!is_initialized) {
         return {};
     }
 
-    std::array<double, 6> doubleArray = {};
-    for (int i = 0; i < current_angles.size(); i++) {
-        doubleArray[i] = current_angles[i];
-    }
-
-    return armModel.GenerateClawOrientation(doubleArray, claw_pitch, claw_roll);
+    return double2IntArray(armModel.GenerateClawOrientation(
+        int2DoubleArray(current_angles), claw_pitch, claw_roll));
 }
