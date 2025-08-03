@@ -1,5 +1,6 @@
 #include "ArmHandler.h"
 #include "ArmModel.h"
+#include <string>
 
 // Constructor
 ArmHandler::ArmHandler(Arm& arm, MessageQueue& armQueue) :
@@ -115,7 +116,7 @@ void ArmHandler::calibrateStepper(int stepper) {
     initialIndex = getIndexPosition(*encoderStuct.handler.encoder);
 
     // Get the current position of the wheel
-    int lastKnownAngle = m_lastKnownPos[driveIndexToString(wheel)].asInt();
+    int lastKnownAngle = m_lastKnownPos[std::to_string(stepper)].asInt();
     PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
                                      -lastKnownAngle);
 
