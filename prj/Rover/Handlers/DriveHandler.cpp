@@ -67,6 +67,8 @@ Stepper motors turn wheels and report when their targets are hit afterwards
 */
 static void CCONV onButtonPressedHandler(PhidgetDigitalInputHandle pdih,
                                          void* ctx, int state);
+static void CCONV onAngleReached(PhidgetHandle pdih, void* ctx,
+                                 PhidgetReturnCode returnCode);
 
 const float PI = 3.14;
 
@@ -122,12 +124,15 @@ void DriveHandler::turnWheel(DriveIndex wheel, int angle) {
     double currentAngle = (currentPos / MAX_ENCODER_POSITIONS) * 360;
 
     if (abs(currentPos - angle) > WHEEL_TURN_THRESH) {
+        m_wheelTargetStatuses[wheel] = false;
         stopWheels();
     }
 
     // turn the wheel
     // can make this async with PhidgetStepper_setTargetPosition_async
-    PhidgetStepper_setTargetPosition(*motorStuct.handler.stepperMotor, angle);
+    PhidgetStepper_setTargetPosition_async(*motorStuct.handler.stepperMotor,
+                                           angle, onAngleReached,
+                                           &m_wheelTargetStatuses[wheel]);
 }
 
 float DriveHandler::spotTurnSpeed(int stickAngle) {
@@ -576,4 +581,9 @@ static void CCONV onButtonPressedHandler(PhidgetDigitalInputHandle pdih,
 
     int* myIntPtr = (int*)ctx;
     *myIntPtr = 1;
+}
+
+static void CCONV onAngleReached(PhidgetHandle pdih, void* ctx,
+                                 PhidgetReturnCode returnCode) {
+    *(bool*)ctx = true;
 }
