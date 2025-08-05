@@ -63,17 +63,6 @@ public:
     bool getDriveDigitalInputHandle(MotorHandlerReturn* retVal, int index);
 
     /**
-     * @brief Edits retVal to contain the motor type (in this case encoder) and
-     * the phidgets handler for that motor.
-     * @param retVal Pointer to a stuct that will get updated with the motor
-     * handler and motor type.
-     * @param index Valid value from DriveMotorIndex to specify what wheel you
-     * want the encoder handler for.
-     * @return True is successful, false otherwise.
-     */
-    bool getDriveEncoderHandle(MotorHandlerReturn* retVal, int index);
-
-    /**
      * @brief Gets the width of the rover between motors
      * @return The width of the rover from the motor on the left to the motor on
      * the right.
@@ -91,7 +80,6 @@ private:
     PhidgetDCMotorHandle** m_handlesDC;
     PhidgetStepperHandle** m_handlesStepper;
     PhidgetDigitalInputHandle** m_handlesDigitalInput;
-    PhidgetEncoderHandle** m_handlesEncoder;
 
     // if true, the wheels are in spot turning configuration
     bool m_spotTurnFlag = false;

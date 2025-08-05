@@ -7,7 +7,6 @@ Drive::Drive(float width, float length) : m_width(width), m_length(length) {
     m_handlesStepper = new PhidgetStepperHandle*[DRIVE_INDEX_WHEEL_COUNT]();
     m_handlesDigitalInput
         = new PhidgetDigitalInputHandle*[DRIVE_INDEX_WHEEL_COUNT]();
-    m_handlesEncoder = new PhidgetEncoderHandle*[DRIVE_INDEX_WHEEL_COUNT]();
 
     // initialise DC motors
     Logging::logD(file, "Initialising Drive DC Motors");
@@ -36,15 +35,6 @@ Drive::Drive(float width, float length) : m_width(width), m_length(length) {
             DRIVE_DIGITAL_INPUT_SERIAL_NUMBER[digitalInput],
             DRIVE_DIGITAL_INPUT_CHANNEL[digitalInput]);
     }
-
-    // initialise encoders
-    Logging::logD(file, "Initialising Drive Encoders");
-    for (int encoder = 0; encoder < DRIVE_INDEX_WHEEL_COUNT; encoder++) {
-        PhidgetEncoder_create(m_handlesEncoder[encoder]);
-        setAddressProperties<PhidgetEncoderHandle>(
-            m_handlesEncoder[encoder], DRIVE_ENCODER_SERIAL_NUMBER[encoder],
-            DRIVE_ENCODER_CHANNEL[encoder]);
-    }
 }
 
 Drive::~Drive() {
@@ -68,13 +58,6 @@ Drive::~Drive() {
          digitalInput++) {
         Phidget_close((PhidgetHandle)*m_handlesDigitalInput[digitalInput]);
         PhidgetDigitalInput_delete(m_handlesDigitalInput[digitalInput]);
-    }
-
-    // deinitialise encoders
-    Logging::logD(file, "Deinitialising Drive Encoders");
-    for (int encoder = 0; encoder < DRIVE_INDEX_WHEEL_COUNT; encoder++) {
-        Phidget_close((PhidgetHandle)*m_handlesEncoder[encoder]);
-        PhidgetEncoder_delete(m_handlesEncoder[encoder]);
     }
 }
 
@@ -104,19 +87,6 @@ bool Drive::getDriveDigitalInputHandle(MotorHandlerReturn* retVal, int index) {
             = MOTOR_TYPE_DIGITAL_INPUT; // Assuming digital input is treated as
                                         // servo for this context
         retVal->handler.digitalInput = m_handlesDigitalInput[index];
-        return true;
-    }
-    retVal->type = MOTOR_TYPE_INVALID;
-    return false;
-}
-
-bool Drive::getDriveEncoderHandle(MotorHandlerReturn* retVal, int index) {
-    // Assuming encoder is handled similarly to digital input
-    if (index >= 0 && index < DRIVE_INDEX_WHEEL_COUNT) {
-        retVal->type = MOTOR_TYPE_ENCODER; // Assuming encoder is treated as
-                                           // servo for this context
-        retVal->handler.encoder
-            = m_handlesEncoder[index]; // Placeholder for actual encoder handler
         return true;
     }
     retVal->type = MOTOR_TYPE_INVALID;
