@@ -1,3 +1,10 @@
+#ifndef ARM_MODEL_H
+#define ARM_MODEL_H
+
+#pragma once
+
+#include "SSRTArm2025Analytical.h"
+#include "SSRTArm2025JointLimits.h"
 #include <array>
 #include <vector>
 
@@ -22,3 +29,5 @@ public:
 private:
     static bool is_initialized;
 };
+
+#endif

@@ -9,7 +9,8 @@ BASE_SRC_FILES := $(filter-out prj/Websocket/Server.cpp, $(BASE_SRC_FILES))
 ROVER_SRC_FILES := $(wildcard prj/*.cpp)
 ROVER_SRC_FILES += $(wildcard prj/Rover/*.cpp)
 ROVER_SRC_FILES += $(wildcard prj/Rover/Systems/Drive.cpp)
-ROVER_SRC_FILES += $(wildcard prj/Rover/Handlers/DriveHandler.cpp)
+ROVER_SRC_FILES += $(wildcard prj/Rover/Systems/Arm.cpp)
+ROVER_SRC_FILES += $(wildcard prj/Rover/Handlers/*.cpp)
 ROVER_SRC_FILES += $(wildcard prj/Websocket/*.cpp)
 
 ROVER_SRC_FILES := $(filter-out prj/Websocket/Client.cpp, $(ROVER_SRC_FILES))
@@ -17,11 +18,13 @@ ROVER_SRC_FILES := $(filter-out prj/Websocket/Server.cpp, $(ROVER_SRC_FILES))
 
 BOOST_ROOT = /usr/include
 SDL_ROOT = tools/SDL
+IK_root = tools/IK
 
 CMPL_BOOST = -I $(BOOST_ROOT)
 CMPL_SDL = -I$(SDL_ROOT)/include -L$(SDL_ROOT)/lib -lSDL2
 CMPL_PHIDETS = -lphidget22
 CMPL_JSON = -ljsoncpp
+CMPL_IK = -I$(IK_root)/include
 
 NULL_DEVICE := $(if $(filter Windows_NT,$(OS)),NUL,/dev/null)
 
@@ -42,7 +45,7 @@ base: build_dir
 > g++ -DSIDE_TO_BUILD=1 -I"prj" $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) -o out/base
 
 rover: build_dir
-> g++ -DSIDE_TO_BUILD=2 -I"prj" $(ROVER_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_JSON) -o out/rover
+> g++ -DSIDE_TO_BUILD=2 -I"prj" $(CMPL_IK) $(ROVER_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_JSON) -o out/rover
 
 run_base: base
 > ./base 

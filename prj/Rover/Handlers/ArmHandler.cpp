@@ -1,29 +1,27 @@
 #include "ArmHandler.h"
-#include "ArmModel.h"
-#include <string>
+
+static const char* file = "ArmHandler";
 
 // Constructor
 ArmHandler::ArmHandler(Arm& arm, MessageQueue& armQueue) :
     m_arm(arm), m_armQueue(armQueue) {
 
     // Open the file to store stepper positions
-    std::ifstream positionFile(ARM_LAST_KNOWN_POS_FILE, std::ifstream::binary);
-    if (!positionFile.is_open()) {
+    std::ifstream angleFile(ARM_LAST_KNOWN_POS_FILE, std::ifstream::binary);
+    if (!angleFile.is_open()) {
         Logging::logE(file, "Failed to open angle storage file.");
     }
     Json::CharReaderBuilder readerBuilder;
     std::string errs;
-    Json::parseFromStream(readerBuilder, positionFile, &m_lastKnownPos, &errs);
+    Json::parseFromStream(readerBuilder, angleFile, &m_lastKnownPos, &errs);
     angleFile.close();
     // Updates for this not set up yet <------------------------------------
 
     // Initialize static Arm Model Wrapper
     ArmModel::initialize();
 
-    for (int i = 0; i < m_arm->getDOF(); i++) {
-        if (motorTypes[motor] == MOTOR_TYPE_STEPPER_MOTOR) {
-            calibrateStepper(i);
-        }
+    for (int i = 0; i < m_arm.getDOF(); i++) {
+        calibrateStepper(i);
     }
 }
 
@@ -95,56 +93,6 @@ void ArmHandler::updateMotorAngles(std::array<double, T> new_angles) {
     }
 }
 
-void ArmHandler::calibrateStepper(int stepper) {
-    // This function should be called before the arm is used to ensure
-    // the steppers are at the correct orientation
-
-    // 1 for clockwise, -1 for counterclockwise
-    int direction = -1;
-    MotorHandlerReturn motorStuct;
-    MotorHandlerReturn encoderStuct;
-    int currentIndex; // will change to its actual value when the stepper finds
-                      // it
-    int initialIndex; // index given by initial index call
-    int change = -10; // starting off negative so first sweep is clockwise
-
-    // get the encoder and stepper
-    m_arm->getArmMotorHandle(&motorStuct, wheel);
-    m_arm->getArmEncoderHandle(&encoderStuct, stepper);
-
-    // Get the initial value of the index
-    initialIndex = getIndexPosition(*encoderStuct.handler.encoder);
-
-    // Get the current position of the wheel
-    int lastKnownAngle = m_lastKnownPos[std::to_string(stepper)].asInt();
-    PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
-                                     -lastKnownAngle);
-
-    // start sweeping until index changes
-    while (currentIndex == initialIndex) {
-        angleGoal += change * direction;
-
-        PhidgetStepper_setTargetPosition(*motorStuct.handler.stepperMotor,
-                                         angleGoal);
-
-        // Get the current value of the index
-        currentIndex = getIndexPosition(*encoderStuct.handler.encoder);
-
-        if (abs(angleGoal) > 100) {
-            Logging::logE(file,
-                          "Calibration failed: angle goal exceeded limit.");
-            exit(1);
-        }
-    }
-
-    // Reset the position of the stepper motor to 0 where the index is
-    PhidgetStepper_setTargetPosition(*motorStuct.handler.stepperMotor,
-                                     currentIndex);
-    PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
-                                     -currentIndex);
-    PhidgetEncoder_setPosition(*encoderStuct.handler.encoder, 0);
-}
-
 // Destructor
 ArmHandler::~ArmHandler() {
     // Shut down arm handler threads
@@ -161,7 +109,7 @@ void ArmHandler::loop() {
 
     while (true) {
         // Get message from armQueue
-        message = m_armQueue.pop().get_payload();
+        message = std::get<ArmMessage>(m_armQueue.pop().get_payload());
 
         switch (message.type) {
         case ARM_MESSAGE_TYPE_MANUAL:
@@ -181,4 +129,65 @@ void ArmHandler::loop() {
 
 void ArmHandler::start() {
     m_startThread = std::thread(&ArmHandler::loop, this);
+}
+
+void ArmHandler::calibrateStepper(int joint_num) {
+    // This function should be called before the arm is used to ensure
+    // the steppers are at the correct orientation
+
+    // 1 for clockwise, -1 for counterclockwise
+    int direction = -1;
+    MotorHandlerReturn motorStuct;
+    MotorHandlerReturn encoderStuct;
+    int64_t currentIndex; // will change to its actual value when the stepper
+                          // finds it
+    double currentAngle = 0;
+    int64_t initialIndex; // index given by initial index call
+    int change = -10;     // starting off negative so first sweep is clockwise
+
+    // get the encoder and stepper
+    m_arm.getArmMotorHandle(&motorStuct, joint_num);
+    m_arm.getArmEncoderHandle(&encoderStuct, joint_num);
+
+    // Get the initial value of the index
+    PhidgetEncoder_getIndexPosition(*encoderStuct.handler.encoder,
+                                    &initialIndex);
+    double initialAngle = (initialIndex / MAX_ENCODER_POSITIONS) * 360;
+
+    // Get the current position of the wheel
+    int lastKnownAngle = m_lastKnownPos[std::to_string(joint_num)].asInt();
+    PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
+                                     -lastKnownAngle);
+
+    int angleGoal = 0;
+
+    // start sweeping until index changes
+    while (1) {
+        // Get the current value of the index
+        PhidgetEncoder_getIndexPosition(*encoderStuct.handler.encoder,
+                                        &currentIndex);
+        currentAngle = (currentIndex / MAX_ENCODER_POSITIONS) * 360;
+
+        PhidgetStepper_setTargetPosition(*motorStuct.handler.stepperMotor,
+                                         angleGoal);
+
+        if (initialAngle == initialAngle) {
+            break;
+        }
+
+        if (abs(angleGoal) > 100) {
+            Logging::logE(file,
+                          "Calibration failed: angle goal exceeded limit.");
+            exit(1);
+        }
+        direction *= -1;
+        angleGoal = (change + abs(angleGoal)) * direction;
+    }
+
+    // Reset the position of the stepper motor to 0 where the index is
+    PhidgetStepper_setTargetPosition(*motorStuct.handler.stepperMotor,
+                                     currentIndex);
+    PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
+                                     -currentIndex);
+    PhidgetEncoder_setPosition(*encoderStuct.handler.encoder, 0);
 }

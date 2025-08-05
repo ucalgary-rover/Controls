@@ -2,7 +2,7 @@
 
 static const char* file = "Arm";
 
-Arm::Arm(const std::vector<const MotorType> motorTypes) :
+Arm::Arm(const std::vector<MotorType> motorTypes) :
     m_degOfFreedom(motorTypes.size()), m_motorTypes(motorTypes) {
     m_handlesDC = new PhidgetDCMotorHandle*[m_degOfFreedom]();
     m_handlesStepper = new PhidgetStepperHandle*[m_degOfFreedom]();

@@ -3,10 +3,13 @@
 
 #pragma once
 
+#include "ArmModel.h"
 #include "HandlerInterface.h"
-#include "Rover/Rover.h"       // This also needs to be fixed
-#include "Rover/Systems/Arm.h" // This needs to be fixed
+#include "Rover/Rover.h"
+#include "Rover/Systems/Arm.h"
+#include <jsoncpp/json/json.h>
 #include <mutex>
+#include <string>
 
 class ArmHandler : public HandlerInterface {
 public:
@@ -17,9 +20,9 @@ public:
 
     /**
      * @brief Calibrates steppers so they start in the zero positions
-     * @param stepper the index of the stepper to be calibrated
+     * @param joint_num the index of the joint to be calibrated
      */
-    void calibrateStepper(int stepper);
+    void calibrateStepper(int joint_num);
 
 private:
     Arm& m_arm;

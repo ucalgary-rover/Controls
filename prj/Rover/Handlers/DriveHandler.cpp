@@ -119,24 +119,11 @@ void DriveHandler::turnWheel(DriveIndex wheel, int angle) {
     double currentStepperPos;
     MotorHandlerReturn motorStuct;
 
-    // get the encoder handler
-    m_drive->getDriveEncoderHandle(&motorStuct, wheel);
-
-    PhidgetEncoder_getPosition(*motorStuct.handler.encoder, &currentPos);
-
     double currentAngle = (currentPos / MAX_ENCODER_POSITIONS) * 360;
 
     if (abs(currentPos - angle) > WHEEL_TURN_THRESH) {
         stopWheels();
     }
-
-    // get the stepper handler
-    m_drive->getDriveStepperHandle(&motorStuct, wheel);
-
-    PhidgetStepper_getPosition(*motorStuct.handler.stepperMotor,
-                               &currentStepperPos);
-    PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
-                                     currentStepperPos - currentAngle);
 
     // turn the wheel
     // can make this async with PhidgetStepper_setTargetPosition_async
@@ -569,11 +556,11 @@ void DriveHandler::calibrateWheel(DriveIndex wheel) {
             }
 
             if (i = 0) {
-                direction * -1;
+                direction *= -1;
                 angleGoal *= direction;
             }
         }
-        direction * -1;
+        direction *= -1;
     }
 
     // Reset the position of the stepper motor to 0
@@ -582,8 +569,6 @@ void DriveHandler::calibrateWheel(DriveIndex wheel) {
                                &currentStepperPos);
     PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
                                      -currentStepperPos);
-    m_drive->getDriveEncoderHandle(&motorStuct, wheel);
-    PhidgetEncoder_setPosition(*motorStuct.handler.encoder, 0);
 }
 
 static void CCONV onButtonPressedHandler(PhidgetDigitalInputHandle pdih,

@@ -18,7 +18,7 @@ public:
      * @param motorTypes List of motor types  with length equal to the DOF of
      * the arm
      */
-    Arm(const std::vector<const MotorType> motorTypes);
+    Arm(const std::vector<MotorType> motorTypes);
 
     /**
      * @brief Completes the deinitialisation for all motors That make up the arm
@@ -64,7 +64,7 @@ public:
 
 private:
     int m_degOfFreedom;
-    const std::vector<const MotorType> m_motorTypes;
+    const std::vector<MotorType> m_motorTypes;
     PhidgetDCMotorHandle** m_handlesDC;
     PhidgetStepperHandle** m_handlesStepper;
     PhidgetEncoderHandle** m_handlesEncoder;
