@@ -1,4 +1,4 @@
-#include "armModel.h"
+#include "ArmModel.h"
 
 static SSRTArm2025Analytical* armModel;
 bool ArmModel::is_initialized = false;
@@ -48,8 +48,8 @@ void ArmModel::initialize() {
     SSRTArm2025Analytical::JointLimits joint_limits = {};
     joint_limits.push_back(checkIndividualJointBoundaries);
 
-    armModel
-        = &SSRTArm2025Analytical(link_lengths, joint_defaults, joint_limits);
+    *armModel
+        = SSRTArm2025Analytical(link_lengths, joint_defaults, joint_limits);
 
     is_initialized = true;
 }
