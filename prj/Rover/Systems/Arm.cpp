@@ -16,14 +16,14 @@ Arm::Arm(const std::vector<MotorType> motorTypes) :
             PhidgetDCMotor_create(m_handlesDC[motor]);
             setAddressProperties<PhidgetDCMotorHandle>(
                 m_handlesDC[motor], ARM_MOTOR_SERIAL_NUMBER[motor],
-                ARM_MOTOR_CHANNEL[motor]);
+                ARM_MOTOR_CHANNEL[motor], ARM_MOTOR_PORT[motor]);
 
             break;
         case MOTOR_TYPE_STEPPER_MOTOR:
             PhidgetStepper_create(m_handlesStepper[motor]);
             setAddressProperties<PhidgetStepperHandle>(
                 m_handlesStepper[motor], ARM_MOTOR_SERIAL_NUMBER[motor],
-                ARM_MOTOR_CHANNEL[motor]);
+                ARM_MOTOR_CHANNEL[motor], ARM_MOTOR_PORT[motor]);
 
             break;
         default:
@@ -42,14 +42,14 @@ Arm::Arm(const std::vector<MotorType> motorTypes) :
         PhidgetEncoder_create(m_handlesEncoder[encoder]);
         setAddressProperties<PhidgetEncoderHandle>(
             m_handlesEncoder[encoder], ARM_ENCODER_SERIAL_NUMBER[encoder],
-            ARM_ENCODER_CHANNEL[encoder]);
+            ARM_ENCODER_CHANNEL[encoder], ARM_ENCODER_PORT[encoder]);
     }
 
     // initialise claw
     Logging::logD(file, "Initialising Arm Claw");
     PhidgetRCServo_create(m_handleClaw);
     setAddressProperties<PhidgetRCServoHandle>(
-        m_handleClaw, ARM_CLAW_SERIAL_NUMBER, ARM_CLAW_CHANNEL);
+        m_handleClaw, ARM_CLAW_SERIAL_NUMBER, ARM_CLAW_CHANNEL, ARM_CLAW_PORT);
 }
 
 Arm::~Arm() {

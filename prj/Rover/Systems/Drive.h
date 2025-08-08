@@ -77,9 +77,9 @@ public:
     float getLength();
 
 private:
-    PhidgetDCMotorHandle** m_handlesDC;
-    PhidgetStepperHandle** m_handlesStepper;
-    PhidgetDigitalInputHandle** m_handlesDigitalInput;
+    std::vector<PhidgetDCMotorHandle> m_handlesDC = {};
+    std::vector<PhidgetStepperHandle> m_handlesStepper = {};
+    PhidgetDigitalInputHandle* m_handlesDigitalInput;
 
     // if true, the wheels are in spot turning configuration
     bool m_spotTurnFlag = false;

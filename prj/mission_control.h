@@ -20,8 +20,8 @@
 #ifndef SIDE_TO_BUILD
 #define SIDE_TO_BUILD BUILD_SIDE_BASE
 #endif // SIDE_TO_BUILD
-#define EXTENTION EXTENTION_TYPE_ARM
-#define LOGGING_LEVEL LOG_LEVEL_VERBOSE
+#define EXTENTION EXTENTION_TYPE_NONE
+#define LOGGING_LEVEL LOG_LEVEL_DEBUG
 
 // Rover dimentions
 #define ROVER_LENGTH 1.0 // in meters
@@ -41,19 +41,25 @@
 
 // Following consts should follow the order of
 // DriveMotorIndex in pub_rover.cpp
-const int DRIVE_DC_SERIAL_NUMBER[4] = { 1000, 1000, 1000, 1000 };
-const int DRIVE_DC_CHANNEL[4] = { 1, 1, 1, 1 };
-const int DRIVE_STEPPER_SERIAL_NUMBER[4] = { 1000, 1000, 1000, 1000 };
-const int DRIVE_STEPPER_CHANNEL[4] = { 1, 1, 1, 1 };
-const int DRIVE_DIGITAL_INPUT_SERIAL_NUMBER[4] = { 1000, 1000, 1000, 1000 };
-const int DRIVE_DIGITAL_INPUT_CHANNEL[4] = { 1, 1, 1, 1 };
+const int DRIVE_DC_SERIAL_NUMBER[4] = { 697178, 697178, 697178, 697178 };
+const int DRIVE_DC_CHANNEL[4] = { 0, 0, 0, 0 };
+const int DRIVE_DC_PORT[4] = { 0, 1, 5, 4 };
+const int DRIVE_STEPPER_SERIAL_NUMBER[4] = { 697270, 697270, 697270, 697270 };
+const int DRIVE_STEPPER_CHANNEL[4] = { 0, 0, 0, 0 };
+const int DRIVE_STEPPER_PORT[4] = { 1, 0, 5, 4 };
+const int DRIVE_DIGITAL_INPUT_SERIAL_NUMBER = 1000;
+const int DRIVE_DIGITAL_INPUT_CHANNEL = 0;
+const int DRIVE_DIGITAL_INPUT_PORT = 2;
 
 const int ARM_MOTOR_SERIAL_NUMBER[6] = { 1000, 1000, 1000, 1000, 1000, 1000 };
-const int ARM_MOTOR_CHANNEL[6] = { 1, 1, 1, 1, 1, 1 };
+const int ARM_MOTOR_CHANNEL[6] = { 0, 0, 0, 0, 0, 0 };
+const int ARM_MOTOR_PORT[6] = { 0, 0, 0, 0, 0, 0 };
 const int ARM_ENCODER_SERIAL_NUMBER[6] = { 1000, 1000, 1000, 1000, 1000, 1000 };
-const int ARM_ENCODER_CHANNEL[6] = { 1, 1, 1, 1, 1, 1 };
+const int ARM_ENCODER_CHANNEL[6] = { 0, 0, 0, 0, 0, 0 };
+const int ARM_ENCODER_PORT[6] = { 0, 0, 0, 0, 0, 0 };
 const int ARM_CLAW_SERIAL_NUMBER = 1000;
-const int ARM_CLAW_CHANNEL = 1;
+const int ARM_CLAW_CHANNEL = 0;
+const int ARM_CLAW_PORT = 0;
 
 // Websocet Definitions
 const int WEBSOCKET_PORT = 8080;
