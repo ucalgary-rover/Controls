@@ -151,29 +151,11 @@ float DriveHandler::spotTurnSpeed(int stickAngle) {
     // right turn
     if (stickAngle > 180) {
         // note the negative values
-        reportedAngle = stickAngle - 360;
-
+        return -1;
+    } else {
         // left turn
-    } else if (stickAngle < 180) {
-        reportedAngle = stickAngle;
-
-        // deadzone
-    } else if (stickAngle == 180) {
-        reportedAngle = 0;
+        return 1;
     }
-
-    // adjusts value up until a maximum (1 = 100%)
-    speedAdjust = reportedAngle / MAX_SPEED_ANGLE;
-
-    // prevents value from going above maximum by rounding down to 1
-    speedAdjust = (std::abs(speedAdjust) > 1) ? (int)speedAdjust : speedAdjust;
-
-    // calculates speed based on the adjustment with the sign determining the
-    // direction
-    float speed = speedAdjust * SPOT_SPEED_MAX;
-
-    // negative value results in a right turn, otherwise left turn
-    return speed;
 }
 
 void DriveHandler::spotTurn(int stickAngle) {
