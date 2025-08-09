@@ -20,15 +20,16 @@ ArmHandler::ArmHandler(Arm& arm, MessageQueue& armQueue) :
     // Initialize static Arm Model Wrapper
     ArmModel::initialize();
 
-    for (int i = 0; i < m_arm.getDOF(); i++) {
-        calibrateStepper(i);
-    }
+    // for (int i = 0; i < m_arm.getDOF(); i++) {
+    //     calibrateStepper(i);
+    // }
 }
 
 void ArmHandler::handleManualArmMessage(ArmManualMessage message) {
     auto current_angles = ArmModel::getAngles();
 
     if (message.motorId > current_angles.max_size()) {
+        Logging::logE(file, "Invalid motor ID: %d", message.motorId);
         return;
     }
 
@@ -37,6 +38,8 @@ void ArmHandler::handleManualArmMessage(ArmManualMessage message) {
     if (!ArmModel::updateJointAngles(current_angles)) {
         return;
     }
+
+    // updateMotorAngles(current_angles);
 }
 
 void ArmHandler::handleFixedIKMessage(ArmFixedIKMessage message) {
@@ -104,31 +107,35 @@ ArmHandler::~ArmHandler() {
     //     m_stopThread.join();
 }
 
-void ArmHandler::loop() {
+void ArmHandler::start() {
     ArmMessage message;
 
     while (true) {
         // Get message from armQueue
-        message = std::get<ArmMessage>(m_armQueue.pop().get_payload());
+        Message msg = m_armQueue.pop();
+
+        if (msg.getFormat() != MessageFormat::MESSAGE_FORMAT_ARM) {
+            Logging::logE(file, "Received non-arm message in armQueue %d",
+                          msg.getFormat());
+            continue;
+        }
+
+        message = std::get<ArmMessage>(msg.get_payload());
 
         switch (message.type) {
         case ARM_MESSAGE_TYPE_MANUAL:
             handleManualArmMessage(message.manual_message);
             break;
-        case ARM_MESSAGE_TYPE_FIXED_IK:
-            handleFixedIKMessage(message.fixed_ik_message);
-            break;
-        case ARM_MESSAGE_TYPE_VARIABLE_IK:
-            handleVariableIKMessage(message.variable_ik_message);
-            break;
+        // case ARM_MESSAGE_TYPE_FIXED_IK:
+        //     handleFixedIKMessage(message.fixed_ik_message);
+        //     break;
+        // case ARM_MESSAGE_TYPE_VARIABLE_IK:
+        //     handleVariableIKMessage(message.variable_ik_message);
+        //     break;
         default:
             break;
         }
     }
-}
-
-void ArmHandler::start() {
-    m_startThread = std::thread(&ArmHandler::loop, this);
 }
 
 void ArmHandler::calibrateStepper(int joint_num) {

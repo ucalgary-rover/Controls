@@ -481,7 +481,7 @@ void DriveHandler::start() {
 
         msg.printMessage();
 
-        message = std::get<WheelMessage>(m_driveQueue->pop().get_payload());
+        message = std::get<WheelMessage>(msg.get_payload());
 
         // flags for if the value is non-zero
         bool angleVelocityFlag
