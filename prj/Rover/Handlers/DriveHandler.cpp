@@ -310,12 +310,15 @@ void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
         MotorHandlerReturn motorStuct;
         m_drive->getDriveDCHandle(&motorStuct, dc);
 
-        if (dc == DRIVE_INDEX_BACK_LEFT || dc == DRIVE_INDEX_FRONT_LEFT) {
-            speed = speed * -1;
+        if (dc % 2 == 0) {
+            PhidgetBLDCMotor_setTargetVelocity_async(
+                *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone,
+                NULL);
+        } else {
+            PhidgetBLDCMotor_setTargetVelocity_async(
+                *motorStuct.handler.bldcMotor, -speed, setTargetVelocityDone,
+                NULL);
         }
-
-        PhidgetBLDCMotor_setTargetVelocity_async(
-            *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone, NULL);
     }
 }
 

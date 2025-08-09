@@ -1,7 +1,7 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
-#define QUEUE_LIMIT 100 // The maximum size of the queue
+#define QUEUE_LIMIT 5 // The maximum size of the queue
 
 #include "Message.h"
 #include <condition_variable>
