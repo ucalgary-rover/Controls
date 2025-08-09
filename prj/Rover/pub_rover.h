@@ -43,7 +43,7 @@ inline const char* driveIndexToString(DriveIndex index) {
 struct MotorHandlerReturn {
     MotorType type;
     union handler {
-        PhidgetDCMotorHandle* dcMotor;
+        PhidgetBLDCMotorHandle* dcMotor;
         PhidgetStepperHandle* stepperMotor;
         PhidgetRCServoHandle* servoMotor;
         PhidgetDigitalInputHandle* digitalInput;

@@ -422,7 +422,7 @@ void Base::start() {
         sendQueue.push(Message(MESSAGE_PRIORITY_LOW, armMsg));
 
 #endif
-        usleep(3 * 1000000);
+        usleep(0.5 * 1000000);
     }
     controllerThread.join();
     websocketServerThread.join();

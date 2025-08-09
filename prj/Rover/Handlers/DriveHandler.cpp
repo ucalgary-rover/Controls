@@ -70,6 +70,9 @@ static void CCONV onButtonPressedHandler(PhidgetDigitalInputHandle pdih,
 static void CCONV onAngleReached(PhidgetHandle pdih, void* ctx,
                                  PhidgetReturnCode returnCode);
 
+static void CCONV setTargetVelocityDone(PhidgetHandle phid, void* ctx,
+                                        PhidgetReturnCode res);
+
 const float PI = 3.14;
 
 // two decimal places
@@ -100,9 +103,9 @@ DriveHandler::DriveHandler(Drive* drive, MessageQueue* driveQueue) {
     angleFile.close();
 
     // Calibrate all wheels to face forward
-    for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
-        calibrateWheel((DriveIndex)i);
-    }
+    // for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
+    //     calibrateWheel((DriveIndex)i);
+    // }
 }
 
 void DriveHandler::turnWheel(DriveIndex wheel, int angle) {
@@ -117,16 +120,21 @@ void DriveHandler::turnWheel(DriveIndex wheel, int angle) {
     angleFile.close();
 
     // check if the turn is larger than 10 degrees
-    int64_t currentPos;
-    double currentStepperPos;
+
     MotorHandlerReturn motorStuct;
+    m_drive->getDriveStepperHandle(&motorStuct, wheel);
 
-    double currentAngle = (currentPos / MAX_ENCODER_POSITIONS) * 360;
+    double currentStepperPos;
 
-    if (abs(currentPos - angle) > WHEEL_TURN_THRESH) {
+    PhidgetStepper_getPosition(*motorStuct.handler.stepperMotor,
+                               &currentStepperPos);
+
+    if (abs(currentStepperPos - angle) > WHEEL_TURN_THRESH) {
         m_wheelTargetStatuses[wheel] = false;
         stopWheels();
     }
+
+    Logging::logD(file, "angle: %d, wheel: %d", angle, wheel);
 
     // turn the wheel
     // can make this async with PhidgetStepper_setTargetPosition_async
@@ -173,23 +181,18 @@ void DriveHandler::spotTurn(int stickAngle) {
     // deriving speed based on angle of right stick
     float speed = spotTurnSpeed(stickAngle);
 
-    // default directions(those of a left turn at full speed)
-    // if speedAdjust is negative, right turn takes place
-    float leftSpeed = -speed;
-    float rightSpeed = speed;
-
     // turn wheels
 
     // if moving into spot turn configuration, prevents wheels from spinning
-    if (!m_spotTurnFlag) {
+    // if (!m_spotTurnFlag) {
 
-        stopWheels(); // Ensure the wheels wait to finish turning
-                      //  <---------------------
-    }
+    //     stopWheels(); // Ensure the wheels wait to finish turning
+    //                   //  <---------------------
+    // }
 
     // Angle of wheel direction based on length and width
     float wheelAngle
-        = TO_DEGREES(atan(m_drive->getWidth() / m_drive->getLength()));
+        = TO_DEGREES(atan(m_drive->getLength() / m_drive->getWidth()));
 
     // Turn the wheels
     for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
@@ -213,19 +216,11 @@ void DriveHandler::spotTurn(int stickAngle) {
         // get the handler
         MotorHandlerReturn motorStuct;
         m_drive->getDriveDCHandle(&motorStuct, dc);
+        PhidgetReturnCode res;
 
-        // checking for direction to spin each wheel
-
-        // if index odd the wheel is on the right of chassis
-        if (dc % 2 == 1) {
-            PhidgetDCMotor_setTargetVelocity(*motorStuct.handler.dcMotor,
-                                             rightSpeed);
-
-            // if index is even the wheel is on the left of chassis
-        } else if (dc % 2 == 0) {
-            PhidgetDCMotor_setTargetVelocity(*motorStuct.handler.dcMotor,
-                                             leftSpeed);
-        }
+        PhidgetBLDCMotor_setTargetVelocity_async(
+            *motorStuct.handler.dcMotor, speed, setTargetVelocityDone, NULL);
+        Logging::logD(file, "Setting DC motor %d to speed %f", dc, speed);
     }
 }
 
@@ -248,7 +243,7 @@ int DriveHandler::strafeAngleAdjust(int stickTheta) {
         // edge positions ----> (massive headache ahead) <----
         // since 90 and 270 are equivalent positions, the following code tries
         // to find which is easiest to move to
-    } else if (reportedAngle == 90 || reportedAngle == 270) {
+    } else if (stickTheta == 90 || stickTheta == 270) {
         // used to hold the current position
         double currentPos;
 
@@ -283,6 +278,8 @@ int DriveHandler::strafeAngleAdjust(int stickTheta) {
         } else {
             reportedAngle = -90;
         }
+    } else {
+        Logging::logE(file, "AAAHHHHHHHHHH: %d", stickTheta);
     }
 
     return reportedAngle;
@@ -331,7 +328,8 @@ void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
         MotorHandlerReturn motorStuct;
         m_drive->getDriveDCHandle(&motorStuct, dc);
 
-        PhidgetDCMotor_setTargetVelocity(*motorStuct.handler.dcMotor, speed);
+        PhidgetBLDCMotor_setTargetVelocity_async(
+            *motorStuct.handler.dcMotor, speed, setTargetVelocityDone, NULL);
     }
 }
 
@@ -393,10 +391,10 @@ float DriveHandler::radialTurnWheelAngles(int headingAngle, bool innerFlag) {
 // Applies to the front wheels regardless of direction
 void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
                               int stickTheta) {
-
+    Logging::logD(file, "Radial turn with angle %d, magnitude %d, theta %d",
+                  stickAngle, stickMagnitude, stickTheta);
     // Finding heading angle
     float headingAngle = radialTurnHeadingAngle(stickAngle);
-
     // calculating angles of leading wheels
     float innerAngle = radialTurnWheelAngles(headingAngle, true);
 
@@ -422,12 +420,12 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
     // list of angles to iterate thru
     float wheelAngles[2] = { leftAngle, rightAngle };
 
-    for (int stepper = 0; stepper < 2; ++stepper) {
+    for (int stepper = 0; stepper < 2; stepper++) {
         turnWheel((DriveIndex)stepper, wheelAngles[stepper]);
     }
 
     // make sure back wheels are straight
-    for (int stepper = 2; stepper < 4; ++stepper) {
+    for (int stepper = 2; stepper < 4; stepper++) {
         turnWheel((DriveIndex)stepper, 0);
     }
 
@@ -446,7 +444,8 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
         MotorHandlerReturn motorStuct;
         m_drive->getDriveDCHandle(&motorStuct, dc);
 
-        PhidgetDCMotor_setTargetVelocity(*motorStuct.handler.dcMotor, speed);
+        PhidgetBLDCMotor_setTargetVelocity_async(
+            *motorStuct.handler.dcMotor, speed, setTargetVelocityDone, NULL);
     }
 }
 
@@ -457,7 +456,8 @@ void DriveHandler::stopWheels() {
         MotorHandlerReturn motorStuct;
         m_drive->getDriveDCHandle(&motorStuct, dc);
 
-        PhidgetDCMotor_setTargetVelocity(*motorStuct.handler.dcMotor, 0);
+        PhidgetBLDCMotor_setTargetVelocity_async(*motorStuct.handler.dcMotor, 0,
+                                                 setTargetVelocityDone, NULL);
     }
 
     // wait for an amount of seconds to let the wheels slow down
@@ -476,6 +476,7 @@ void DriveHandler::awaitWheelTargets() {
             overallStatus = overallStatus && m_wheelTargetStatuses[i];
         }
     }
+    Logging::logD(file, "Exiting await wheel targets");
 }
 
 void DriveHandler::start() {
@@ -484,6 +485,16 @@ void DriveHandler::start() {
 
     while (true) {
         // Get message from driveQueue
+        Message msg = m_driveQueue->pop();
+
+        if (msg.getFormat() != MessageFormat::MESSAGE_FORMAT_WHEEL) {
+            Logging::logE(file, "Received non-wheel message in driveQueue %d",
+                          msg.getFormat());
+            continue;
+        }
+
+        msg.printMessage();
+
         message = std::get<WheelMessage>(m_driveQueue->pop().get_payload());
 
         // flags for if the value is non-zero
@@ -501,15 +512,18 @@ void DriveHandler::start() {
 
         // Radial turn (angular velocity and velocity forwards or backwards)
         if (angleVelocityFlag && thetaFlag && velocityFlag) {
+            Logging::logD(file, "Radial turn");
             m_spotTurnFlag = false;
             radialTurn(message.angleVelocity, message.velocity, message.theta);
 
             // Spot turning (angular velocity)
         } else if (angleVelocityFlag) {
+            Logging::logD(file, "Spot turn");
             spotTurn(message.angleVelocity);
 
             // Strafing (angle and velocity)
         } else if (velocityFlag) {
+            Logging::logD(file, "Strafing");
             m_spotTurnFlag = false;
             strafe(message.theta, message.velocity);
 
@@ -525,7 +539,7 @@ void DriveHandler::calibrateWheel(DriveIndex wheel) {
     // the wheels are facing the correct direction
 
     // 1 for clockwise, -1 for counterclockwise
-    int direction = 1;
+    int calibrationDirection = 1;
     MotorHandlerReturn motorStuct;
     bool buttonPressed = 0;
     int changes[] = { 10, 4, 1 };
@@ -542,12 +556,34 @@ void DriveHandler::calibrateWheel(DriveIndex wheel) {
     PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
                                      -lastKnownAngle);
     for (int i = 0; i < sizeof(changes) / sizeof(changes[0]); i++) {
+        int state;
+        PhidgetDigitalInput_getState(*motorStuct.handler.digitalInput, &state);
+        if (state == 1) {
+            Logging::logI(file,
+                          "Button already pressed, skipping calibration.");
+            return;
+        }
+
         int angleGoal = 0;
-        while (!buttonPressed) {
-            angleGoal += changes[i] * direction;
+        while (true) {
+            angleGoal = (changes[i] + abs(angleGoal)) * calibrationDirection;
+            Logging::logI(file,
+                          "Calibrating change %d to angle %d direction %d",
+                          changes[i], angleGoal, calibrationDirection);
 
             PhidgetStepper_setTargetPosition(*motorStuct.handler.stepperMotor,
                                              angleGoal);
+
+            while (true) {
+                double position;
+                PhidgetStepper_getPosition(*motorStuct.handler.stepperMotor,
+                                           &position);
+                if ((position >= angleGoal - 0.5)
+                    && (position <= angleGoal + 0.5)) {
+                    break;
+                }
+                usleep(10000); // Sleep for 10ms to avoid busy waiting
+            }
 
             if (buttonPressed) {
                 buttonPressed = 0;
@@ -560,12 +596,11 @@ void DriveHandler::calibrateWheel(DriveIndex wheel) {
                 exit(1);
             }
 
-            if (i = 0) {
-                direction *= -1;
-                angleGoal *= direction;
+            if (i == 0) {
+                calibrationDirection *= -1;
             }
         }
-        direction *= -1;
+        calibrationDirection *= -1;
     }
 
     // Reset the position of the stepper motor to 0
@@ -578,7 +613,6 @@ void DriveHandler::calibrateWheel(DriveIndex wheel) {
 
 static void CCONV onButtonPressedHandler(PhidgetDigitalInputHandle pdih,
                                          void* ctx, int state) {
-
     int* myIntPtr = (int*)ctx;
     *myIntPtr = 1;
 }
@@ -586,4 +620,10 @@ static void CCONV onButtonPressedHandler(PhidgetDigitalInputHandle pdih,
 static void CCONV onAngleReached(PhidgetHandle pdih, void* ctx,
                                  PhidgetReturnCode returnCode) {
     *(bool*)ctx = true;
+}
+
+static void CCONV setTargetVelocityDone(PhidgetHandle phid, void* ctx,
+                                        PhidgetReturnCode res) {
+
+    // Async call completed
 }

@@ -14,15 +14,15 @@ MessageQueue::~MessageQueue() { }
  * Add message into correct queue depending on priority
  */
 void MessageQueue::push(const Message message) {
-
-    // Check for Queue limit
-    if (this->isQueueLimit()) {
-        Logging::logW(file, "Queue limit reached. push discarded");
-        return;
-    }
-
     // Thread acquires lock
     std::unique_lock<std::mutex> lock(m_mutex);
+
+    // Check for Queue limit
+    if (m_regularQueue.size() >= QUEUE_LIMIT) {
+        m_regularQueue
+            .pop(); // Remove the oldest message from the regular queue
+        Logging::logW(file, "Queue limit reached, discarded oldest message.");
+    }
 
     if (message.isHighPriority()) {
         m_priorityQueue.push(message);
