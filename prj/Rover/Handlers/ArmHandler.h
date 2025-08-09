@@ -45,7 +45,7 @@ private:
     void handleFixedIKMessage(ArmFixedIKMessage message);
     void handleVariableIKMessage(ArmVariableIKMessage message);
 
-    template <int T> void updateMotorAngles(std::array<double, T> new_angles);
+    void updateMotorAngles(std::array<int, 6> new_angles);
 };
 
 #endif

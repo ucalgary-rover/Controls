@@ -1,4 +1,5 @@
 #include "ArmHandler.h"
+#include "tools/IK/include/SSRTArm2025JointLimits.h"
 
 static const char* file = "ArmHandler";
 
@@ -39,7 +40,7 @@ void ArmHandler::handleManualArmMessage(ArmManualMessage message) {
         return;
     }
 
-    // updateMotorAngles(current_angles);
+    updateMotorAngles(current_angles);
 }
 
 void ArmHandler::handleFixedIKMessage(ArmFixedIKMessage message) {
@@ -87,12 +88,75 @@ void updateMotorAngle(MotorHandlerReturn* handler, double angle) {
     }
 }
 
-template <int T>
-void ArmHandler::updateMotorAngles(std::array<double, T> new_angles) {
-    for (int i = 0; i < T; i++) {
+static constexpr double b1 = 10.59;
+static constexpr double c1 = 24.5;
+static constexpr double b2 = 13;
+static constexpr double c2 = 29;
+
+static double alpha
+    = acos((14 * 14 - 24.5 * 24.5 - 35.5 * 35.5) / (2 * 24.5 * 35.5));
+static double beta = atan(3.5 / 10);
+
+int l1ToTheta1(double l1) {
+    double a1 = l1;
+
+    double A1 = acos((a1 * a1 - b1 * b1 - c1 * c1) / (2 * b1 * c1));
+
+    int theta1 = A1 - alpha - beta;
+
+    return theta1;
+}
+
+int l2ToThetaa2(double l2) {
+    double a2 = l2;
+
+    double A2 = acos((a2 * a2 - b2 * b2 - c2 * c2) / (2 * b2 * c2));
+
+    int theta2 = 180 - A2;
+
+    return theta2;
+}
+
+double theta1ToL1(int theta1) {
+    double A1 = theta1 + alpha + beta;
+
+    double a1 = sqrt(2 * b1 * c1 * cos(A1) + b1 * b1 + c1 * c1);
+
+    return a1;
+}
+
+double theta2ToL2(int theta2) {
+    double A2 = 180 - theta2;
+
+    double a2 = sqrt(2 * b2 * c2 * cos(A2) + b2 * b2 + c2 * c2);
+
+    return a2;
+}
+
+void ArmHandler::updateMotorAngles(std::array<int, 6> new_angles) {
+
+    std::array<double, 6> new_actuator_values = {};
+
+    // Base
+    new_actuator_values[0] = new_angles.at(0);
+
+    // Linear Actuator 1
+    new_actuator_values[1] = theta1ToL1(new_angles.at(1));
+
+    // Linear Actuator 2
+    new_actuator_values[2] = theta2ToL2(new_angles.at(2));
+
+    // Wrist
+    new_actuator_values[3] = new_angles.at(3);
+
+    new_actuator_values[4] = new_angles.at(4);
+
+    new_actuator_values[5] = new_angles.at(5);
+
+    for (int i = 0; i < 6; i++) {
         MotorHandlerReturn* handler = nullptr;
         m_arm.getArmMotorHandle(handler, i);
-        updateMotorAngle(handler, new_angles.at(i));
+        updateMotorAngle(handler, new_actuator_values.at(i));
     }
 }
 
