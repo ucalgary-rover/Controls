@@ -4,7 +4,7 @@ static const char* file = "Arm";
 
 Arm::Arm(const std::vector<MotorType> motorTypes) :
     m_degOfFreedom(motorTypes.size()), m_motorTypes(motorTypes) {
-    m_handlesDC = new PhidgetBLDCMotorHandle*[m_degOfFreedom]();
+    m_handlesDC = new PhidgetDCMotorHandle*[m_degOfFreedom]();
     m_handlesStepper = new PhidgetStepperHandle*[m_degOfFreedom]();
     m_handlesEncoder = new PhidgetEncoderHandle*[m_degOfFreedom]();
 
@@ -13,7 +13,7 @@ Arm::Arm(const std::vector<MotorType> motorTypes) :
     for (int motor = 0; motor < m_degOfFreedom; motor++) {
         switch (motorTypes[motor]) {
         case MOTOR_TYPE_DC_MOTOR:
-            PhidgetBLDCMotor_create(m_handlesDC[motor]);
+            PhidgetDCMotor_create(m_handlesDC[motor]);
             setAddressProperties<PhidgetBLDCMotorHandle>(
                 m_handlesDC[motor], ARM_MOTOR_SERIAL_NUMBER[motor],
             // Add new DC Motor Handle
@@ -65,7 +65,7 @@ Arm::~Arm() {
         switch (m_motorTypes[motor]) {
         case MOTOR_TYPE_DC_MOTOR:
             Phidget_close((PhidgetHandle)*m_handlesDC[motor]);
-            PhidgetBLDCMotor_delete(m_handlesDC[motor]);
+            PhidgetDCMotor_delete(m_handlesDC[motor]);
             Phidget_close((PhidgetHandle)m_handlesDC.at(motor));
             PhidgetDCMotor_delete(&m_handlesDC.at(motor));
             break;
