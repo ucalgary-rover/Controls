@@ -10,6 +10,7 @@
 #include <cmath>
 #include <iostream>
 #include <stdio.h>
+#include <vector>
 
 class Drive {
 public:

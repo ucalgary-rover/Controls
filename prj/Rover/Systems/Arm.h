@@ -65,9 +65,9 @@ public:
 private:
     int m_degOfFreedom;
     const std::vector<MotorType> m_motorTypes;
-    PhidgetDCMotorHandle** m_handlesDC;
-    PhidgetStepperHandle** m_handlesStepper;
-    PhidgetEncoderHandle** m_handlesEncoder;
+    std::vector<PhidgetDCMotorHandle> m_handlesDC = {};
+    std::vector<PhidgetStepperHandle> m_handlesStepper = {};
+    std::vector<PhidgetEncoderHandle> m_handlesEncoder = {};
     PhidgetRCServoHandle* m_handleClaw;
 };
 
