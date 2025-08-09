@@ -201,7 +201,7 @@ void DriveHandler::spotTurn(int stickAngle) {
         PhidgetReturnCode res;
 
         PhidgetBLDCMotor_setTargetVelocity_async(
-            *motorStuct.handler.dcMotor, speed, setTargetVelocityDone, NULL);
+            *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone, NULL);
         Logging::logD(file, "Setting DC motor %d to speed %f", dc, speed);
     }
 }
@@ -310,12 +310,12 @@ void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
         MotorHandlerReturn motorStuct;
         m_drive->getDriveDCHandle(&motorStuct, dc);
 
-        if(dc == DRIVE_INDEX_BACK_LEFT || dc == DRIVE_INDEX_FRONT_LEFT) {
+        if (dc == DRIVE_INDEX_BACK_LEFT || dc == DRIVE_INDEX_FRONT_LEFT) {
             speed = speed * -1;
         }
-        
+
         PhidgetBLDCMotor_setTargetVelocity_async(
-            *motorStuct.handler.dcMotor, speed, setTargetVelocityDone, NULL);
+            *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone, NULL);
     }
 }
 
@@ -431,7 +431,7 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
         m_drive->getDriveDCHandle(&motorStuct, dc);
 
         PhidgetBLDCMotor_setTargetVelocity_async(
-            *motorStuct.handler.dcMotor, speed, setTargetVelocityDone, NULL);
+            *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone, NULL);
     }
 }
 
@@ -442,8 +442,8 @@ void DriveHandler::stopWheels() {
         MotorHandlerReturn motorStuct;
         m_drive->getDriveDCHandle(&motorStuct, dc);
 
-        PhidgetBLDCMotor_setTargetVelocity_async(*motorStuct.handler.dcMotor, 0,
-                                                 setTargetVelocityDone, NULL);
+        PhidgetBLDCMotor_setTargetVelocity_async(
+            *motorStuct.handler.bldcMotor, 0, setTargetVelocityDone, NULL);
     }
 
     // wait for an amount of seconds to let the wheels slow down

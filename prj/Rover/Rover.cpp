@@ -47,8 +47,9 @@ void Rover::start() {
     // Instantiate the systems for the rover
 #if EXTENTION == EXTENTION_TYPE_ARM
     const std::vector<MotorType> motorTypes
-        = { MOTOR_TYPE_STEPPER_MOTOR, MOTOR_TYPE_DC_MOTOR, MOTOR_TYPE_DC_MOTOR,
-            MOTOR_TYPE_STEPPER_MOTOR, MOTOR_TYPE_STEPPER_MOTOR };
+        = { MOTOR_TYPE_STEPPER_MOTOR, MOTOR_TYPE_BLDC_MOTOR,
+            MOTOR_TYPE_BLDC_MOTOR, MOTOR_TYPE_STEPPER_MOTOR,
+            MOTOR_TYPE_STEPPER_MOTOR };
     Arm arm(motorTypes);
 #endif
 

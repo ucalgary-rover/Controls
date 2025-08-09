@@ -4,18 +4,12 @@ static const char* file = "Arm";
 
 Arm::Arm(const std::vector<MotorType> motorTypes) :
     m_degOfFreedom(motorTypes.size()), m_motorTypes(motorTypes) {
-    m_handlesDC = new PhidgetDCMotorHandle*[m_degOfFreedom]();
-    m_handlesStepper = new PhidgetStepperHandle*[m_degOfFreedom]();
-    m_handlesEncoder = new PhidgetEncoderHandle*[m_degOfFreedom]();
 
     // initialise motors in the arm
     Logging::logD(file, "Initialising Arm Motors");
     for (int motor = 0; motor < m_degOfFreedom; motor++) {
         switch (motorTypes[motor]) {
         case MOTOR_TYPE_DC_MOTOR:
-            PhidgetDCMotor_create(m_handlesDC[motor]);
-            setAddressProperties<PhidgetBLDCMotorHandle>(
-                m_handlesDC[motor], ARM_MOTOR_SERIAL_NUMBER[motor],
             // Add new DC Motor Handle
             m_handlesDC.push_back(PhidgetDCMotorHandle());
             PhidgetDCMotor_create(&m_handlesDC.at(motor));
@@ -23,12 +17,8 @@ Arm::Arm(const std::vector<MotorType> motorTypes) :
                 &m_handlesDC.at(motor), ARM_MOTOR_SERIAL_NUMBER[motor],
                 ARM_MOTOR_CHANNEL[motor], ARM_MOTOR_PORT[motor]);
 
-            // Add new DC Motor Encoder Handle
+            // Add new empty encoder
             m_handlesEncoder.push_back(PhidgetEncoderHandle());
-            PhidgetEncoder_create(&m_handlesEncoder.at(motor));
-            setAddressProperties<PhidgetEncoderHandle>(
-            &m_handlesEncoder.at(motor), ARM_ENCODER_SERIAL_NUMBER[motor],
-            ARM_ENCODER_CHANNEL[motor], ARM_ENCODER_PORT[motor]);
 
             break;
         case MOTOR_TYPE_STEPPER_MOTOR:
@@ -38,8 +28,12 @@ Arm::Arm(const std::vector<MotorType> motorTypes) :
                 &m_handlesStepper.at(motor), ARM_MOTOR_SERIAL_NUMBER[motor],
                 ARM_MOTOR_CHANNEL[motor], ARM_MOTOR_PORT[motor]);
 
-            // Add new empty encoder
+            // Add new Stepper Motor Encoder Handle
             m_handlesEncoder.push_back(PhidgetEncoderHandle());
+            PhidgetEncoder_create(&m_handlesEncoder.at(motor));
+            setAddressProperties<PhidgetEncoderHandle>(
+                &m_handlesEncoder.at(motor), ARM_ENCODER_SERIAL_NUMBER[motor],
+                ARM_ENCODER_CHANNEL[motor], ARM_ENCODER_PORT[motor]);
             break;
         default:
             Logging::logE(
@@ -64,8 +58,8 @@ Arm::~Arm() {
     for (int motor = 0; motor < m_degOfFreedom; motor++) {
         switch (m_motorTypes[motor]) {
         case MOTOR_TYPE_DC_MOTOR:
-            Phidget_close((PhidgetHandle)*m_handlesDC[motor]);
-            PhidgetDCMotor_delete(m_handlesDC[motor]);
+            Phidget_close((PhidgetHandle)m_handlesDC[motor]);
+            PhidgetDCMotor_delete(&m_handlesDC[motor]);
             Phidget_close((PhidgetHandle)m_handlesDC.at(motor));
             PhidgetDCMotor_delete(&m_handlesDC.at(motor));
             break;

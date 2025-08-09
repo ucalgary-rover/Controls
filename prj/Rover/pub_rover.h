@@ -5,6 +5,7 @@
 
 enum MotorType {
     MOTOR_TYPE_DC_MOTOR,
+    MOTOR_TYPE_BLDC_MOTOR,
     MOTOR_TYPE_STEPPER_MOTOR,
     MOTOR_TYPE_SERVO_MOTOR,
     MOTOR_TYPE_DIGITAL_INPUT,
@@ -43,7 +44,8 @@ inline const char* driveIndexToString(DriveIndex index) {
 struct MotorHandlerReturn {
     MotorType type;
     union handler {
-        PhidgetBLDCMotorHandle* dcMotor;
+        PhidgetBLDCMotorHandle* bldcMotor;
+        PhidgetDCMotorHandle* dcMotor;
         PhidgetStepperHandle* stepperMotor;
         PhidgetRCServoHandle* servoMotor;
         PhidgetDigitalInputHandle* digitalInput;

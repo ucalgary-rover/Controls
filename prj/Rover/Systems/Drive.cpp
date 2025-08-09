@@ -71,8 +71,8 @@ Drive::~Drive() {
 
 bool Drive::getDriveDCHandle(MotorHandlerReturn* retVal, int index) {
     if (index >= 0 && index < DRIVE_INDEX_WHEEL_COUNT) {
-        retVal->type = MOTOR_TYPE_DC_MOTOR;
-        retVal->handler.dcMotor = &m_handlesDC.at(index);
+        retVal->type = MOTOR_TYPE_BLDC_MOTOR;
+        retVal->handler.bldcMotor = &m_handlesDC.at(index);
         return true;
     }
     retVal->type = MOTOR_TYPE_INVALID;
