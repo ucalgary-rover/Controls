@@ -493,14 +493,15 @@ void DriveHandler::start() {
 
         // for if the movement is forward or backward
         // left joystick angle
-        bool thetaFlag = ((message.theta < 10 && message.theta > 350)
-                          || (message.theta < 190 && message.theta > 170))
-                         && (message.theta > 0);
+        bool longitudinalVelocityOnly
+            = (message.theta == 0) || (message.theta == 180);
 
-        // Scenarios
+        // We're going to disable superimposed radial + strafing turning
+        // For now radial turning should only work when strafing velocity is 0
+        // And strafing should only work when angular velocity is 0
 
         // Radial turn (angular velocity and velocity forwards or backwards)
-        if (angleVelocityFlag && thetaFlag && velocityFlag) {
+        if (angleVelocityFlag && longitudinalVelocityOnly && velocityFlag) {
             Logging::logD(file, "Radial turn");
             m_spotTurnFlag = false;
             radialTurn(message.angleVelocity, message.velocity, message.theta);
