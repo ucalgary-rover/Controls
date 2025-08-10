@@ -26,7 +26,7 @@ Base::Base() {
     chassisSpeed = 0;           // speed for strafing
     chassisAngularVelocity = 0; // speed of spot turn or sharpness of radial
                                 // turn
-    chassisMaxSpeed = 100;      // maximum speed of wheels
+    chassisMaxSpeed = 80;       // maximum speed of wheels
 
     // Variables for state of rover arm
     armControlType = ARM_MESSAGE_TYPE_MANUAL;
@@ -75,11 +75,11 @@ Base::Base() {
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
         // left shoulder increments down
         [this]() {
-            incrementInt(&chassisMaxSpeed, -2, 0, 100, "chassisMaxSpeed");
+            incrementInt(&chassisMaxSpeed, -2, 0, 80, "chassisMaxSpeed");
         }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
         // right shoulder increments up
         [this]() {
-            incrementInt(&chassisMaxSpeed, 2, 0, 100, "chassisMaxSpeed");
+            incrementInt(&chassisMaxSpeed, 2, 0, 80, "chassisMaxSpeed");
         },                        // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
