@@ -92,7 +92,7 @@ public:
      * calculates the outer
      * @return The spcified wheel angle in degrees <---
      */
-    float radialTurnWheelAngles(int headingAngle, bool innerFlag);
+    float radialTurnWheelAngles(float headingAngle, bool innerFlag);
 
     /**
      * @brief Stops all wheel movement

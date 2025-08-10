@@ -21,5 +21,5 @@ void setAddressProperties(T* handler, int serialNum, int channel, int hubPort) {
     res = Phidget_setChannel((PhidgetHandle)*handler, channel);
     res = Phidget_setOnAttachHandler((PhidgetHandle)*handler, onAttachHandler,
                                      NULL);
-    res = Phidget_openWaitForAttachment((PhidgetHandle)*handler, 10000);
+    res = Phidget_openWaitForAttachment((PhidgetHandle)*handler, 5000);
 };

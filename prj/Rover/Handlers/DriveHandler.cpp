@@ -131,6 +131,8 @@ void DriveHandler::turnWheel(DriveIndex wheel, int angle) {
 
     if (abs(currentStepperPos - angle) > WHEEL_TURN_THRESH) {
         m_wheelTargetStatuses[wheel] = false;
+        Logging::logD(file,
+                      "Stopping wheels because turning threshold is too large");
         stopWheels();
     }
 
@@ -213,8 +215,11 @@ int DriveHandler::strafeAngleAdjust(int stickTheta) {
     int reportedAngle;
 
     // corresponding to forward wheel spin
-    if (stickTheta < 90 || stickTheta > 270) {
+    if (stickTheta < 90) {
         reportedAngle = stickTheta;
+
+    } else if (stickTheta > 270) {
+        reportedAngle = stickTheta - 360;
 
         // corresponding to backward wheel spin
     } else if (stickTheta > 90 && stickTheta < 270) {
@@ -331,27 +336,14 @@ float DriveHandler::radialTurnHeadingAngle(int stickAngle) {
 
     float reportedAngle = 0;
 
-    // offsets angle if above 180
-    if (stickAngle >= 180) {
-        stickAngle -= 180;
-    }
-
     // corresponding to a left turn
     if (stickAngle < 90) {
-        reportedAngle = (stickAngle / 90) * RADIAL_ANGLE_MAX;
+        reportedAngle = (((float)stickAngle * RADIAL_ANGLE_MAX) / 90);
 
         // corresponding to a right turn (note the negative reported angle
         // value)
-    } else if (stickAngle > 90) {
-        reportedAngle = ((stickAngle - 180) / 90) * RADIAL_ANGLE_MAX;
-
-        // max positions
-    } else if (stickAngle == 90) {
-        reportedAngle = RADIAL_ANGLE_MAX * m_lastRadialOutput;
-
-        // neutral positions
-    } else if (stickAngle == 0) {
-        reportedAngle = 0;
+    } else if (stickAngle > 180) {
+        reportedAngle = ((((float)stickAngle - 360) * RADIAL_ANGLE_MAX) / 90);
     }
 
     // set new lastRadialOutput
@@ -364,7 +356,7 @@ float DriveHandler::radialTurnHeadingAngle(int stickAngle) {
     return headingAngle;
 }
 
-float DriveHandler::radialTurnWheelAngles(int headingAngle, bool innerFlag) {
+float DriveHandler::radialTurnWheelAngles(float headingAngle, bool innerFlag) {
     // adjusts the calculation based on if inner wheel or outer wheel
     int wheelInt = (innerFlag) ? 1 : -1;
 
@@ -382,6 +374,20 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
                               int stickTheta) {
     Logging::logD(file, "Radial turn with angle %d, magnitude %d, theta %d",
                   stickAngle, stickMagnitude, stickTheta);
+
+    // Only valid angles are between 0 and 90 and 270 and 360
+
+    if (stickAngle < 0 || stickAngle > 360) {
+        Logging::logE(file, "Invalid stick angle: %d", stickAngle);
+        return;
+    }
+
+    if (stickAngle >= 90 && stickAngle <= 270) {
+        Logging::logE(file, "Invalid stick angle for radial turn: %d",
+                      stickAngle);
+        return;
+    }
+
     // Finding heading angle
     float headingAngle = radialTurnHeadingAngle(stickAngle);
     // calculating angles of leading wheels
@@ -433,8 +439,15 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
         MotorHandlerReturn motorStuct;
         m_drive->getDriveDCHandle(&motorStuct, dc);
 
-        PhidgetBLDCMotor_setTargetVelocity_async(
-            *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone, NULL);
+        if (dc % 2 == 0) {
+            PhidgetBLDCMotor_setTargetVelocity_async(
+                *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone,
+                NULL);
+        } else {
+            PhidgetBLDCMotor_setTargetVelocity_async(
+                *motorStuct.handler.bldcMotor, -speed, setTargetVelocityDone,
+                NULL);
+        }
     }
 }
 
@@ -496,23 +509,31 @@ void DriveHandler::start() {
         bool longitudinalVelocityOnly
             = (message.theta == 0) || (message.theta == 180);
 
+        bool lateralVelocityOnly
+            = (message.theta == 90) || (message.theta == 270);
+
         // We're going to disable superimposed radial + strafing turning
         // For now radial turning should only work when strafing velocity is 0
         // And strafing should only work when angular velocity is 0
 
         // Radial turn (angular velocity and velocity forwards or backwards)
-        if (angleVelocityFlag && longitudinalVelocityOnly && velocityFlag) {
+        if (!velocityFlag && !angleVelocityFlag) {
+            stopWheels();
+        } else if (angleVelocityFlag && longitudinalVelocityOnly
+                   && velocityFlag) {
             Logging::logD(file, "Radial turn");
             m_spotTurnFlag = false;
             radialTurn(message.angleVelocity, message.velocity, message.theta);
 
             // Spot turning (angular velocity)
-        } else if (angleVelocityFlag) {
+        } else if (angleVelocityFlag && !velocityFlag) {
             Logging::logD(file, "Spot turn");
             spotTurn(message.angleVelocity);
 
             // Strafing (angle and velocity)
-        } else if (velocityFlag) {
+        } else if (velocityFlag
+                   && (longitudinalVelocityOnly || lateralVelocityOnly)
+                   && !angleVelocityFlag) {
             Logging::logD(file, "Strafing");
             m_spotTurnFlag = false;
             strafe(message.theta, message.velocity);
