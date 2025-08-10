@@ -110,7 +110,7 @@ float Stick::stickUpdate(Sint16 axisValue, int axisID) {
     float otherPos = *rawPosList[(int)!((bool)axisID)] / INT16_MAX;
 
     // If near the maximum value, adjusts the value to the maximum
-    if (abs(Pos) > (INT16_MAX - m_staticDeadzone)) {
+    if (abs(Pos) > (INT16_MAX - STATIC_DEADZONE)) {
 
         // quick and dirty way to adjust the sign of the value
         Pos = (INT16_MAX + 1) * ((Pos < 0) ? -1 : 1);
@@ -119,14 +119,14 @@ float Stick::stickUpdate(Sint16 axisValue, int axisID) {
 
     }
     // if close to zero, adjusts to zero
-    else if (abs(Pos) < m_staticDeadzone) {
+    else if (abs(Pos) < STATIC_DEADZONE) {
 
         Pos = 0;
         // std::cout << "\033[31m" << "\nX Zero\n"
         //           << "\033[0m"; //==========================================
     }
     // Checks if it is outside of the moving deadzone, if so, changes value
-    else if (abs(Pos - *rawPos) > m_movingDeadzone) {
+    else if (abs(Pos - *rawPos) > MOVING_DEADZONE) {
         Pos = Pos;
         // std::cout << "\033[31m" << "\nX Deadzone\n"
         //           << "\033[0m"; //==========================================

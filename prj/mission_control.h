@@ -33,6 +33,14 @@
 // Encoder configs
 #define MAX_ENCODER_POSITIONS 1000
 
+#define NO_MESSAGE_RECIEVED_TIMEOUT 5 // in seconds
+
+// Holds settings for the deadzone sizes
+//  any number less than ~30000
+//  5000 is a moderate rate
+#define MOVING_DEADZONE 3000
+#define STATIC_DEADZONE 5000
+
 // Logging past motor positions
 #define BASE_LAST_KNOWN_POS_FILE                                               \
     "/home/dawsonvv/Documents/SSRT/Controls/prj/Rover/Handlers/"               \

@@ -29,12 +29,6 @@ private:
     // a function for sending this stick's data
     std::function<void(int, int)> m_stickFunc;
 
-    // Holds settings for the deadzone sizes
-    //  any number less than ~30000
-    //  5000 is a moderate rate
-    int m_movingDeadzone = 5000;
-    int m_staticDeadzone = 10000;
-
 public:
     /**
      *Assigns a joystick's axes (ex. right stick has a rightX and a rightY axis)
@@ -55,11 +49,6 @@ public:
     // setters
     void setStickFunc(std::function<void(int, int)> newStickFunc) {
         m_stickFunc = newStickFunc;
-    };
-
-    void setStickSetup(int movingDeadzone, int staticDeadzone) {
-        m_movingDeadzone = movingDeadzone;
-        m_staticDeadzone = staticDeadzone;
     };
 
     /**

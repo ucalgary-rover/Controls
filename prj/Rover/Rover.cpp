@@ -193,9 +193,10 @@ void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
 
             Logging::logE(file,
                           "Connection to base timed out, halting motors.");
-
-            armQueue->push(Message(0, ArmMessage()));
-            driveQueue->push(Message(0, WheelMessage()));
+            if (time_since_reception.count() > NO_MESSAGE_RECIEVED_TIMEOUT) {
+                armQueue->push(Message(0, ArmMessage()));
+                driveQueue->push(Message(0, WheelMessage()));
+            }
         }
 
         message = clientQueue->pop();

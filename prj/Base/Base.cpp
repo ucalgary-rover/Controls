@@ -311,7 +311,7 @@ int Base::stickAngle(int axisX, int axisY) {
     if (axisY != 0) {
         // note how the axes have to be switched since we are measuring from the
         // y axis
-        angle = (int)radianToDegree(atan(axisX / axisY));
+        angle = (int)radianToDegree(atan((double)axisX / (double)axisY));
 
         // don't change reference angle (positive angle)
         if (axisX < 0 && axisY < 0) {

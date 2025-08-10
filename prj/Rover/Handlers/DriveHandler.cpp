@@ -153,10 +153,10 @@ float DriveHandler::spotTurnSpeed(int stickAngle) {
         return 0;
     } else if (stickAngle > 180) {
         // note the negative values
-        return -abs(270 - (float)stickAngle) / 60;
+        return -1 + (abs(270 - (float)stickAngle) / 60);
     } else {
         // left turn
-        return abs(90 - (float)stickAngle) / 60;
+        return 1 - (abs(90 - (float)stickAngle) / 60);
     }
 }
 
@@ -203,8 +203,8 @@ void DriveHandler::spotTurn(int stickAngle) {
         PhidgetReturnCode res;
 
         PhidgetBLDCMotor_setTargetVelocity_async(
-            *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone, NULL);
-        Logging::logD(file, "Setting DC motor %d to speed %f", dc, speed);
+            *motorStuct.handler.bldcMotor, -speed, setTargetVelocityDone, NULL);
+        Logging::logD(file, "Setting DC motor %d to speed %f", dc, -speed);
     }
 }
 
@@ -317,11 +317,11 @@ void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
 
         if (dc % 2 == 0) {
             PhidgetBLDCMotor_setTargetVelocity_async(
-                *motorStuct.handler.bldcMotor, -speed, setTargetVelocityDone,
+                *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone,
                 NULL);
         } else {
             PhidgetBLDCMotor_setTargetVelocity_async(
-                *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone,
+                *motorStuct.handler.bldcMotor, -speed, setTargetVelocityDone,
                 NULL);
         }
     }
