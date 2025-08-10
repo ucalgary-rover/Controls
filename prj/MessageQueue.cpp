@@ -21,7 +21,8 @@ void MessageQueue::push(const Message message) {
     if (m_regularQueue.size() >= QUEUE_LIMIT) {
         m_regularQueue
             .pop(); // Remove the oldest message from the regular queue
-        Logging::logW(file, "Queue limit reached, discarded oldest message.");
+        // Logging::logW(file, "Queue limit reached, discarded oldest
+        // message.");
     }
 
     if (message.isHighPriority()) {
