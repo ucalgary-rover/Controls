@@ -85,6 +85,7 @@ enum MotorID : int {
 };
 
 enum ArmMessageType : int {
+    ARM_MESSAGE_TYPE_HALT,
     ARM_MESSAGE_TYPE_MANUAL,
     ARM_MESSAGE_TYPE_FIXED_IK,
     ARM_MESSAGE_TYPE_VARIABLE_IK,
@@ -115,7 +116,7 @@ struct ArmVariableIKMessage {
 };
 
 struct ArmMessage {
-    ArmMessageType type;
+    ArmMessageType type = ArmMessageType::ARM_MESSAGE_TYPE_HALT;
     union {
         ArmManualMessage manual_message;
         ArmFixedIKMessage fixed_ik_message;

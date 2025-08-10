@@ -1,5 +1,7 @@
 #include "Rover.h"
 
+#include <chrono>
+
 static const char* file = "Rover";
 
 using namespace std;
@@ -177,9 +179,25 @@ void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
                         MessageQueue* driveQueue) {
 
     Message message;
+    auto last_reception = std::chrono::system_clock::now();
 
     while (true) {
         // Get message from roverQueue
+
+        if (!clientQueue->empty()) {
+            last_reception = std::chrono::system_clock::now();
+        } else {
+            std::chrono::seconds time_since_reception
+                = std::chrono::duration_cast<std::chrono::seconds>(
+                    std::chrono::system_clock::now() - last_reception);
+
+            Logging::logE(file,
+                          "Connection to base timed out, halting motors.");
+
+            armQueue->push(Message(0, ArmMessage()));
+            driveQueue->push(Message(0, WheelMessage()));
+        }
+
         message = clientQueue->pop();
 
         // Push message to appropriate queue
