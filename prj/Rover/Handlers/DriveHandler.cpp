@@ -147,16 +147,16 @@ void DriveHandler::turnWheel(DriveIndex wheel, int angle) {
 
 float DriveHandler::spotTurnSpeed(int stickAngle) {
     // determine direction of wheel spin and speed based on stickAngle
-    float speedAdjust;
-    int reportedAngle;
 
     // right turn
-    if (stickAngle > 180) {
+    if (stickAngle < 30 || stickAngle > 330) {
+        return 0;
+    } else if (stickAngle > 180) {
         // note the negative values
-        return -1;
+        return -abs(270 - (float)stickAngle) / 60;
     } else {
         // left turn
-        return 1;
+        return abs(90 - (float)stickAngle) / 60;
     }
 }
 
