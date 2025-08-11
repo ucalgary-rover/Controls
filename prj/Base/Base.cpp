@@ -64,27 +64,57 @@ Base::Base() {
     drive_control->LEFT_TRIGGER = [](int xValue) { unusedTrigger(xValue); };
     drive_control->RIGHT_TRIGGER = [](int xValue) { unusedTrigger(xValue); };
     drive_control->buttonArray = {
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_A
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_B
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_X
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_Y
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_BACK
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_GUIDE
-        [this]() { quit(); },     // SDL_CONTROLLER_BUTTON_START
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_A);
+        }, // SDL_CONTROLLER_BUTTON_A
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_B);
+        }, // SDL_CONTROLLER_BUTTON_B
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_X);
+        }, // SDL_CONTROLLER_BUTTON_X
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_Y);
+        }, // SDL_CONTROLLER_BUTTON_Y
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_BACK);
+        }, // SDL_CONTROLLER_BUTTON_BACK
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_GUIDE);
+        }, // SDL_CONTROLLER_BUTTON_GUIDE
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_START);
+        }, // SDL_CONTROLLER_BUTTON_START
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_LEFTSTICK);
+        }, // SDL_CONTROLLER_BUTTON_LEFTSTICK
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_RIGHTSTICK);
+        }, // SDL_CONTROLLER_BUTTON_RIGHTSTICK
         // left shoulder increments down
         [this]() {
-            incrementInt(&chassisMaxSpeed, -2, 0, 80, "chassisMaxSpeed");
+            incrementInt(&chassisMaxSpeed, -2, 0, &maxMaxSpeed,
+                         "chassisMaxSpeed");
+            checkState(SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
         }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
         // right shoulder increments up
         [this]() {
-            incrementInt(&chassisMaxSpeed, 2, 0, 80, "chassisMaxSpeed");
-        },                        // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_UP
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
-        []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+            incrementInt(&chassisMaxSpeed, 2, 0, &maxMaxSpeed,
+                         "chassisMaxSpeed");
+            checkState(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
+        }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_DPAD_UP);
+        }, // SDL_CONTROLLER_BUTTON_DPAD_UP
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_DPAD_DOWN);
+        }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_DPAD_LEFT);
+        }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
+        [this]() {
+            checkState(SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+        }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
     arm_manual_control = new buttonFunctions();
@@ -201,16 +231,16 @@ Base::Base() {
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_LEFTSHOULDER
         []() { unusedButton(); }, // SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
         [this]() {
-            incrementInt(&clawPitch, 5, -90, 90, "clawPitch");
+            incrementInt(&clawPitch, 5, -90, &maxPitch, "clawPitch");
         }, // SDL_CONTROLLER_BUTTON_DPAD_UP
         [this]() {
-            incrementInt(&clawPitch, -5, -90, 90, "clawPitch");
+            incrementInt(&clawPitch, -5, -90, &maxPitch, "clawPitch");
         }, // SDL_CONTROLLER_BUTTON_DPAD_DOWN
         [this]() {
-            incrementInt(&clawRoll, -5, -180, 180, "clawRoll");
+            incrementInt(&clawRoll, -5, -180, &maxRoll, "clawRoll");
         }, // SDL_CONTROLLER_BUTTON_DPAD_LEFT
         [this]() {
-            incrementInt(&clawRoll, 5, -180, 180, "clawRoll");
+            incrementInt(&clawRoll, 5, -180, &maxRoll, "clawRoll");
         }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
@@ -230,8 +260,8 @@ void Base::setFloat(float* var, float n, float min, float max,
     return setVal<float>(var, n, min, max, name);
 }
 
-void Base::incrementInt(int* var, int n, int min, int max, const char* name) {
-    return incrementVal<int>(var, n, min, max, name);
+void Base::incrementInt(int* var, int n, int min, int* max, const char* name) {
+    return incrementVal<int>(var, n, min, *max, name);
 }
 
 void Base::incrementFloat(float* var, float n, float min, float max,
@@ -269,7 +299,7 @@ void Base::incrementJoint(int change) {
 void Base::triggerToIncrement(int triggerValue, int* compare, int* var, int n,
                               int min, int max, const char* name) {
     if (triggerValue > 0 && *compare < 0) {
-        incrementInt(var, n, min, max, name);
+        incrementInt(var, n, min, &max, name);
     }
     *compare
         = triggerValue; // Update the compare value to the current trigger value
@@ -472,4 +502,47 @@ static void unusedStick(int X, int Y) {
 
 static void unusedTrigger(int X) {
     Logging::logV(file, "Unused Trigger X: %d", X);
+}
+
+void Base::checkState(SDL_GameControllerButton button) {
+    // Create array length 11 with desired input chain
+    static int desiredInputChain[11]
+        = { SDL_CONTROLLER_BUTTON_DPAD_UP,   SDL_CONTROLLER_BUTTON_DPAD_UP,
+            SDL_CONTROLLER_BUTTON_DPAD_DOWN, SDL_CONTROLLER_BUTTON_DPAD_DOWN,
+            SDL_CONTROLLER_BUTTON_DPAD_LEFT, SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
+            SDL_CONTROLLER_BUTTON_DPAD_LEFT, SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
+            SDL_CONTROLLER_BUTTON_B,         SDL_CONTROLLER_BUTTON_A,
+            SDL_CONTROLLER_BUTTON_START };
+
+    // create array of length 11 with current input chain
+    static int currentInputChain[11] = { SDL_CONTROLLER_BUTTON_INVALID };
+
+    // save index of last saved input
+    static int lastSavedIndex = 10;
+
+    // each time a new button is pressed save the input and increment index
+    if (button != SDL_CONTROLLER_BUTTON_INVALID) {
+        lastSavedIndex++;
+        if (lastSavedIndex >= 11) {
+            lastSavedIndex = 0; // reset index to 0
+        }
+
+        currentInputChain[lastSavedIndex] = button;
+    }
+
+    bool match = true;
+    // for i in range 11 match current with desired starting index
+    for (int i = 0; i < 11; i++) {
+        match &= (desiredInputChain[i]
+                  == currentInputChain[(i + lastSavedIndex + 1) % 11]);
+    }
+
+    if (!match) {
+        return;
+    }
+
+    Logging::logI(file, "SUPER ULTRA SECRET HACKER SEQUENCE ENTERED");
+    Logging::logI(file, "ENGAGING HYPER DRIVE THRUSTERS!!!!");
+
+    maxMaxSpeed = 100;
 }

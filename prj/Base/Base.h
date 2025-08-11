@@ -45,7 +45,7 @@ public:
      * @param max The maximum limit for the variable
      * @param name The name of the variable (for logging)
      */
-    void incrementInt(int* var, int n, int min, int max, const char* name);
+    void incrementInt(int* var, int n, int min, int* max, const char* name);
 
     /**
      * Sets a float variable to a value within specified limits
@@ -145,6 +145,7 @@ private:
      */
     template <typename T>
     void setVal(T* member, T n, T min, T max, const char* name);
+    void checkState(SDL_GameControllerButton button);
 
     /**
      * Increments a member variable by a value within specified limits
@@ -165,6 +166,10 @@ private:
     buttonFunctions* arm_manual_control;
     buttonFunctions* arm_fixed_ik_control;
     buttonFunctions* arm_variable_ik_control;
+
+    int maxMaxSpeed = 80; // Maximum speed of the chassis
+    int maxPitch = 90;    // Maximum pitch of the claw
+    int maxRoll = 180;    // Maximum roll of the claw
 };
 
 #endif
