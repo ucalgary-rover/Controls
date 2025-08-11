@@ -11,7 +11,7 @@ const char* file = "DriveHandler";
 
 // If a wheel changes angle larger than this threshold all wheel spinning is
 // stopped
-static const int WHEEL_TURN_THRESH = 10;
+static const int WHEEL_TURN_THRESH = 20;
 
 // The amount of seconds stopWheels() waits to allow the wheels to lose momentum
 static const int STOP_WHEEL_WAIT = 1;
