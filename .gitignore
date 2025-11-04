@@ -1,0 +1,10 @@
+
+.vscode
+.gitignore
+*.exe
+*.o
+prj/websocketpp
+prj/boost
+test/build/
+out/
+logs/
