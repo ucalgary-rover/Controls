@@ -42,12 +42,8 @@
 #define STATIC_DEADZONE 5000
 
 // Logging past motor positions
-#define BASE_LAST_KNOWN_POS_FILE                                               \
-    "/home/dawsonvv/Documents/SSRT/Controls/prj/Rover/Handlers/"               \
-    "LastKnowPosBase.json"
-#define ARM_LAST_KNOWN_POS_FILE                                                \
-    "/home/dawsonvv/Documents/SSRT/Controls/prj/Rover/Handlers/"               \
-    "LastKnowPosArm.json"
+#define BASE_LAST_KNOWN_POS_FILE "./prj/Rover/Handlers/LastKnowPosBase.json"
+#define ARM_LAST_KNOWN_POS_FILE "./prj/Rover/Handlers/LastKnowPosArm.json"
 
 // Configuration file to set serial numbers and channels for each of the motors
 

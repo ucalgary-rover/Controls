@@ -363,15 +363,21 @@ void ControllerHolder::eventLoop() {
     // This combo works, it is a little strange tho
     // -> SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
-        fprintf(stderr, "could not initialize sdl2: %s\n", SDL_GetError());
+    int sdl_init_status = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
+
+    std::cout << "SDL_Init status: " << sdl_init_status << std::endl;
+    if (sdl_init_status < 0) {
+        Logging::logE(file, "could not initialize sdl2: %s\n", SDL_GetError());
         SDL_Quit();
         quit = true;
     }
 
     // Check for game controllers
-    if (SDL_NumJoysticks() < 1) {
-        Logging::logV(file, "No controllers connected! Number of joysticks: %d",
+    int sdl_joysticks = SDL_NumJoysticks();
+
+    std::cout << "Connected Joysticks: " << sdl_joysticks << std::endl;
+    if (sdl_joysticks < 1) {
+        Logging::logI(file, "No controllers connected! Number of joysticks: %d",
                       SDL_NumJoysticks());
     }
 
@@ -385,6 +391,8 @@ void ControllerHolder::eventLoop() {
         // anything!) this is the event loop yet to figure out why event loop
         // has to look like this
         while (SDL_PollEvent(&event)) {
+
+            Logging::logV(file, "SDL Event type: %d", event.type);
 
             // checks what kind of event
             switch (event.type) {
