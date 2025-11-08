@@ -2,12 +2,12 @@
 
 # Install pre-commit using sudo apt:
 echo "Installing pre-commit..."
-sudo apt install pre-commit
+sudo apt install -y pre-commit
 echo "Finished installing pre-commit..."
 
 # Install clang-format using sudo apt:
 echo "Installing clang-format..."
-sudo apt install clang-format
+sudo apt install -y clang-format
 echo "Finished installing clang-format..."
 
 # install pre-commit into your git hooks:
@@ -20,19 +20,11 @@ echo "Enabling git commit template..."
 git config commit.template .gitmessage
 echo "git commit template Enabled..."
 
-echo "Installing cmake..."
-sudo apt install cmake
-echo "Finished installing cmake..."
+echo "Installing curl, cmake, & make..."
+sudo apt install -y curl cmake make
+echo "Finished installing curl, cmake, & make..."
 
-sudo apt install libboost-all-dev
-sudo apt install curl
 curl -fsSL https://www.phidgets.com/downloads/setup_linux | sudo -E bash -
-sudo apt install -y libphidget22
-sudo apt-get install libphidget22-dev
-sudo apt-get install libsdl2-dev
-sudo apt install g++
-sudo apt-get install libjsoncpp-dev
+sudo apt install -y g++ libboost-all-dev libphidget22 libphidget22-dev libsdl2-dev libjsoncpp-dev 
 
-echo Please be sure to setup "make" if you have yet to do so.
-sudo apt install make
 echo "Have a nice day :)"
