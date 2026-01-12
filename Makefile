@@ -20,10 +20,13 @@ BOOST_ROOT = /usr/include
 SDL_ROOT = tools/SDL
 IK_root = tools/IK
 
+CPP_STD = -std=c++17
+
 CMPL_BOOST = -I $(BOOST_ROOT)
 CMPL_SDL = -I$(SDL_ROOT)/include -L$(SDL_ROOT)/lib -lSDL2
 CMPL_PHIDETS = -lphidget22
 CMPL_JSON = -ljsoncpp
+CMPL_PTHREAD = -lpthread
 CMPL_IK = -I$(IK_root)/include
 
 NULL_DEVICE := $(if $(filter Windows_NT,$(OS)),NUL,/dev/null)
@@ -42,10 +45,10 @@ build_dir:
 > mkdir -p logs
 
 base: build_dir
-> g++ -DSIDE_TO_BUILD=1 -I"prj" $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) -o out/base
+> g++ $(CPP_STD) -DSIDE_TO_BUILD=1 -I"prj" $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_PTHREAD) -o out/base
 
 rover: build_dir
-> g++ -DSIDE_TO_BUILD=2 -I"prj" $(CMPL_IK) $(ROVER_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_JSON) -o out/rover
+> g++ $(CPP_STD) -DSIDE_TO_BUILD=2 -I"prj" $(CMPL_IK) $(ROVER_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_JSON) $(CMPL_PTHREAD) -o out/rover
 
 run_base: base
 > ./base 
