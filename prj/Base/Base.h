@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <vector>
 
-#include "Base/Controller.h"
+#include "Base/ControllerHandler.h"
 #include "Message.h"
 #include "MessageQueue.h"
 #include "Websocket/WebsocketServer.h"
@@ -160,7 +160,7 @@ private:
     void incrementVal(T* member, T n, T min, T max, const char* name);
 
     // List of all controllers in use
-    ControllerHolder* controller;
+    ControllerHandler* controller;
 
     buttonFunctions* drive_control;
     buttonFunctions* arm_manual_control;
