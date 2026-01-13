@@ -2,6 +2,9 @@
 BASE_SRC_FILES := $(wildcard prj/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/Base/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/Websocket/*.cpp)
+BASE_SRC_FILES += $(wildcard prj/RoverState/*.cpp)
+BASE_SRC_FILES += $(wildcard prj/RoverState/StateManagers/*.cpp)
+BASE_SRC_FILES += $(wildcard prj/Controller/*.cpp)
 
 BASE_SRC_FILES := $(filter-out prj/Websocket/Client.cpp, $(BASE_SRC_FILES))
 BASE_SRC_FILES := $(filter-out prj/Websocket/Server.cpp, $(BASE_SRC_FILES))
@@ -15,6 +18,13 @@ ROVER_SRC_FILES += $(wildcard prj/Websocket/*.cpp)
 
 ROVER_SRC_FILES := $(filter-out prj/Websocket/Client.cpp, $(ROVER_SRC_FILES))
 ROVER_SRC_FILES := $(filter-out prj/Websocket/Server.cpp, $(ROVER_SRC_FILES))
+
+BASE_INC_FILES := -I prj
+BASE_INC_FILES += -I prj/Base
+BASE_INC_FILES += -I prj/Websocket
+BASE_INC_FILES  += -I prj/RoverState
+BASE_INC_FILES  += -I prj/RoverState/StateManagers
+BASE_INC_FILES  += -I prj/Controller
 
 BOOST_ROOT = /usr/include
 SDL_ROOT = tools/SDL
@@ -45,7 +55,7 @@ build_dir:
 > mkdir -p logs
 
 base: build_dir
-> g++ $(CPP_STD) -DSIDE_TO_BUILD=1 -I"prj" $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_PTHREAD) -o out/base
+> g++ $(CPP_STD) -DSIDE_TO_BUILD=1 $(BASE_INC_FILES) $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_PTHREAD) -o out/base
 
 rover: build_dir
 > g++ $(CPP_STD) -DSIDE_TO_BUILD=2 -I"prj" $(CMPL_IK) $(ROVER_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_JSON) $(CMPL_PTHREAD) -o out/rover

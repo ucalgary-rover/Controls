@@ -71,6 +71,14 @@ struct WheelMessage {
     int angleVelocity;
 };
 
+enum WheelID : int {
+    WHEEL_FR,
+    WHEEL_FL,
+    WHEEL_BR,
+    WHEEL_BL,
+    WHEEL_COUNT,
+};
+
 // Message format for arm
 
 enum MotorID : int {
