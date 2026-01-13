@@ -81,6 +81,27 @@ std::string getButtonName(Uint8 button) {
     }
 }
 
+// function for remapping axes if necessary
+static GameControllerAxis
+covert_stl_axis_to_game_controller(SDL_GameControllerAxis axis) {
+    switch (axis) {
+    case SDL_CONTROLLER_AXIS_LEFTX:
+        return GAME_CONTROLLER_AXIS_LEFTX;
+    case SDL_CONTROLLER_AXIS_LEFTY:
+        return GAME_CONTROLLER_AXIS_LEFTY;
+    case SDL_CONTROLLER_AXIS_RIGHTX:
+        return GAME_CONTROLLER_AXIS_TRIGGERLEFT;
+    case SDL_CONTROLLER_AXIS_RIGHTY:
+        return GAME_CONTROLLER_AXIS_RIGHTX;
+    case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+        return GAME_CONTROLLER_AXIS_RIGHTY;
+    case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+        return GAME_CONTROLLER_AXIS_TRIGGERRIGHT;
+    default:
+        return GAME_CONTROLLER_AXIS_INVALID;
+    }
+}
+
 // ControllerHandler definitions -----------------------------------------
 
 ControllerHandler::ControllerHandler(buttonFunctions functionStruct1,
@@ -449,24 +470,4 @@ void ControllerHandler::testingEventLoop() {
     quit = false;
 
     SDL_Quit();
-}
-
-static GameControllerAxis
-covert_stl_axis_to_game_controller(SDL_GameControllerAxis axis) {
-    switch (axis) {
-    case SDL_CONTROLLER_AXIS_LEFTX:
-        return GAME_CONTROLLER_AXIS_LEFTX;
-    case SDL_CONTROLLER_AXIS_LEFTY:
-        return GAME_CONTROLLER_AXIS_LEFTY;
-    case SDL_CONTROLLER_AXIS_RIGHTX:
-        return GAME_CONTROLLER_AXIS_TRIGGERLEFT;
-    case SDL_CONTROLLER_AXIS_RIGHTY:
-        return GAME_CONTROLLER_AXIS_RIGHTX;
-    case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
-        return GAME_CONTROLLER_AXIS_RIGHTY;
-    case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
-        return GAME_CONTROLLER_AXIS_TRIGGERRIGHT;
-    default:
-        return GAME_CONTROLLER_AXIS_INVALID;
-    }
 }
