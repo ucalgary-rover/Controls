@@ -270,8 +270,7 @@ Base::Base() {
         }, // SDL_CONTROLLER_BUTTON_DPAD_RIGHT
     };
 
-    Logging::logI(file, "Initializing Controller Holder");
-    controller = new ControllerHolder(*drive_control, *arm_manual_control);
+    controller = new ControllerHandler(*drive_control, *arm_manual_control);
 
     Logging::logI(file, "Initializing Base done");
 }

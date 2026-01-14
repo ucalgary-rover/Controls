@@ -11,7 +11,7 @@
 #include "ArmFixedIKControllerLayout.h"
 #include "ArmManualControllerLayout.h"
 #include "ArmVariableIKControllerLayout.h"
-#include "Base/Controller.h"
+#include "Base/ControllerHandler.h"
 #include "DriveControllerLayout.h"
 #include "Message.h"
 #include "MessageQueue.h"
@@ -51,7 +51,7 @@ private:
     void changeArmControlType(ArmMessageType type);
 
     // List of all controllers in use
-    ControllerHolder* controller;
+    ControllerHandler* controller;
 
     DriveControllerLayout driveLayout;
     ArmManualControllerLayout armManualLayout;
