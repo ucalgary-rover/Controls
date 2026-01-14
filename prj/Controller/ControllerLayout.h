@@ -1,0 +1,104 @@
+#pragma once
+
+#include <string>
+
+#include "Logging.h"
+
+#define NAMEOF(var) #var
+
+class ControllerLayout {
+public:
+    ControllerLayout() { }
+
+    ControllerLayout(std::string file) { this->filename = file; }
+
+    void unusedButton();
+    void unusedStick(int X, int Y);
+    void unusedTrigger(int X);
+
+protected:
+    std::string filename = "DefaultController";
+
+    /**
+     * Calculates the magnitude of the stick's position from the center
+     *
+     * @param axisX The distance along the x axis
+     * @param axisY The distance along the y axis
+     * @param max The maximum limit for the output
+     * @return The magnitude of the stick's position as a percentage of 255 (the
+     * full radius) (0 - 100%)
+     */
+    static int stickMagnitude(int axisX, int axisY);
+
+    /**
+     * Calculates the angle of the stick's position counterclockwise from
+     * the positive y axis in DEGREES (which is ironically reported with a
+     * negative value by SDL)
+     *
+     * @param axisX The distance along the x axis
+     * @param axisY The distance along the y axis
+     */
+    static int stickAngle(int axisX, int axisY);
+
+    // Converter functions
+    static float degreeToRadian(int n);
+
+    static int radianToDegree(float n);
+
+    template <typename T> static T clampVal(T val, T min, T max) {
+        if (val < min) {
+            val = min;
+        } else if (val > max) {
+            val = max;
+        }
+
+        return val;
+    }
+
+    // General getter, setter, and incrementor for int member variables
+    void triggerToIncrement(int triggerValue, int* compare, int* var, int n,
+                            int min, int max, const char* name);
+
+    void stickChangeAxis(int axisX, int axisY, float* varX, float* varY,
+                         float maxChangeX, float maxChangeY, float rangeX,
+                         float rangeY, const char* nameX, const char* nameY);
+
+    // Template functions for setting and incrementing member variables
+    /**
+     * Sets a member variable to a value within specified limits
+     *
+     * @param member The member variable to set
+     * @param n The value to set the member variable to
+     * @param min The minimum limit for the member variable
+     * @param max The maximum limit for the member variable
+     * @param name The name of the member variable (for logging)
+     */
+    template <typename T>
+    void setVal(T* val, T n, T min, T max, const char* name) {
+        *val = clampVal(n, min, max);
+        if (std::is_same<T, int>::value) {
+            Logging::logI(filename.c_str(), "Setting %s to %d", name, *val);
+        } else if (std::is_same<T, float>::value) {
+            Logging::logI(filename.c_str(), "Setting %s to %f", name, *val);
+        }
+    }
+
+    /**
+     * Increments a member variable by a value within specified limits
+     *
+     * @param member The member variable to increment
+     * @param n The value to increment the member variable by
+     * @param min The minimum limit for the member variable
+     * @param max The maximum limit for the member variable
+     * @param name The name of the member variable (for logging)
+     */
+    template <typename T>
+    void incrementVal(T* val, T n, T min, T max, const char* name) {
+        *val = clampVal(*val + n, min, max);
+        if (std::is_same<T, int>::value) {
+            Logging::logI(filename.c_str(), "Setting %s to %d", name, *val);
+        } else if (std::is_same<T, float>::value) {
+            Logging::logI(filename.c_str(), "Setting %s to %f", name, *val);
+        }
+    }
+};
