@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "DriveModel.h"
 #include "HandlerInterface.h"
 #include "MessageQueue.h"
 #include "Rover/Systems/Drive.h"
@@ -39,13 +40,6 @@ public:
     void spotTurn(int stickAngle);
 
     /**
-     * @brief Takes in an angle and derives speed value from it
-     * @param stickAngle The input angle from the joystick
-     * @return A speed value based on the angle
-     */
-    float spotTurnSpeed(int stickAngle);
-
-    /**
      * @brief Directly moves the rover in a direction without turning the body.
      * Takes velocity and angle
      * @param stickTheta Int of angle of joystick by used for direction (theta)
@@ -53,15 +47,6 @@ public:
      * @return None
      */
     void strafe(int stickTheta, int stickMagnitude);
-
-    /**
-     * @brief Takes in an angle and derives an adujusted angle and direction
-     * from it
-     * @param stickTheta The input angle from the left joystick
-     * @return An adjusted angle within wheel range of motion. Sign determines
-     * direction of wheel spin
-     */
-    int strafeAngleAdjust(int stickTheta);
 
     /**
      * @brief Moves the rover with a radial turn
@@ -74,25 +59,6 @@ public:
      * @return None
      */
     void radialTurn(int stickAngle, int stickMagnitude, int stickTheta);
-
-    /**
-     * @brief Determines the heading angle of the radial turn and updates last
-     * radial turn
-     * @param stickAngle Int of angle of joystick by used for sharpness of turn
-     * (in degrees)
-     * @return The absolute value of the heading angle of the turn in radians
-     * <----
-     */
-    float radialTurnHeadingAngle(int stickAngle);
-
-    /**
-     * @brief Determines the angle of a leading wheel (inner or outer)
-     * @param headingAngle Float angle of desired turn (in radians)
-     * @param innerFlag If true, calculates for the inner wheel, if false
-     * calculates the outer
-     * @return The spcified wheel angle in degrees <---
-     */
-    float radialTurnWheelAngles(float headingAngle, bool innerFlag);
 
     /**
      * @brief Stops all wheel movement
@@ -144,9 +110,6 @@ private:
 
     // if true, the wheels are in spot turning configuration
     bool m_spotTurnFlag = false;
-
-    // holds the sign of the direction of the last radial output
-    int m_lastRadialOutput = 1;
 };
 
 #endif

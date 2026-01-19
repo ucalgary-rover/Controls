@@ -26,13 +26,6 @@ static const float SPOT_SPEED_MAX = 1;
 // is the maximum speed for strafing
 static const float STRAFE_SPEED_MAX = 1;
 
-// maximum turning angle for radial turning
-static const int RADIAL_ANGLE_MAX = 45;
-
-// the angle at which the spot turn reaches max
-// speed 90 is the smallest possible angle
-static const int MAX_SPEED_ANGLE = 90;
-
 /*
 Notes:
 
@@ -73,14 +66,6 @@ static void CCONV onAngleReached(PhidgetHandle pdih, void* ctx,
 static void CCONV setTargetVelocityDone(PhidgetHandle phid, void* ctx,
                                         PhidgetReturnCode res);
 
-const float PI = 3.14;
-
-// two decimal places
-#define TO_RADIANS(value) round(value* PI / 180 * 100) / 100
-
-// two decimal places
-#define TO_DEGREES(value) round(value * 180 / PI * 100) / 100
-
 // Constructor
 DriveHandler::DriveHandler(Drive* drive, MessageQueue* driveQueue) {
 
@@ -101,6 +86,9 @@ DriveHandler::DriveHandler(Drive* drive, MessageQueue* driveQueue) {
     std::string errs;
     Json::parseFromStream(readerBuilder, angleFile, &m_lastKnownPos, &errs);
     angleFile.close();
+
+    // Initialize static Drive Model
+    DriveModel::initialize(m_drive);
 
     // Calibrate all wheels to face forward
     // for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
@@ -145,25 +133,10 @@ void DriveHandler::turnWheel(DriveIndex wheel, int angle) {
                                            &m_wheelTargetStatuses[wheel]);
 }
 
-float DriveHandler::spotTurnSpeed(int stickAngle) {
-    // determine direction of wheel spin and speed based on stickAngle
-
-    // right turn
-    if (stickAngle < 30 || stickAngle > 330) {
-        return 0;
-    } else if (stickAngle > 180) {
-        // note the negative values
-        return -1 + (abs(270 - (float)stickAngle) / 60);
-    } else {
-        // left turn
-        return 1 - (abs(90 - (float)stickAngle) / 60);
-    }
-}
-
 void DriveHandler::spotTurn(int stickAngle) {
 
     // deriving speed based on angle of right stick
-    float speed = spotTurnSpeed(stickAngle);
+    float speed = DriveModel::spotTurnSpeed(stickAngle);
 
     // turn wheels
 
@@ -208,74 +181,10 @@ void DriveHandler::spotTurn(int stickAngle) {
     }
 }
 
-int DriveHandler::strafeAngleAdjust(int stickTheta) {
-    // adjusting angle for wheels based on stick angle (keeping in mind 180
-    // restriction)
-
-    int reportedAngle;
-
-    // corresponding to forward wheel spin
-    if (stickTheta < 90) {
-        reportedAngle = stickTheta;
-
-    } else if (stickTheta > 270) {
-        reportedAngle = stickTheta - 360;
-
-        // corresponding to backward wheel spin
-    } else if (stickTheta > 90 && stickTheta < 270) {
-        // 180 is subtracted to put the angle in the range of motion
-
-        reportedAngle = stickTheta - 180;
-
-        // edge positions ----> (massive headache ahead) <----
-        // since 90 and 270 are equivalent positions, the following code tries
-        // to find which is easiest to move to
-    } else if (stickTheta == 90 || stickTheta == 270) {
-        // used to hold the current position
-        double currentPos;
-
-        // these are used to find the average wheel orientation
-        float positionSum;
-        int positionAverage;
-
-        // sum the wheel positions and get the average
-        for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
-            // get the handler
-            MotorHandlerReturn motorStuct;
-            m_drive->getDriveStepperHandle(&motorStuct, stepper);
-
-            PhidgetStepper_getPosition(*motorStuct.handler.stepperMotor,
-                                       &currentPos);
-            positionSum += currentPos;
-        }
-
-        positionAverage = (int)(positionSum / DRIVE_INDEX_WHEEL_COUNT);
-
-        // finding differences between current position and possible
-        // satisfactory end points
-        int diff90 = 90 - positionAverage;
-
-        // corresponding to the -90 position
-        int diffAlt90 = -90 - positionAverage;
-
-        // set the reported angle to whichever has the lowest difference
-        if (diff90 < diffAlt90) {
-            reportedAngle = 90;
-
-        } else {
-            reportedAngle = -90;
-        }
-    } else {
-        Logging::logE(file, "AAAHHHHHHHHHH: %d", stickTheta);
-    }
-
-    return reportedAngle;
-}
-
 void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
 
     // finding the reported angle
-    int wheelAngle = strafeAngleAdjust(stickTheta);
+    int wheelAngle = DriveModel::strafeAngleAdjust(stickTheta);
 
     // forward or backward wheel spin (and the special edge cases) based on
     // joystick angle
@@ -327,48 +236,6 @@ void DriveHandler::strafe(int stickTheta, int stickMagnitude) {
     }
 }
 
-float DriveHandler::radialTurnHeadingAngle(int stickAngle) {
-
-    // derive a percentage for the amount turned (0 - 100% for each quadrant)
-    // and multiply by a maximum turning angle
-    // angle is from the right joystick
-    // makes more sense with a diagram
-
-    float reportedAngle = 0;
-
-    // corresponding to a left turn
-    if (stickAngle < 90) {
-        reportedAngle = (((float)stickAngle * RADIAL_ANGLE_MAX) / 90);
-
-        // corresponding to a right turn (note the negative reported angle
-        // value)
-    } else if (stickAngle > 180) {
-        reportedAngle = ((((float)stickAngle - 360) * RADIAL_ANGLE_MAX) / 90);
-    }
-
-    // set new lastRadialOutput
-    // also use this to determine direction later (negative is right turn)
-    m_lastRadialOutput = (reportedAngle > 0) ? 1 : -1;
-
-    // must convert to radians for trig functions
-    float headingAngle = TO_RADIANS(std::abs(reportedAngle));
-
-    return headingAngle;
-}
-
-float DriveHandler::radialTurnWheelAngles(float headingAngle, bool innerFlag) {
-    // adjusts the calculation based on if inner wheel or outer wheel
-    int wheelInt = (innerFlag) ? 1 : -1;
-
-    // Finding the angles of the leading wheels
-    float wheelAngle
-        = atan(2 * m_drive->getLength() * sin(headingAngle)
-               / (2 * m_drive->getLength() * cos(headingAngle)
-                  - wheelInt * m_drive->getWidth() * sin(headingAngle)));
-
-    return TO_DEGREES(wheelAngle);
-}
-
 // Applies to the front wheels regardless of direction
 void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
                               int stickTheta) {
@@ -389,11 +256,11 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
     }
 
     // Finding heading angle
-    float headingAngle = radialTurnHeadingAngle(stickAngle);
+    float headingAngle = DriveModel::radialTurnHeadingAngle(stickAngle);
     // calculating angles of leading wheels
-    float innerAngle = radialTurnWheelAngles(headingAngle, true);
+    float innerAngle = DriveModel::radialTurnWheelAngles(headingAngle, true);
 
-    float outerAngle = radialTurnWheelAngles(headingAngle, false);
+    float outerAngle = DriveModel::radialTurnWheelAngles(headingAngle, false);
 
     // Determining left and right angles based on directions
 
@@ -401,12 +268,12 @@ void DriveHandler::radialTurn(int stickAngle, int stickMagnitude,
     float rightAngle;
 
     // left wheel is inner wheel (left turn)
-    if (m_lastRadialOutput > 0) {
+    if (DriveModel::getLastRadialOutput() > 0) {
         leftAngle = innerAngle;
         rightAngle = outerAngle;
 
         // right wheel is inner wheel (right turn)
-    } else if (m_lastRadialOutput < 0) {
+    } else if (DriveModel::getLastRadialOutput() < 0) {
         leftAngle = -outerAngle;
         rightAngle = -innerAngle;
     }
