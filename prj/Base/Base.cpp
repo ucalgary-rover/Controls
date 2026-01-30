@@ -2,6 +2,7 @@
 // Written by Gavin Grubert
 
 #include "Base/Base.h"
+#include "Base/Models/ArmModel.h"
 #include <cmath>
 #include <unistd.h>
 
@@ -310,8 +311,56 @@ void Base::start() {
     ArmMessage armMsg;
 #endif
 
+    ArmModel::initialize();
     while (!exitLoop) {
+
+        bool armManual = true;
+
         RoverState desiredState = desiredStateManager.getState();
+
+        MotorState desiredMotorstate = {};
+
+        // desiredMotorstate.driveMotorState = Process(desiredState.driveState);
+
+        if (armManual) {
+            desiredMotorstate.armMotorState = armManualChangeManager.getState();
+        } else {
+            // desiredMotorstate.armMotorState = Process(desiredState.armState);
+            const ArmState& s = desiredState.armState;
+
+            ArmMotorState armMs {};
+            for (int i = 0; i < MOTOR_ID_END; i++)
+                armMs.motorValues[i] = 0;
+
+            // Wrist position IK
+            std::array<double, 3> desiredPos
+                = { (double)s.x, (double)s.y, (double)s.z };
+            std::array<int, 6> angles
+                = ArmModel::generateWristPosition(desiredPos);
+
+            // Apply claw orientation
+            double pitch = (double)s.pitch;
+            double roll = (double)s.roll;
+
+            angles = ArmModel::generateClawOrientation(angles, pitch, roll);
+
+            // Map angles to motor IDs
+            armMs.motorValues[MOTOR_ID_BASE] = angles[0];
+            armMs.motorValues[MOTOR_ID_SHOULDER] = angles[1];
+            armMs.motorValues[MOTOR_ID_ELBOW] = angles[2];
+            armMs.motorValues[MOTOR_ID_WRIST] = angles[3];
+
+            // ArmState desired orientation
+            armMs.motorValues[MOTOR_ID_CLAW_ROLL] = angles[4];
+            armMs.motorValues[MOTOR_ID_CLAW_PITCH] = angles[5];
+
+            // Open/close value
+            armMs.motorValues[MOTOR_ID_CLAW_OPEN] = s.clawOpen;
+
+            desiredMotorstate.armMotorState = armMs;
+        }
+
+        // send desired motor state rover
 
         // Update message for Drive
         wheelMsg.angleVelocity = desiredState.driveState.angularVelocity;
