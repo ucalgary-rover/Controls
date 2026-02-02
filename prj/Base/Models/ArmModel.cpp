@@ -1,5 +1,8 @@
 #include "ArmModel.h"
 
+#include "SSRTArm2025Analytical.h"
+#include "SSRTArm2025JointLimits.h"
+
 static SSRTArm2025Analytical* armModel;
 bool ArmModel::is_initialized = false;
 

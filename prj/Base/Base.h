@@ -50,6 +50,12 @@ private:
     void incrementJoint(int change);
     void changeArmControlType(ArmMessageType type);
 
+    // Desired Motor State Update Methods
+    DriveMotorState
+    processDesiredDriveState(const DriveState& desiredDriveState);
+    ArmMotorState processDesiredArmState(const ArmState& desiredArmState);
+    MotorState processDesiredRoverState();
+
     // List of all controllers in use
     ControllerHandler* controller;
 

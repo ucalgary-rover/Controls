@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "SSRTArm2025Analytical.h"
-#include "SSRTArm2025JointLimits.h"
 #include <array>
 #include <vector>
 
