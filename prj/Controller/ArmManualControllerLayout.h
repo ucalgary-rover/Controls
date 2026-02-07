@@ -19,6 +19,12 @@ public:
 
     void incrementJoint(int change);
 
+    void buttonResponse(uint8_t buttonID) override;
+
+    void leftTriggerResponse(int16_t axisValue) override;
+
+    void rightTriggerResponse(int16_t axisValue) override;
+
 private:
     ArmMotorStateManager* stateManager;
     ArmMotorState armState = {};

@@ -15,13 +15,15 @@ public:
             armState = stateManager->getState();
     }
 
-    void handleLeftJoyStick(int xValue, int yValue);
+    void buttonResponse(uint8_t buttonID); // unused right now
 
-    void handleRightJoyStick(int xValue, int yValue);
+    void leftStickResponse(int xValue, int yValue) override;
 
-    void handleLeftTrigger(int xValue);
+    void rightStickResponse(int xValue, int yValue) override;
 
-    void handleRightTrigger(int xValue);
+    void leftTriggerResponse(int16_t axisValue) override;
+
+    void rightTriggerResponse(int16_t axisValue) override;
 
 private:
     ArmStateManager* stateManager;

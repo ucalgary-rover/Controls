@@ -1,4 +1,25 @@
 #include "ArmManualControllerLayout.h"
+#include <string>
+
+void ArmManualControllerLayout::leftTriggerResponse(int16_t axisValue) {
+    triggerToincrementJointValue(axisValue, -5);
+}
+
+void ArmManualControllerLayout::rightTriggerResponse(int16_t axisValue) {
+    triggerToincrementJointValue(axisValue, 5);
+}
+
+void ArmManualControllerLayout::buttonResponse(uint8_t buttonID) {
+    switch (buttonID) {
+    case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+        incrementJoint(-1);
+        break;
+
+    case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+        incrementJoint(1);
+        break;
+    }
+}
 
 void ArmManualControllerLayout::triggerToincrementJointValue(int triggerVal,
                                                              int increment) {

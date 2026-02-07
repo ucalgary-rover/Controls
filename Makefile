@@ -25,6 +25,7 @@ BASE_INC_FILES += -I prj/Websocket
 BASE_INC_FILES  += -I prj/RoverState
 BASE_INC_FILES  += -I prj/RoverState/StateManagers
 BASE_INC_FILES  += -I prj/Controller
+BASE_INC_FILES  += -I /usr/include/c++/15/i686-redhat-linux
 
 BOOST_ROOT = /usr/include
 SDL_ROOT = tools/SDL
