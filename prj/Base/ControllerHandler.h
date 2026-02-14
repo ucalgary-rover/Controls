@@ -73,76 +73,76 @@ public:
      *@return None
      *
      */
-    void buttonResponse(Uint8 buttonID, int controllerIndex);
+    //void buttonResponse(Uint8 buttonID, int controllerIndex);
 
     /**
      *Identifies which stick requires an update and pass in variable for the
      *appropriate stick update function
      *
-     *@param axisValue The value of the axis moved
-     *@param axisID An ID differentiating the x and y axes across both sticks
-     *@param controllerIndex The index of the active controller for the event
+     //*@param axisValue The value of the axis moved
+     //*@param axisID An ID differentiating the x and y axes across both sticks
+     //*@param controllerIndex The index of the active controller for the event
      *
      *
-     *@return None. Updates values directly through stick functions
+     //*@return None. Updates values directly through stick functions
      *
      */
-    void stickResponse(Sint16 axisValue, int axisID, int controllerIndex);
+    //void stickResponse(Sint16 axisValue, int axisID, int controllerIndex);
 
     /**
      *Identifies which trigger requires an update and pass in variable for the
      *appropriate trigger update function
      *
-     *@param axisValue The value of the trigger moved
-     *@param axisID An ID differentiating the left and right triggers
-     *@param controllerIndex The index of the active controller for the event
+     //*@param axisValue The value of the trigger moved
+     //*@param axisID An ID differentiating the left and right triggers
+     //*@param controllerIndex The index of the active controller for the event
      *
-     *@return None.
+     //*@return None.
      *
      */
-    void triggerResponse(Sint16 axisValue, int axisID, int controllerIndex);
+    //void triggerResponse(Sint16 axisValue, int axisID, int controllerIndex);
 
     /**
      *Executes a function when a button is pressed
      *
-     *@param controllerIndex The index of the active controller for the event
+     //*@param controllerIndex The index of the active controller for the event
      *
-     *@return None
+     //*@return None
      *
      */
-    void controllerAddedResponse(int controllerIndex);
+    //void controllerAddedResponse(int controllerIndex);
 
     /**
      *Closes the removed controller and sends an update with all zero values
      *
-     *@param controllerIndex The index of the active controller for the event
+     //*@param controllerIndex The index of the active controller for the event
      *
-     *@return None
+     //*@return None
      *
      */
-    void controllerRemovedResponse(int controllerIndex);
+    //void controllerRemovedResponse(int controllerIndex);
 
     /**
      *Runs the event loop to recieve any controller events. Initializes SDL
      *subsystems and closes them once the loop is terminated.
      *
-     *@param None
+     //*@param None
      *
-     *@return None
+     //*@return None
      *
      */
-    void eventLoop();
+    //void eventLoop();
 
     /**
      *Runs the event loop with a testing window that shows joystick positions.
      *Initializes SDL subsystems and closes them once the loop is terminated.
      *
-     *@param None
+     //*@param None
      *
-     *@return None
+     //*@return None
      *
      */
-    void testingEventLoop();
+    //void testingEventLoop();
 };
 
 #endif
