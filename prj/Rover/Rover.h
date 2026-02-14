@@ -13,8 +13,6 @@
 
 // #include "Handlers/ArmHandler.h"
 
-#include "Websocket/WebsocketClient.h"
-
 class Rover {
 public:
     // Regular Constructor

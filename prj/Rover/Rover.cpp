@@ -1,4 +1,6 @@
 #include "Rover.h"
+#include "Udp/UDPHandler.h"
+#include "pub_general.h"
 
 #include <chrono>
 
@@ -39,12 +41,10 @@ Rover::~Rover() {
 
 void Rover::start() {
     char address[16];
-    snprintf(address, sizeof(address), "%d.%d.%d.%d", WEBSOCKET_ADDR[0],
-             WEBSOCKET_ADDR[1], WEBSOCKET_ADDR[2], WEBSOCKET_ADDR[3]);
 
-    Logging::logI(file, "Connecting to WebSocket server at %s:%d", address,
-                  WEBSOCKET_PORT);
-    WebSocketClient client(address, std::to_string(WEBSOCKET_PORT));
+    /*Logging::logI(file, "Connecting to WebSocket server at %s:%d", address,
+                  WEBSOCKET_PORT);*/
+    UDPHandler client(CLIENT_PORT, SERVER_PORT);
 
     // Instantiate the systems for the rover
 #if EXTENTION == EXTENTION_TYPE_ARM
@@ -78,7 +78,6 @@ void Rover::start() {
     thread armHandlerThread([&]() { armHandler.start(); });
 #endif
 
-    client.connect();
     while (true) {
         Message reply = client.receive();
         reply.printMessage(); // Print the received message
@@ -193,24 +192,16 @@ void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
 
             Logging::logE(file,
                           "Connection to base timed out, halting motors.");
-            if (time_since_reception.count() > NO_MESSAGE_RECIEVED_TIMEOUT) {
-                armQueue->push(Message(0, ArmMessage()));
-                driveQueue->push(Message(0, WheelMessage()));
-            }
+            // if (time_since_reception.count() > NO_MESSAGE_RECIEVED_TIMEOUT) {
+            //     armQueue->push(Message(0, ArmMessage()));
+            //     driveQueue->push(Message(0, WheelMessage()));
+            // }
         }
 
         message = clientQueue->pop();
 
         // Push message to appropriate queue
         switch (message.getFormat()) {
-        case MESSAGE_FORMAT_ARM:
-            armQueue->push(message);
-            message.printMessage(); // Print the received message
-            break;
-        case MESSAGE_FORMAT_WHEEL:
-            driveQueue->push(message);
-            message.printMessage(); // Print the received message
-            break;
 
         default:
             Logging::logE(file,

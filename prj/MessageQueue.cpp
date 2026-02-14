@@ -25,11 +25,7 @@ void MessageQueue::push(const Message message) {
         // message.");
     }
 
-    if (message.isHighPriority()) {
-        m_priorityQueue.push(message);
-    } else {
-        m_regularQueue.push(message);
-    }
+    m_regularQueue.push(message);
 
     // If there is a thread waiting to pop an element with nothing in the
     // queues, this sends a signal to let that thread know that something has

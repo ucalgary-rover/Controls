@@ -17,7 +17,6 @@
 #include "MessageQueue.h"
 #include "MotorStateManager.h"
 #include "RoverStateManager.h"
-#include "Websocket/WebsocketServer.h"
 #include "mission_control.h"
 #include "pub_general.h"
 

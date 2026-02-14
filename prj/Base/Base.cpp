@@ -4,6 +4,7 @@
 #include "Base/Base.h"
 #include "Base.h"
 #include "Base/Models/ArmModel.h"
+#include "Udp/UDPHandler.h"
 #include <cmath>
 #include <unistd.h>
 
@@ -355,7 +356,7 @@ MotorState Base::processDesiredRoverState() {
 
 void Base::start() {
     MessageQueue sendQueue;
-    WebSocketServer server(WEBSOCKET_PORT);
+    UDPHandler server(SERVER_PORT, CLIENT_PORT);
 
     thread controllerThread([&]() { controller->eventLoop(); });
     thread websocketServerThread([&]() { server.run(sendQueue); });
@@ -366,6 +367,8 @@ void Base::start() {
         MotorState desiredMotorState = processDesiredRoverState();
 
         // Add Method For Printing DesiredMotorState
+        Message message = Message(desiredMotorState);
+        sendQueue.push(message);
 
         usleep(0.1 * 1000000);
     }
