@@ -1,9 +1,12 @@
-
 #ifndef CONTROLLER_HANDLER_H
 #define CONTROLLER_HANDLER_H
 
 #pragma once
+#include <vector>
+#include <map>
+#include <cstdint>
 #include "Controller.h"
+
 
 // A class for initializing controllers and running the pollEvent loop
 // Holds a list of structs that are linked to the positions of the controllers
@@ -11,11 +14,19 @@
 class ControllerHandler {
 
 private:
-    // Holding the controller objects
-    Controller m_controllerList[2];
+    //// Holding the controller objects
+    //Controller m_controllerList[2];  >>>>> OLD
 
-    // Holding the structs for each controller
-    buttonFunctions m_buttonFuncList[2];
+    //// Holding the structs for each controller
+    //buttonFunctions m_buttonFuncList[2]; >>>>> OLD
+
+    //init bool as per UML
+    static bool is_initialized;
+
+    static std::vector<Controller> controllers; //- vector<const Controller>: controllers (FROM UML)
+    static std::map<int, int> controllerAssignment; //- map<int, int>: controllerAssignment (FROM UML)
+
+    static int getAssignedIndex(int controllerID); //index identifier for controllerID
 
 public:
     /**
@@ -27,21 +38,34 @@ public:
      *@return None
      *
      */
-    ControllerHandler(buttonFunctions functionStruct1,
-                      buttonFunctions functionStruct2);
-    void setControllerButtonFuncs(int index, buttonFunctions functionStruct);
+
+    //OLD:
+    //ControllerHandler(buttonFunctions functionStruct1,
+                      //buttonFunctions functionStruct2);
+    //void setControllerButtonFuncs(int index, buttonFunctions functionStruct);
 
     // getter and setter function
-    Controller getControllerFromList(int i) {
-        return (i == 1 || i == 0) ? m_controllerList[i] : m_controllerList[0];
-    };
+    //Controller getControllerFromList(int i) {
+        //return (i == 1 || i == 0) ? m_controllerList[i] : m_controllerList[0];
+    //};
 
-    void setControllerFromList(int i, Controller controller) {
-        i = (i == 1 || i == 0) ? i : 0;
-        m_controllerList[i] = controller;
-    };
+    //void setControllerFromList(int i, Controller controller) {
+        //i = (i == 1 || i == 0) ? i : 0;
+        //m_controllerList[i] = controller;
+    //};
+    static bool initialize(const std::vector<Controller>& controller_functionality);
 
-    /**
+    static void buttonResponse(uint8_t button ID, int contollerID);
+    static void stickResponse(int16_t axisValue, int axisID, int controllerID);
+    static void triggerResponse(int16_t axisValue, int axisID, int controllerID);
+
+    static void controllerAddedResponse(int controllerID);
+    static void controllerRemovedResponse(int controllerID);
+
+    static void eventLoop();
+    static void testingEventLoop();
+
+    /**22
      *Executes a function when a button is pressed
      *
      *@param buttonID The ID of the button pressed
