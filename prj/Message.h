@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "RoverState/MotorState.h"
 #include "pub_general.h"
 #include <iostream>
 #include <sstream>
@@ -16,8 +17,7 @@
 // Generic message format for default constructor
 
 // Allows for different message formats
-using MessagePayload
-    = std::variant<Generic, WheelMessage, ArmMessage, ScienceToolMessage>;
+using MessagePayload = std::variant<Generic, MotorState, ScienceToolMessage>;
 
 class Message {
 public:
@@ -31,21 +31,11 @@ public:
      *   Message msg1(1, WheelMessage{10, 20, 30});
      *   Message msg2(0, ArmMessage{15, 25});
      */
-    Message(int prty, MessagePayload payload);
+    Message(MessagePayload payload);
     Message();
     Message(Message const& src);
-    ~Message();
     Message& operator=(const Message& src);
-
-    /** Returns if a message has priority
-     *
-     * @param
-     * none
-     *
-     * @return
-     * (bool) if the message has priority (True) or not (False)
-     */
-    bool isHighPriority() const;
+    ~Message();
 
     /** prints contents of Message
      *
@@ -62,53 +52,26 @@ public:
     /** Serializes the Message object to a string
      *
      * @return
-     *  std::string - The serialized message
+     *  std::vector<std::byte> - The serialized message
      */
-    std::string serialize() const;
+    std::vector<std::byte> serialize() const;
 
-    /** Returns the payload of the message
-     *
-     * @return
-     *  MessagePayload - The payload of the message
-     */
-    MessagePayload get_payload() { return m_payload; }
-
-    /** Sets isHighPriority of the message
+    /** Deserializes a string to a Message object
      *
      * @param
-     *  isHighPriority: bool - The priority of the message
+     *  data: const std::vector<std::byte> - The serialized message byte vector
+     *  size: size_t - The size of the message to deserialize - the message will
+     * be deserialized from the start of the byte vector until this number of
+     * bytes has been deserialized
      *
      * @return
-     *  none
+     *  Message - The deserialized Message object
      */
-    void set_is_high_priority(bool isHighPriority) {
-        m_isHighPriority = isHighPriority;
-    }
-
-    /** Sets the format of the message
-     *
-     * @param
-     *  format: MessageFormat - The format of the message
-     *
-     * @return
-     *  none
-     */
-    void set_format(MessageFormat format) { m_format = format; }
-
-    /** Sets the payload of the message
-     *
-     * @param
-     *  payload: MessagePayload - The payload of the message
-     *
-     * @return
-     *  none
-     */
-    void set_payload(MessagePayload payload) { m_payload = payload; }
+    static Message deserialize(const std::vector<std::byte> data, size_t size);
 
 private:
-    bool m_isHighPriority;    // Priority of message
-    MessagePayload m_payload; // One of the struct messages
     MessageFormat m_format;
+    MessagePayload m_payload; // One of the struct messages
 };
 
 #endif

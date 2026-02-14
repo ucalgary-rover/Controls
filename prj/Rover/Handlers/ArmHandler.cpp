@@ -26,47 +26,6 @@ ArmHandler::ArmHandler(Arm& arm, MessageQueue& armQueue) :
     // }
 }
 
-void ArmHandler::handleManualArmMessage(ArmManualMessage message) {
-    auto current_angles = ArmModel::getAngles();
-
-    if (message.motorId > current_angles.max_size()) {
-        Logging::logE(file, "Invalid motor ID: %d", message.motorId);
-        return;
-    }
-
-    current_angles[message.motorId] += message.angleChange;
-
-    if (!ArmModel::updateJointAngles(current_angles)) {
-        return;
-    }
-
-    updateMotorAngles(current_angles);
-}
-
-void ArmHandler::handleFixedIKMessage(ArmFixedIKMessage message) {
-    std::array<double, 3> desired_wrist_position
-        = { message.wristX, message.wristY, message.wristZ };
-
-    auto new_angles = ArmModel::generateWristPosition(desired_wrist_position);
-
-    if (!ArmModel::updateJointAngles(new_angles)) {
-        return;
-    }
-}
-
-void ArmHandler::handleVariableIKMessage(ArmVariableIKMessage message) {
-    std::array<double, 3> desired_wrist_position
-        = { message.wristX, message.wristY, message.wristZ };
-
-    auto new_angles = ArmModel::generateWristPosition(desired_wrist_position);
-    new_angles = ArmModel::generateClawOrientation(
-        new_angles, message.clawPitch, message.clawRoll);
-
-    if (!ArmModel::updateJointAngles(new_angles)) {
-        return;
-    }
-}
-
 void updateMotorAngle(MotorHandlerReturn* handler, double angle) {
     if (handler == nullptr) {
         return;
@@ -172,13 +131,14 @@ ArmHandler::~ArmHandler() {
 }
 
 void ArmHandler::start() {
-    ArmMessage message;
+    Message message;
 
     while (true) {
         // Get message from armQueue
         Message msg = m_armQueue.pop();
 
-        if (msg.getFormat() != MessageFormat::MESSAGE_FORMAT_ARM) {
+        // TODO: Handle the message
+        /*if (msg.getFormat() != MessageFormat::MESSAGE_FORMAT_ARM) {
             Logging::logE(file, "Received non-arm message in armQueue %d",
                           msg.getFormat());
             continue;
@@ -198,7 +158,7 @@ void ArmHandler::start() {
         //     break;
         default:
             break;
-        }
+        }*/
     }
 }
 

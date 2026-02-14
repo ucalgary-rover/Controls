@@ -2,27 +2,18 @@
 BASE_SRC_FILES := $(wildcard prj/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/Base/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/Base/Models/*.cpp)
-BASE_SRC_FILES += $(wildcard prj/Websocket/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/RoverState/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/RoverState/StateManagers/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/Controller/*.cpp)
-
-BASE_SRC_FILES := $(filter-out prj/Websocket/Client.cpp, $(BASE_SRC_FILES))
-BASE_SRC_FILES := $(filter-out prj/Websocket/Server.cpp, $(BASE_SRC_FILES))
 
 ROVER_SRC_FILES := $(wildcard prj/*.cpp)
 ROVER_SRC_FILES += $(wildcard prj/Rover/*.cpp)
 ROVER_SRC_FILES += $(wildcard prj/Rover/Systems/Drive.cpp)
 ROVER_SRC_FILES += $(wildcard prj/Rover/Systems/Arm.cpp)
 ROVER_SRC_FILES += $(wildcard prj/Rover/Handlers/*.cpp)
-ROVER_SRC_FILES += $(wildcard prj/Websocket/*.cpp)
-
-ROVER_SRC_FILES := $(filter-out prj/Websocket/Client.cpp, $(ROVER_SRC_FILES))
-ROVER_SRC_FILES := $(filter-out prj/Websocket/Server.cpp, $(ROVER_SRC_FILES))
 
 BASE_INC_FILES := -I prj
 BASE_INC_FILES += -I prj/Base
-BASE_INC_FILES += -I prj/Websocket
 BASE_INC_FILES  += -I prj/RoverState
 BASE_INC_FILES  += -I prj/RoverState/StateManagers
 BASE_INC_FILES  += -I prj/Controller
