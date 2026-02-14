@@ -1,6 +1,7 @@
 .RECIPEPREFIX = >
 BASE_SRC_FILES := $(wildcard prj/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/Base/*.cpp)
+BASE_SRC_FILES += $(wildcard prj/Base/Models/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/Websocket/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/RoverState/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/RoverState/StateManagers/*.cpp)
@@ -55,7 +56,7 @@ build_dir:
 > mkdir -p logs
 
 base: build_dir
-> g++ $(CPP_STD) -DSIDE_TO_BUILD=1 $(BASE_INC_FILES) $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_PTHREAD) -o out/base
+> g++ $(CPP_STD) -DSIDE_TO_BUILD=1 $(BASE_INC_FILES) $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_IK) $(CMPL_PHIDETS) $(CMPL_PTHREAD) -o out/base
 
 rover: build_dir
 > g++ $(CPP_STD) -DSIDE_TO_BUILD=2 -I"prj" $(CMPL_IK) $(ROVER_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_JSON) $(CMPL_PTHREAD) -o out/rover

@@ -2,6 +2,8 @@
 // Written by Gavin Grubert
 
 #include "Base/Base.h"
+#include "Base.h"
+#include "Base/Models/ArmModel.h"
 #include <cmath>
 #include <unistd.h>
 
@@ -297,6 +299,60 @@ void Base::changeArmControlType(ArmMessageType type) {
 
 void Base::quit() { this->exitLoop = 1; }
 
+DriveMotorState
+Base::processDesiredDriveState(const DriveState& desiredDriveState) {
+    // TODO: Add logic for drive state processing
+    return DriveMotorState();
+}
+
+ArmMotorState Base::processDesiredArmState(const ArmState& desiredArmState) {
+    ArmMotorState armMs = {};
+
+    // Wrist position IK
+    std::array<double, 3> desiredPos
+        = { (double)desiredArmState.x, (double)desiredArmState.y,
+            (double)desiredArmState.z };
+    std::array<int, 6> angles = ArmModel::generateWristPosition(desiredPos);
+
+    // Apply claw orientation
+    double pitch = (double)desiredArmState.pitch;
+    double roll = (double)desiredArmState.roll;
+
+    angles = ArmModel::generateClawOrientation(angles, pitch, roll);
+
+    // Map angles to motor IDs
+    armMs.motorValues[MOTOR_ID_BASE] = angles[0];
+    armMs.motorValues[MOTOR_ID_SHOULDER] = angles[1];
+    armMs.motorValues[MOTOR_ID_ELBOW] = angles[2];
+    armMs.motorValues[MOTOR_ID_WRIST] = angles[3];
+
+    // ArmState desired orientation
+    armMs.motorValues[MOTOR_ID_CLAW_ROLL] = angles[4];
+    armMs.motorValues[MOTOR_ID_CLAW_PITCH] = angles[5];
+
+    // Open/close value
+    armMs.motorValues[MOTOR_ID_CLAW_OPEN] = desiredArmState.clawOpen;
+
+    return armMs;
+}
+
+MotorState Base::processDesiredRoverState() {
+    constexpr bool armManual
+        = true; // TODO: Add Controller logic for determining whether to use
+                // armManualState
+
+    RoverState desiredState = desiredStateManager.getState();
+
+    MotorState desiredMotorstate = {
+        .driveMotorState = processDesiredDriveState(desiredState.driveState),
+        .armMotorState = armManual
+                             ? armManualChangeManager.getState()
+                             : processDesiredArmState(desiredState.armState),
+    };
+
+    return desiredMotorstate;
+}
+
 void Base::start() {
     MessageQueue sendQueue;
     WebSocketServer server(WEBSOCKET_PORT);
@@ -304,75 +360,16 @@ void Base::start() {
     thread controllerThread([&]() { controller->eventLoop(); });
     thread websocketServerThread([&]() { server.run(sendQueue); });
 
-    WheelMessage wheelMsg;
-
-#if Extention == EXTENTION_TYPE_ARM
-    ArmMessage armMsg;
-#endif
+    ArmModel::initialize();
 
     while (!exitLoop) {
-        RoverState desiredState = desiredStateManager.getState();
+        MotorState desiredMotorState = processDesiredRoverState();
 
-        // Update message for Drive
-        wheelMsg.angleVelocity = desiredState.driveState.angularVelocity;
-        wheelMsg.theta = desiredState.driveState.heading;
-        wheelMsg.velocity = desiredState.driveState.speed;
+        // Add Method For Printing DesiredMotorState
 
-        Message driveMessage(MESSAGE_PRIORITY_LOW, wheelMsg);
-
-        // Add Drive Message to queue
-        Logging::logV(file, "Adding drive message to queue");
-
-        sendQueue.push(driveMessage);
-
-#if Extention == EXTENTION_TYPE_ARM
-        // Update messgae for Arm
-        switch (armControlType) {
-        case ARM_MESSAGE_TYPE_MANUAL:
-            // Manual Control
-            ArmManualMessage manualMsg;
-            manualMsg.motorId
-                = MOTOR_ID_BASE; // TODO: Replace with correct logic once
-                                 // MotorState refactor is complete
-            manualMsg.angleChange = 0;
-            armMsg.type = ARM_MESSAGE_TYPE_MANUAL;
-            armMsg.manual_message = manualMsg;
-            break;
-
-        case ARM_MESSAGE_TYPE_FIXED_IK:
-            // Fixed Inverse Kinematics Control
-            ArmFixedIKMessage fixedIKMsg;
-            fixedIKMsg.wristX = desiredState.armState.x;
-            fixedIKMsg.wristY = desiredState.armState.y;
-            fixedIKMsg.wristZ = desiredState.armState.z;
-            fixedIKMsg.clawOpen = desiredState.armState.clawOpen;
-            armMsg.type = ARM_MESSAGE_TYPE_FIXED_IK;
-            armMsg.fixed_ik_message = fixedIKMsg;
-
-            break;
-
-        case ARM_MESSAGE_TYPE_VARIABLE_IK:
-            // Variable Inverse Kinematics Control
-            ArmVariableIKMessage variableIKMsg;
-            variableIKMsg.wristX = desiredState.armState.x;
-            variableIKMsg.wristY = desiredState.armState.y;
-            variableIKMsg.wristZ = desiredState.armState.z;
-            variableIKMsg.clawPitch = desiredState.armState.pitch;
-            variableIKMsg.clawRoll = desiredState.armState.roll;
-            variableIKMsg.clawOpen = desiredState.armState.clawOpen;
-            armMsg.type = ARM_MESSAGE_TYPE_VARIABLE_IK;
-            armMsg.variable_ik_message = variableIKMsg;
-
-            break;
-        }
-        // Add Arm Message to queue
-        Logging::logV(file, "Adding arm message to queue");
-
-        sendQueue.push(Message(MESSAGE_PRIORITY_LOW, armMsg));
-
-#endif
         usleep(0.1 * 1000000);
     }
+
     controllerThread.join();
     websocketServerThread.join();
 }
