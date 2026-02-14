@@ -2,6 +2,11 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <string>
+#include "ControllerHandler.h"
+
+bool ControllerHandler::is_initialized = false;
+std::vector<Controller> ControllerHandler::controllers;
+std::map<int, int> ControllerHandler::controllerAssignment;
 
 static const char* file = "ControllerHandler";
 

@@ -28,6 +28,12 @@ private:
 
     static int getAssignedIndex(int controllerID); //index identifier for controllerID
 
+    static void buttonResponse(uint8_t buttonID, int controllerID);
+    static void stickResponse(int16_t axisValue, int axisID, int controllerID);
+    static void triggerResponse(int16_t axisValue, int axisID, int controllerID);
+    static void controllerAddedResponse(int controllerID);
+    static void controllerRemovedResponse(int controllerID);
+
 public:
     /**
      *Initializes SDL and maps the appropriate functions to controllers
@@ -54,13 +60,6 @@ public:
         //m_controllerList[i] = controller;
     //};
     static bool initialize(const std::vector<Controller>& controller_functionality);
-
-    static void buttonResponse(uint8_t button ID, int contollerID);
-    static void stickResponse(int16_t axisValue, int axisID, int controllerID);
-    static void triggerResponse(int16_t axisValue, int axisID, int controllerID);
-
-    static void controllerAddedResponse(int controllerID);
-    static void controllerRemovedResponse(int controllerID);
 
     static void eventLoop();
     static void testingEventLoop();
