@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <vector>
 
+#include "ArmControllerLayout.h"
 #include "ArmFixedIKControllerLayout.h"
 #include "ArmManualControllerLayout.h"
 #include "ArmVariableIKControllerLayout.h"
@@ -54,14 +55,6 @@ private:
     ControllerHandler* controller;
 
     DriveControllerLayout driveLayout;
-    ArmManualControllerLayout armManualLayout;
-    ArmFixedIKControllerLayout armFixedIKLayout;
-    ArmVariableIKControllerLayout armVariableIKLayout;
-
-    buttonFunctions* drive_control;
-    buttonFunctions* arm_manual_control;
-    buttonFunctions* arm_fixed_ik_control;
-    buttonFunctions* arm_variable_ik_control;
+    ArmControllerLayout armLayout;
 };
-
 #endif

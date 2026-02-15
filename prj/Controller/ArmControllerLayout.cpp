@@ -1,7 +1,21 @@
 #include "ArmControllerLayout.h"
 
 void ArmControllerLayout::buttonResponse(uint8_t buttonID) {
-    layouts[currentLayout]->buttonResponse(buttonID);
+    switch (buttonID) {
+    case SDL_CONTROLLER_BUTTON_BACK:
+        currentLayout = FIXED_IK;
+        break;
+
+    case SDL_CONTROLLER_BUTTON_GUIDE:
+        currentLayout = MANUAL;
+        break;
+
+    case SDL_CONTROLLER_BUTTON_START:
+        currentLayout = VARIABLE_IK;
+
+    default:
+        layouts[currentLayout]->buttonResponse(buttonID);
+    }
 }
 
 void ArmControllerLayout::leftStickResponse(int xValue, int yValue) {

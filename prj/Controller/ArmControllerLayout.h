@@ -7,9 +7,9 @@
 #include <string>
 
 enum layout {
-    FixedIK,
-    ArmVariableIK,
-    ArmManual
+    FIXED_IK,
+    VARIABLE_IK,
+    MANUAL
 };
 
 class ArmControllerLayout : public ControllerLayout {
@@ -25,11 +25,11 @@ public:
         ArmManualControllerLayout armManualLayout
             = ArmManualControllerLayout(armMotorStateManager);
 
-        layouts[FixedIK] = &armFixedIKLayout;
-        layouts[ArmVariableIK] = &armVariableIKLayout;
-        layouts[ArmManual] = &armManualLayout;
+        layouts[FIXED_IK] = &armFixedIKLayout;
+        layouts[VARIABLE_IK] = &armVariableIKLayout;
+        layouts[MANUAL] = &armManualLayout;
 
-        currentLayout = FixedIK;
+        currentLayout = FIXED_IK;
     }
 
     //
