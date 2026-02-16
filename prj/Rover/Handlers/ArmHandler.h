@@ -41,10 +41,6 @@ private:
     // InverseKinematics m_ik;
     // PIDController m_pid;
 
-    void handleManualArmMessage(ArmManualMessage message);
-    void handleFixedIKMessage(ArmFixedIKMessage message);
-    void handleVariableIKMessage(ArmVariableIKMessage message);
-
     void updateMotorAngles(std::array<int, 6> new_angles);
 };
 

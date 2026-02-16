@@ -483,13 +483,15 @@ void DriveHandler::awaitWheelTargets() {
 
 void DriveHandler::start() {
 
-    WheelMessage message;
+    Message message;
 
     while (true) {
         // Get message from driveQueue
         Message msg = m_driveQueue->pop();
 
-        if (msg.getFormat() != MessageFormat::MESSAGE_FORMAT_WHEEL) {
+        // TODO: Handle the message
+
+        /*if (msg.getFormat() != MessageFormat::MESSAGE_FORMAT_WHEEL) {
             Logging::logE(file, "Received non-wheel message in driveQueue %d",
                           msg.getFormat());
             continue;
@@ -541,7 +543,7 @@ void DriveHandler::start() {
             // execute stop if no joysticks active
         } else {
             stopWheels();
-        }
+        }*/
     }
 }
 
