@@ -2,7 +2,6 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <string>
-#include "ControllerHandler.h"
 
 bool ControllerHandler::is_initialized = false;
 std::vector<Controller> ControllerHandler::controllers;
@@ -220,41 +219,40 @@ void ControllerHandler::triggerResponse(Sint16 axisValue, int axisID,
 }
 
 void ControllerHandler::controllerAddedResponse(int controllerIndex) {
-    // checks for which controller object is not active and connects
+    // checks for which controller object is not active (key == -1) and connects
     // the new controller there
-    for (int i = 0; i < 3; i++) {
 
-        // have to do this since nullptrs are special little
-        // snowflakes they don't play nice with "!" I guess
-        if (!((bool)m_controllerList[i].getPointerID())) {
-            m_controllerList[i]
-                = Controller(SDL_GameControllerOpen(controllerIndex));
+    for (auto& [key, value] : controllerAssignment) {
+        if (key == -1) {
 
-            // sets buttonfuncs based on the position the connected
-            // controller is assigned
-            m_controllerList[i].setButtonFuncs(m_buttonFuncList[i]);
+            SDL_GameControllerOpen(controllerIndex);
+            key = controllerIndex;
 
-            Logging::logV(file, "Controller added", i);
+            Logging::logV(file, "Controller added", value);
             break;
         }
     }
 }
 
 void ControllerHandler::controllerRemovedResponse(int controllerIndex) {
-    // checks if there is a controller id and the controller id
     // matches the current controller
-    for (int i = 0; i < 3; i++) {
-        if (m_controllerList[i].getInstanceID() == controllerIndex) {
+    for (auto& [key, value] : controllerAssignment) {
+        if (key == controllerIndex) {
 
             // closes the controller in question
-            SDL_GameControllerClose(m_controllerList[i].getPointerID());
-            m_controllerList[i] = Controller();
+            SDL_GameControllerClose(
+                SDL_GameControllerFromInstanceID(controllerIndex));
+
+            // sets the key to some invalid value
+            key = -1;
 
             // sends an update that sets all values to zero to prevent any ghost
             // movement
             for (int j = 0; j < 4; j++) {
-                stickResponse(0, j, i);
+                stickResponse(0, j, value);
             };
+
+            Logging::logV(file, "Controller removed", value);
             break;
         }
     }
@@ -263,6 +261,9 @@ void ControllerHandler::controllerRemovedResponse(int controllerIndex) {
 void ControllerHandler::eventLoop() {
 
     bool quit = false;
+
+    int homePressedStartTime;
+    int timeElapsed;
 
     // initializing SDL sub systems`
     // This combo works, it is a little strange tho
@@ -340,6 +341,9 @@ void ControllerHandler::eventLoop() {
 
             case SDL_CONTROLLERBUTTONDOWN:
 
+                if (event.cbutton.button == SDL_CONTROLLER_BUTTON_GUIDE)
+                    homePressedStartTime = SDL_GetTicks();
+
                 buttonResponse(event.cbutton.button, event.cdevice.which);
 
                 //-------------------------------------------------------------
@@ -347,6 +351,26 @@ void ControllerHandler::eventLoop() {
                 // if (SDL_CONTROLLER_BUTTON_START == event.cbutton.button) {
                 //     quit = true;
                 // }
+
+                break;
+
+            case SDL_CONTROLLERBUTTONUP:
+                if (event.cbutton.button == SDL_CONTROLLER_BUTTON_GUIDE)
+                    timeElapsed = SDL_GetTicks() - homePressedStartTime;
+
+                if (timeElapsed >= 3000)
+                    // switching logic here
+                    for (auto& [key, value] : controllerAssignment) {
+                        switch (value) {
+                        case 1:
+                            value = 2;
+                            break;
+
+                        case 2:
+                            value = 1;
+                            break;
+                        }
+                    }
 
                 break;
             }

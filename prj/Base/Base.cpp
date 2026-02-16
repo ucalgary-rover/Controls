@@ -33,30 +33,12 @@ Base::Base() {
 
     exitLoop = 0;
 
-    controller = new ControllerHandler(*drive_control, *arm_manual_control);
+    controller = new ControllerHandler(*driveLayout, *armLayout);
 
     Logging::logI(file, "Initializing Base done");
 }
 
 Base::~Base() { }
-
-void Base::changeArmControlType(ArmMessageType type) {
-    mtx.lock();
-    Logging::logI(file, "Setting Arm Control Type to %d", type);
-    armControlType = type;
-    switch (armControlType) {
-    case ARM_MESSAGE_TYPE_MANUAL:
-        controller->setControllerButtonFuncs(1, *arm_manual_control);
-        break;
-    case ARM_MESSAGE_TYPE_FIXED_IK:
-        controller->setControllerButtonFuncs(1, *arm_fixed_ik_control);
-        break;
-    case ARM_MESSAGE_TYPE_VARIABLE_IK:
-        controller->setControllerButtonFuncs(1, *arm_variable_ik_control);
-        break;
-    }
-    mtx.unlock();
-}
 
 void Base::quit() { this->exitLoop = 1; }
 
