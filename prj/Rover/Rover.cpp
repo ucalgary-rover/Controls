@@ -1,5 +1,5 @@
 #include "Rover.h"
-#include "Udp/UDPHandler.h"
+#include "UDPHandler.h"
 #include "pub_general.h"
 
 #include <chrono>
@@ -44,7 +44,7 @@ void Rover::start() {
 
     /*Logging::logI(file, "Connecting to WebSocket server at %s:%d", address,
                   WEBSOCKET_PORT);*/
-    UDPHandler client(CLIENT_PORT, SERVER_PORT);
+    UDPHandler client(ROVER_PORT, BASE_PORT);
 
     // Instantiate the systems for the rover
 #if EXTENTION == EXTENTION_TYPE_ARM

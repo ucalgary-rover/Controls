@@ -83,7 +83,9 @@ void Message::printMessage() const {
                           << payload.armMotorState.motorValues[2] << " "
                           << payload.armMotorState.motorValues[3] << " "
                           << payload.armMotorState.motorValues[4] << " "
-                          << payload.armMotorState.motorValues[5] << std::endl;
+                          << payload.armMotorState.motorValues[5]
+                          << std::endl; // TODO: hardcoded for 6
+                                        // arm motors, update later
             } else if constexpr (std::is_same_v<T, ScienceToolMessage>) {
                 std::cout << "ScienceToolMessage - Move Up/Down: "
                           << payload.moveUpDown

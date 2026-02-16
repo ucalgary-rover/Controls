@@ -4,7 +4,7 @@
 #include "Base/Base.h"
 #include "Base.h"
 #include "Base/Models/ArmModel.h"
-#include "Udp/UDPHandler.h"
+#include "UDPHandler.h"
 #include <cmath>
 #include <unistd.h>
 
@@ -356,10 +356,10 @@ MotorState Base::processDesiredRoverState() {
 
 void Base::start() {
     MessageQueue sendQueue;
-    UDPHandler server(SERVER_PORT, CLIENT_PORT);
+    UDPHandler server(BASE_PORT, ROVER_PORT);
 
     thread controllerThread([&]() { controller->eventLoop(); });
-    thread websocketServerThread([&]() { server.run(sendQueue); });
+    thread UDPServerThread([&]() { server.run(sendQueue); });
 
     ArmModel::initialize();
 
@@ -374,5 +374,5 @@ void Base::start() {
     }
 
     controllerThread.join();
-    websocketServerThread.join();
+    UDPServerThread.join();
 }

@@ -70,7 +70,7 @@ const int ARM_CLAW_CHANNEL = 0;
 const int ARM_CLAW_PORT = 0;
 
 // UDP Definitions
-const int CLIENT_PORT = 8080; // For on the nook: 5995
-const int SERVER_PORT = 8008;
+const int ROVER_PORT = 8080; // For on the nook: 5995
+const int BASE_PORT = 8008;
 
 #endif // MISSION_CONTROL_H
