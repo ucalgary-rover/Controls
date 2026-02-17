@@ -16,7 +16,7 @@ void UDPHandler::run(MessageQueue& queue) {
     std::thread(&UDPHandler::handle_session, this, std::ref(queue)).detach();
 
     // Create some fake asio tasks - prevent the context from finishing
-    asio::io_context::work idleWork(ioc);
+    auto work = boost::asio::make_work_guard(ioc);
     ioc.run();
 }
 

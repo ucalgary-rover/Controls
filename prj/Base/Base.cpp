@@ -359,7 +359,7 @@ void Base::start() {
     UDPHandler server(BASE_PORT, ROVER_PORT);
 
     thread controllerThread([&]() { controller->eventLoop(); });
-    thread UDPServerThread([&]() { server.run(sendQueue); });
+    server.run(sendQueue);
 
     ArmModel::initialize();
 
@@ -374,5 +374,6 @@ void Base::start() {
     }
 
     controllerThread.join();
-    UDPServerThread.join();
+    // UDPServerThread.join();
+    std::cout << "Finished startup" << std::endl;
 }
