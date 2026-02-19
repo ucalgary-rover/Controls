@@ -12,7 +12,6 @@ UDPHandler::UDPHandler(unsigned short myPort, unsigned short theirPort) :
 
 // Prepare the UDP sender
 void UDPHandler::run(MessageQueue& queue) {
-    ;
     std::thread(&UDPHandler::handle_session, this, std::ref(queue)).detach();
 
     // Create some fake asio tasks - prevent the context from finishing

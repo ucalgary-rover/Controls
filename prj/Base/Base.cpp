@@ -359,9 +359,10 @@ void Base::start() {
     UDPHandler server(BASE_PORT, ROVER_PORT);
 
     thread controllerThread([&]() { controller->eventLoop(); });
-    server.run(sendQueue);
+    thread udpThread([&]() { server.run(sendQueue); });
 
-    ArmModel::initialize();
+    // std::cout << "A" << std::endl;
+    // ArmModel::initialize();
 
     while (!exitLoop) {
         MotorState desiredMotorState = processDesiredRoverState();
@@ -372,8 +373,10 @@ void Base::start() {
 
         usleep(0.1 * 1000000);
     }
+    // std::cout << "B" << std::endl;
 
     controllerThread.join();
-    // UDPServerThread.join();
-    std::cout << "Finished startup" << std::endl;
+    // std::cout << "C" << std::endl;
+    udpThread.join();
+    // std::cout << "Finished startup" << std::endl;
 }

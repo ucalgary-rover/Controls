@@ -79,9 +79,12 @@ void Rover::start() {
 #endif
 
     while (true) {
+        std::cout << "Print message A" << std::endl;
         Message reply = client.receive();
         reply.printMessage(); // Print the received message
         roverQueue.push(reply);
+
+        std::cout << "Print message" << std::endl;
     }
 
     driveHandlerThread.join();
@@ -201,14 +204,14 @@ void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
         message = clientQueue->pop();
 
         // Push message to appropriate queue
-        switch (message.getFormat()) {
+        /*switch (message.getFormat()) {
 
         default:
             Logging::logE(file,
                           "Recieved message for un-used message format of %d",
                           message.getFormat());
             break;
-        }
+        }*/
     }
 }
 
