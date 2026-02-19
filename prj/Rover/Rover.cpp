@@ -79,12 +79,9 @@ void Rover::start() {
 #endif
 
     while (true) {
-        std::cout << "Print message A" << std::endl;
         Message reply = client.receive();
         reply.printMessage(); // Print the received message
         roverQueue.push(reply);
-
-        std::cout << "Print message" << std::endl;
     }
 
     driveHandlerThread.join();
@@ -193,12 +190,13 @@ void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
                 = std::chrono::duration_cast<std::chrono::seconds>(
                     std::chrono::system_clock::now() - last_reception);
 
-            Logging::logE(file,
-                          "Connection to base timed out, halting motors.");
-            // if (time_since_reception.count() > NO_MESSAGE_RECIEVED_TIMEOUT) {
-            //     armQueue->push(Message(0, ArmMessage()));
-            //     driveQueue->push(Message(0, WheelMessage()));
-            // }
+            // Logging::logE(file,
+            //               "Connection to base timed out, halting motors.");
+            //  if (time_since_reception.count() > NO_MESSAGE_RECIEVED_TIMEOUT)
+            //  {
+            //      armQueue->push(Message(0, ArmMessage()));
+            //      driveQueue->push(Message(0, WheelMessage()));
+            //  }
         }
 
         message = clientQueue->pop();
