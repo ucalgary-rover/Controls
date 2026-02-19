@@ -51,8 +51,8 @@ void ArmModel::initialize() {
     SSRTArm2025Analytical::JointLimits joint_limits = {};
     joint_limits.push_back(checkIndividualJointBoundaries);
 
-    *armModel
-        = SSRTArm2025Analytical(link_lengths, joint_defaults, joint_limits);
+    armModel
+        = new SSRTArm2025Analytical(link_lengths, joint_defaults, joint_limits);
 
     is_initialized = true;
 }
