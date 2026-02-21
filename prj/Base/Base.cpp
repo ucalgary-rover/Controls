@@ -361,7 +361,7 @@ void Base::start() {
     thread controllerThread([&]() { controller->eventLoop(); });
     thread udpThread([&]() { server.run(sendQueue); });
 
-    // ArmModel::initialize();
+    ArmModel::initialize();
 
     while (!exitLoop) {
         MotorState desiredMotorState = processDesiredRoverState();
@@ -369,6 +369,8 @@ void Base::start() {
         // Add Method For Printing DesiredMotorState
         Message message = Message(desiredMotorState);
         sendQueue.push(message);
+        message.printMessage(); // Makes base output messy with other info
+                                // messages - clean up?
 
         usleep(0.1 * 1000000);
     }
