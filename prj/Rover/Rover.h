@@ -18,6 +18,7 @@ public:
     // Regular Constructor
     Rover() = default;
 
+    // Destructor
     ~Rover() = default;
 
     /** Instantiate the threads for each queue
