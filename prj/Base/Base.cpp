@@ -5,6 +5,7 @@
 #include "Base.h"
 #include "Base/Models/ArmModel.h"
 #include "UDPHandler.h"
+#include "Base/Models/DriveModel.h"
 #include <cmath>
 #include <unistd.h>
 
@@ -300,12 +301,6 @@ void Base::changeArmControlType(ArmMessageType type) {
 
 void Base::quit() { this->exitLoop = 1; }
 
-DriveMotorState
-Base::processDesiredDriveState(const DriveState& desiredDriveState) {
-    // TODO: Add logic for drive state processing
-    return DriveMotorState();
-}
-
 ArmMotorState Base::processDesiredArmState(const ArmState& desiredArmState) {
     ArmMotorState armMs = {};
 
@@ -335,6 +330,15 @@ ArmMotorState Base::processDesiredArmState(const ArmState& desiredArmState) {
     armMs.motorValues[MOTOR_ID_CLAW_OPEN] = desiredArmState.clawOpen;
 
     return armMs;
+}
+
+DriveMotorState Base::processDesiredDriveState(const DriveState& state) {
+
+    return DriveModel::convert(
+        state,
+        1, // we're suppose to get m_drive->getLength()and getWidth but we don't
+           // have access to it in the model, so just use 1
+        1);
 }
 
 MotorState Base::processDesiredRoverState() {
