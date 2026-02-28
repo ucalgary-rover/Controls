@@ -17,7 +17,6 @@
 #include "MessageQueue.h"
 #include "MotorStateManager.h"
 #include "RoverStateManager.h"
-#include "Websocket/WebsocketServer.h"
 #include "mission_control.h"
 #include "pub_general.h"
 
@@ -28,7 +27,7 @@ using namespace std;
 class Base {
 public:
     Base();
-    ~Base();
+    ~Base() = default;
 
     // Start the loops to have Base working
     void start();

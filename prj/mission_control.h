@@ -69,9 +69,8 @@ const int ARM_CLAW_SERIAL_NUMBER = 1000;
 const int ARM_CLAW_CHANNEL = 0;
 const int ARM_CLAW_PORT = 0;
 
-// Websocet Definitions
-const int WEBSOCKET_PORT = 8080; // For on the nook: 5995
-const int WEBSOCKET_ADDR[4]
-    = { 127, 0, 0, 1 }; // For on the nook: { 0, 0, 0, 0 }
+// UDP Definitions
+const int ROVER_PORT = 8080; // For on the nook: 5995
+const int BASE_PORT = 8008;
 
 #endif // MISSION_CONTROL_H

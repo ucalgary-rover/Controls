@@ -16,9 +16,9 @@ class MessageQueue {
 
 public:
     // Constructor
-    MessageQueue();
+    MessageQueue() = default;
     // Destructor
-    ~MessageQueue();
+    ~MessageQueue() = default;
 
     /** Add message into correct queue depending on priority
      *

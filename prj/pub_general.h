@@ -8,9 +8,9 @@
 #pragma once
 
 enum MessageFormat : int {
-    MESSAGE_FORMAT_WHEEL,
-    MESSAGE_FORMAT_ARM,
+    MESSAGE_FORMAT_MOTOR_STATE,
     MESSAGE_FORMAT_SCIENCE_TOOL,
+    MESSAGE_FORMAT_GENERIC
 };
 
 enum MessagePriority : int {
@@ -64,13 +64,6 @@ struct Generic {
     int value;
 };
 
-// Message format for wheels
-struct WheelMessage {
-    int velocity;
-    int theta;
-    int angleVelocity;
-};
-
 enum WheelID : int {
     WHEEL_FR,
     WHEEL_FL,
@@ -80,6 +73,12 @@ enum WheelID : int {
 };
 
 // Message format for arm
+enum ArmMessageType : int {
+    ARM_MESSAGE_TYPE_HALT,
+    ARM_MESSAGE_TYPE_MANUAL,
+    ARM_MESSAGE_TYPE_FIXED_IK,
+    ARM_MESSAGE_TYPE_VARIABLE_IK,
+};
 
 enum MotorID : int {
     MOTOR_ID_BASE,
@@ -90,46 +89,6 @@ enum MotorID : int {
     MOTOR_ID_CLAW_PITCH,
     MOTOR_ID_CLAW_OPEN,
     MOTOR_ID_END,
-};
-
-enum ArmMessageType : int {
-    ARM_MESSAGE_TYPE_HALT,
-    ARM_MESSAGE_TYPE_MANUAL,
-    ARM_MESSAGE_TYPE_FIXED_IK,
-    ARM_MESSAGE_TYPE_VARIABLE_IK,
-};
-
-struct ArmManualMessage {
-    MotorID motorId;
-    int angleChange;
-};
-
-struct ArmFixedIKMessage {
-    float wristX;
-    float wristY;
-    float wristZ;
-
-    int clawOpen;
-};
-
-struct ArmVariableIKMessage {
-    float wristX;
-    float wristY;
-    float wristZ;
-
-    int clawPitch;
-    int clawRoll;
-
-    int clawOpen;
-};
-
-struct ArmMessage {
-    ArmMessageType type = ArmMessageType::ARM_MESSAGE_TYPE_HALT;
-    union {
-        ArmManualMessage manual_message;
-        ArmFixedIKMessage fixed_ik_message;
-        ArmVariableIKMessage variable_ik_message;
-    };
 };
 
 // Message format for science tool

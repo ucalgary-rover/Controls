@@ -4,6 +4,7 @@
 #include "Base/Base.h"
 #include "Base.h"
 #include "Base/Models/ArmModel.h"
+#include "UDPHandler.h"
 #include <cmath>
 #include <unistd.h>
 
@@ -277,8 +278,6 @@ Base::Base() {
     Logging::logI(file, "Initializing Base done");
 }
 
-Base::~Base() { }
-
 void Base::changeArmControlType(ArmMessageType type) {
     mtx.lock();
     Logging::logI(file, "Setting Arm Control Type to %d", type);
@@ -355,21 +354,24 @@ MotorState Base::processDesiredRoverState() {
 
 void Base::start() {
     MessageQueue sendQueue;
-    WebSocketServer server(WEBSOCKET_PORT);
+    UDPHandler server(BASE_PORT, ROVER_PORT);
 
     thread controllerThread([&]() { controller->eventLoop(); });
-    thread websocketServerThread([&]() { server.run(sendQueue); });
+    thread udpThread([&]() { server.run(sendQueue); });
 
     ArmModel::initialize();
 
     while (!exitLoop) {
         MotorState desiredMotorState = processDesiredRoverState();
 
-        // Add Method For Printing DesiredMotorState
+        Message message = Message(desiredMotorState);
+        sendQueue.push(message);
+        message.printMessage(); // Makes base output messy with other info
+                                // messages - clean up?
 
         usleep(0.1 * 1000000);
     }
 
     controllerThread.join();
-    websocketServerThread.join();
+    udpThread.join();
 }
