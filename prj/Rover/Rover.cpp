@@ -69,8 +69,8 @@ void Rover::start() {
     ArmHandler armHandler(&arm, &armQueue);
 #endif
     // Start the client thread
-    thread websocetClientThread(
-        [&]() { startClient(&roverQueue, &armQueue, &driveQueue); });
+    // thread websocetClientThread(
+    //    [&]() { startClient(&roverQueue, &armQueue, &driveQueue); });
 
     // start thread for handlers
     thread driveHandlerThread([&]() { driveHandler.start(); });
@@ -85,7 +85,7 @@ void Rover::start() {
     }
 
     driveHandlerThread.join();
-    websocetClientThread.join();
+    // websocetClientThread.join();
 #if EXTENTION_TYPE_ARM
     armHandlerThread.join();
 #endif
