@@ -34,19 +34,23 @@ void Rover::start() {
     Logging::logI(file, "Instantiating Drive system");
     Drive drive(ROVER_WIDTH, ROVER_LENGTH);
 
-    // Create queues for rover, arm, and drive
+    // Create queue for rover
     MessageQueue roverQueue;
-    MessageQueue armQueue;
-    MessageQueue driveQueue;
+
+    // Create state manager
+    desiredStateManager = RoverStateManager(defaultState);
+
+    DriveStateManager* driveStateManager
+        = desiredStateManager.getDriveStateManager();
+    ArmStateManager* armStateManager = desiredStateManager.getArmStateManager();
 
     // instantiate handlers
-    DriveHandler driveHandler(&drive, &driveQueue);
+    DriveHandler driveHandler(&drive, &driveStateManager);
 #if EXTENTION == EXTENTION_TYPE_ARM
-    ArmHandler armHandler(&arm, &armQueue);
+    ArmHandler armHandler(&arm, &armStateManager);
 #endif
     // Start the client thread
-    thread clientThread(
-        [&]() { startClient(&roverQueue, &armQueue, &driveQueue); });
+    thread clientThread([&]() { startClient(&roverQueue); });
 
     // start thread for handlers
     thread driveHandlerThread([&]() { driveHandler.start(); });
@@ -70,8 +74,7 @@ void Rover::start() {
 //---------------------- Instantiation Functions ----------------------//
 
 // Thread instantiation
-void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
-                        MessageQueue* driveQueue) {
+void Rover::startClient(MessageQueue* clientQueue) {
 
     Message message;
     auto last_reception = std::chrono::system_clock::now();
@@ -97,6 +100,9 @@ void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
 
         message = clientQueue->pop();
 
-        // TODO: handle message received
+        if (message.m_format == MotorState) { // Discard invalid messages
+            desiredStateManager.updateState(message.m_payload);
+            processDesiredRoverState();
+        }
     }
 }
