@@ -16,7 +16,7 @@ public:
     MqttPublisher(MqttConfig cfg);
 
     // Destructor
-    ~MqttPublisher() { shutdown(); };
+    ~MqttPublisher() = default;
 
     template <typename T>
     void publish(const std::string& topic, T data);
