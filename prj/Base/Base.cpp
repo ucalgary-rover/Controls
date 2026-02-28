@@ -366,7 +366,6 @@ void Base::start() {
     while (!exitLoop) {
         MotorState desiredMotorState = processDesiredRoverState();
 
-        // Add Method For Printing DesiredMotorState
         Message message = Message(desiredMotorState);
         sendQueue.push(message);
         message.printMessage(); // Makes base output messy with other info

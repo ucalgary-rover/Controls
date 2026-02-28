@@ -11,30 +11,8 @@ using namespace std;
 // Regular Constructor
 Rover::Rover() { }
 
-// // Temp constructor for websockets
-// Rover::Rover(Arm arm, Drive drive, asio::io_context& context,
-//              const char* host, int port) {
-
-//     // Instantiate all neccasary components
-//     instantiateWebsocket(context, host, port);
-//     instantiateSystems(arm, drive);
-//     instantiateQueues();
-//     instantiateThreads();
-//     instantiateHandlers();
-// }
-
 // Destructor
-Rover::~Rover() {
-    // Join all threads if joinable (destroy threads)
-    // if (m_roverQueueThread.joinable())
-    //     m_roverQueueThread.join();
-    // if (m_startThread.joinable())
-    //     m_startThread.join();
-    // if (m_stopThread.joinable())
-    //     m_stopThread.join();
-    // if (m_wsThread.joinable())
-    //     m_wsThread.join();
-}
+Rover::~Rover() { }
 
 //---------------------- Start/Stop Functions ----------------------//
 // Note: Only the start() and stop() functions have their own thread //
@@ -42,8 +20,6 @@ Rover::~Rover() {
 void Rover::start() {
     char address[16];
 
-    /*Logging::logI(file, "Connecting to WebSocket server at %s:%d", address,
-                  WEBSOCKET_PORT);*/
     UDPHandler client(ROVER_PORT, BASE_PORT);
 
     // Instantiate the systems for the rover
@@ -69,8 +45,8 @@ void Rover::start() {
     ArmHandler armHandler(&arm, &armQueue);
 #endif
     // Start the client thread
-    // thread websocetClientThread(
-    //    [&]() { startClient(&roverQueue, &armQueue, &driveQueue); });
+    thread clientThread(
+        [&]() { startClient(&roverQueue, &armQueue, &driveQueue); });
 
     // start thread for handlers
     thread driveHandlerThread([&]() { driveHandler.start(); });
@@ -85,90 +61,10 @@ void Rover::start() {
     }
 
     driveHandlerThread.join();
-    // websocetClientThread.join();
+    clientThread.join();
 #if EXTENTION_TYPE_ARM
     armHandlerThread.join();
 #endif
-}
-
-void Rover::stop() {
-    // Need to add some functionality to how we want to pause the rover and the
-    // handlers (2025-04-12)
-
-    // ex:
-    /*
-    if (controller_input = 'a') {
-        stopAll();
-    }
-    else if (controller_input = 'b') {
-        stopArmHandler();
-    }
-    else if (controller_input = 'c') {
-        stopDriveHandler();
-    }
-    else if (controller_input = 'd') {
-        resumeAll();
-    }
-    else if (controller_input = 'e') {
-        resumeArmHandler();
-    }
-    else if (controller_input = 'f') {
-        resumeDriveHandler();
-    }
-    */
-}
-
-// Pause all start() threads
-void Rover::stopAll() {
-    stopRover();
-    stopArmHandler();
-    stopDriveHandler();
-}
-
-// Pause Rover start() loop
-void Rover::stopRover() {
-    m_roverRunningFlag = false;
-    m_roverConVar.notify_all(); // Notify the Rover loop to pause
-}
-
-// Pause ArmHandler start() loop
-void Rover::stopArmHandler() {
-    m_armRunningFlag = false;
-    m_armConVar.notify_all(); // Notify the ArmHandler loop to pause
-}
-
-// Pause DriveHandler start() loop
-void Rover::stopDriveHandler() {
-    m_driveRunningFlag = false;
-    m_driveConVar.notify_all(); // Notify the DriveHandler loop to pause
-}
-
-// Resume all threads
-void Rover::resumeAll() {
-    resumeRover();
-    resumeArmHandler();
-    resumeDriveHandler();
-}
-
-// Resume Rover start() loop
-void Rover::resumeRover() {
-    m_roverRunningFlag = true;
-    m_roverConVar
-        .notify_all(); // Notify the condition variable to resume the thread
-}
-
-// Resume ArmHandler start() loop
-void Rover::resumeArmHandler() {
-    m_armRunningFlag = true;
-    m_armConVar
-        .notify_all(); // Notify the condition variable to resume the thread
-}
-
-// Resume DriveHandler start() loop
-void Rover::resumeDriveHandler() {
-    m_driveRunningFlag = true;
-    m_driveConVar
-        .notify_all(); // Notify the condition variable to resume the thread
 }
 
 //---------------------- Instantiation Functions ----------------------//
@@ -190,8 +86,8 @@ void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
                 = std::chrono::duration_cast<std::chrono::seconds>(
                     std::chrono::system_clock::now() - last_reception);
 
-            // Logging::logE(file,
-            //               "Connection to base timed out, halting motors.");
+            Logging::logE(file,
+                          "Connection to base timed out, halting motors.");
             //  if (time_since_reception.count() > NO_MESSAGE_RECIEVED_TIMEOUT)
             //  {
             //      armQueue->push(Message(0, ArmMessage()));
@@ -201,32 +97,6 @@ void Rover::startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
 
         message = clientQueue->pop();
 
-        // Push message to appropriate queue
-        /*switch (message.getFormat()) {
-
-        default:
-            Logging::logE(file,
-                          "Recieved message for un-used message format of %d",
-                          message.getFormat());
-            break;
-        }*/
+        // TODO: handle message received
     }
 }
-
-// Handler instantiation
-// void Rover::instantiateHandlers() {
-//     this->m_armHandler
-//         = ArmHandler(m_arm, m_armQueue, m_armConVar, m_armRunningFlag);
-
-//     // NOTE IMPLEMENTED YET:
-//     // this->driveHandler = DriveHandler();
-// }
-
-//---------------------- Getters ----------------------//
-
-// Arm Rover::getArmHandler() const { return this->m_armHandler; }
-
-// NOT IMPLEMENTED YET
-// Drive Rover::getDriveHandler() {
-//     return this->driveHandler;
-// }
