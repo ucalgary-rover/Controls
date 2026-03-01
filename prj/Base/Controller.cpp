@@ -17,7 +17,7 @@ Stick::Stick(GameControllerAxis xID, GameControllerAxis yID) {
     m_yAxis = yID;
 }
 
-float Stick::stickUpdate(Sint16 axisValue, int axisID) {
+void Stick::stickUpdate(Sint16 axisValue, int axisID) {
 
     // lists for pointers to position variables
     int* posList[2] = { &m_posX, &m_posY };
@@ -38,22 +38,16 @@ float Stick::stickUpdate(Sint16 axisValue, int axisID) {
 
         // quick and dirty way to adjust the sign of the value
         Pos = (INT16_MAX + 1) * ((Pos < 0) ? -1 : 1);
-        // std::cout << "\033[31m" << "\nX Max!\n"
-        //           << "\033[0m"; //==========================================
 
     }
     // if close to zero, adjusts to zero
     else if (abs(Pos) < STATIC_DEADZONE) {
 
         Pos = 0;
-        // std::cout << "\033[31m" << "\nX Zero\n"
-        //           << "\033[0m"; //==========================================
     }
     // Checks if it is outside of the moving deadzone, if so, changes value
     else if (abs(Pos - *rawPos) > MOVING_DEADZONE) {
         Pos = Pos;
-        // std::cout << "\033[31m" << "\nX Deadzone\n"
-        //           << "\033[0m"; //==========================================
 
         // if none apply, keep the value the same
     } else {
@@ -65,18 +59,15 @@ float Stick::stickUpdate(Sint16 axisValue, int axisID) {
     // this is important for the moving deadzone
     *rawPos = Pos;
 
-    // adjusting to circular values -255 - 255
+    // adjusting to circular range -255 - 255
     Pos /= INT16_MAX;
 
-    // setting new value
+    // setting new value (converting to circular coordinates)
     *posList[axisID] = Pos * SDL_sqrt((1 - (SDL_pow(otherPos, 2) / 2))) * 255;
+
+    // other coordinte must also be updated accordingly based on the new value
     *posList[(int)!((bool)axisID)]
         = otherPos * SDL_sqrt((1 - (SDL_pow(Pos, 2) / 2))) * 255;
-
-    // sending new values
-    m_stickFunc(m_posX, m_posY);
-
-    return *posList[axisID];
 }
 
 // Trigger definitions------------------------------------------------------
@@ -97,31 +88,40 @@ void Trigger::triggerUpdate(Sint16 axisValue) {
 
     // setting new value
     m_pos = Pos * 255;
-
-    // sending new values
-    m_triggerFunc(m_pos);
 }
 
 // Controller definitions---------------------------------------------------
 
-Controller::Controller() {
-    m_pointerID = nullptr;
+Controller::Controller(std::unique_ptr<ControllerLayout> layout) {
 
-    // invalid joystick ID
-    m_instanceID = -1;
-}
-
-Controller::Controller(SDL_GameController* identifier) {
-    m_pointerID = identifier;
-
-    // joystick / controller instance ID <- joystick pointer <-
-    // controller pointer
-    m_instanceID
-        = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(identifier));
-
+    controllerLayout = layout;
     m_rightStick
         = Stick(GAME_CONTROLLER_AXIS_RIGHTX, GAME_CONTROLLER_AXIS_RIGHTY);
     m_leftStick = Stick(GAME_CONTROLLER_AXIS_LEFTX, GAME_CONTROLLER_AXIS_LEFTY);
     m_leftTrigger = Trigger(GAME_CONTROLLER_AXIS_TRIGGERLEFT);
     m_rightTrigger = Trigger(GAME_CONTROLLER_AXIS_TRIGGERRIGHT);
 }
+
+Controller::leftTriggerUpdate(int16_t axisValue) {
+    controllerLayout->leftTriggerResponse(axisValue);
+}
+
+Controller::rightTriggerUpdate(int16_t axisValue) {
+    controllerLayout->leftTriggerResponse(axisValue);
+}
+
+Controller::leftStickUpdate(int16_t axisValue, int axisID) {
+    m_leftStick.stickUpdate(axisValue, axisID);
+    controllerLayout->leftStickResponse(m_leftStick.getPosX(),
+                                        m_leftStick.getPosY());
+}
+Controller::rightStickUpdate(int16_t axisValue, int axisID) {
+    m_rightStick.stickUpdate(axisValue, axisID);
+    controllerLayout->rightStickResponse(m_rightStick.getPosX(),
+                                         m_rightStick.getPosY());
+}
+Controller::buttonUpdate(int buttonID) {
+    controllerLayout->buttonResponse(buttonID);
+}
+
+Controller::getLayoutName() { return controllerLayout->getName(); }
