@@ -49,6 +49,8 @@ public:
 
     MessageFormat getFormat() const;
 
+    MessagePayload getPayload() const;
+
     /** Serializes the Message object to a string
      *
      * @return

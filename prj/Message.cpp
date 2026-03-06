@@ -46,6 +46,9 @@ Message& Message::operator=(const Message& src) {
 // Get the format of the message
 MessageFormat Message::getFormat() const { return m_format; }
 
+// Get the payload of the message
+MessagePayload Message::getPayload() const { return m_payload; }
+
 // Print Message details
 void Message::printMessage() const {
     std::visit(

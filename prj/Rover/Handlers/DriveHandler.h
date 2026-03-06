@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include "DriveMotorStateManager.h"
 #include "HandlerInterface.h"
-#include "MessageQueue.h"
 #include "Rover/Systems/Drive.h"
 #include "Rover/Systems/pub_systems.h"
 #include "Rover/pub_rover.h"
@@ -17,7 +17,7 @@
 
 class DriveHandler : public HandlerInterface {
 public:
-    DriveHandler(Drive* drive, MessageQueue* driveQueue);
+    DriveHandler(Drive* drive, DriveMotorStateManager* driveMotorStateManager);
     ~DriveHandler() { };
 
     /**
@@ -134,8 +134,10 @@ private:
 
     Json::Value m_lastKnownPos; // Last known position of the rover
 
-    // Drive Queue
-    MessageQueue* m_driveQueue; // References the DriveQueue in Rover.cpp
+    // Drive state manager
+    DriveMotorStateManager*
+        m_driveMotorStateManager; // References the drive state Manager in
+                                  // Rover.cpp
 
     // Variables corresponding to conditions during operation
 

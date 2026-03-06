@@ -1,4 +1,5 @@
 #include "Rover.h"
+#include "Message.h"
 #include "UDPHandler.h"
 #include "pub_general.h"
 
@@ -38,16 +39,17 @@ void Rover::start() {
     MessageQueue roverQueue;
 
     // Create state manager
-    desiredStateManager = RoverStateManager(defaultState);
+    desiredStateManager = MotorStateManager(defaultState);
 
-    DriveStateManager* driveStateManager
+    DriveMotorStateManager* driveMotorStateManager
         = desiredStateManager.getDriveStateManager();
-    ArmStateManager* armStateManager = desiredStateManager.getArmStateManager();
+    ArmMotorStateManager* armMotorStateManager
+        = desiredStateManager.getArmStateManager();
 
     // instantiate handlers
-    DriveHandler driveHandler(&drive, &driveStateManager);
+    DriveHandler driveHandler(&drive, driveMotorStateManager);
 #if EXTENTION == EXTENTION_TYPE_ARM
-    ArmHandler armHandler(&arm, &armStateManager);
+    ArmHandler armHandler(&arm, &armMotorStateManager);
 #endif
     // Start the client thread
     thread clientThread([&]() { startClient(&roverQueue); });
@@ -100,9 +102,14 @@ void Rover::startClient(MessageQueue* clientQueue) {
 
         message = clientQueue->pop();
 
-        if (message.m_format == MotorState) { // Discard invalid messages
-            desiredStateManager.updateState(message.m_payload);
-            processDesiredRoverState();
+        if (message.getFormat()
+            == MESSAGE_FORMAT_MOTOR_STATE) { // Discard invalid messages
+            desiredStateManager.updateState(message.getPayload());
+            processDesiredMotorState(desiredStateManager.getState());
         }
     }
+}
+
+void processDesiredMotorState(MotorState desiredMotorState) {
+    // TODO
 }
