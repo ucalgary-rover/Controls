@@ -92,7 +92,7 @@ void Trigger::triggerUpdate(Sint16 axisValue) {
 
 // Controller definitions---------------------------------------------------
 
-Controller::Controller(std::unique_ptr<ControllerLayout> layout) {
+Controller::Controller(ControllerLayout* layout) {
 
     controllerLayout = layout;
     m_rightStick
@@ -102,26 +102,26 @@ Controller::Controller(std::unique_ptr<ControllerLayout> layout) {
     m_rightTrigger = Trigger(GAME_CONTROLLER_AXIS_TRIGGERRIGHT);
 }
 
-Controller::leftTriggerUpdate(int16_t axisValue) {
+void Controller::leftTriggerUpdate(int16_t axisValue) {
     controllerLayout->leftTriggerResponse(axisValue);
 }
 
-Controller::rightTriggerUpdate(int16_t axisValue) {
-    controllerLayout->leftTriggerResponse(axisValue);
+void Controller::rightTriggerUpdate(int16_t axisValue) {
+    controllerLayout->rightTriggerResponse(axisValue);
 }
 
-Controller::leftStickUpdate(int16_t axisValue, int axisID) {
+void Controller::leftStickUpdate(int16_t axisValue, int axisID) {
     m_leftStick.stickUpdate(axisValue, axisID);
     controllerLayout->leftStickResponse(m_leftStick.getPosX(),
                                         m_leftStick.getPosY());
 }
-Controller::rightStickUpdate(int16_t axisValue, int axisID) {
+void Controller::rightStickUpdate(int16_t axisValue, int axisID) {
     m_rightStick.stickUpdate(axisValue, axisID);
     controllerLayout->rightStickResponse(m_rightStick.getPosX(),
                                          m_rightStick.getPosY());
 }
-Controller::buttonUpdate(int buttonID) {
+void Controller::buttonUpdate(int buttonID) {
     controllerLayout->buttonResponse(buttonID);
 }
 
-Controller::getLayoutName() { return controllerLayout->getName(); }
+std::string Controller::getLayoutName() { return controllerLayout->getName(); }

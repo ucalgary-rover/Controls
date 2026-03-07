@@ -6,8 +6,6 @@
 
 class ArmVariableIKControllerLayout : public ControllerLayout {
 public:
-    ArmVariableIKControllerLayout() { }
-
     ArmVariableIKControllerLayout(ArmStateManager* armStateManager) :
         ControllerLayout("ArmVariableIKController") {
         stateManager = armStateManager;

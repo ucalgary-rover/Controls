@@ -14,20 +14,12 @@ enum layout {
 
 class ArmControllerLayout : public ControllerLayout {
 public:
-    ArmControllerLayout() { }
-
     ArmControllerLayout(ArmStateManager* armStateManager,
                         ArmMotorStateManager* armMotorStateManager) {
-        ArmFixedIKControllerLayout armFixedIKLayout
-            = ArmFixedIKControllerLayout(armStateManager);
-        ArmVariableIKControllerLayout armVariableIKLayout
-            = ArmVariableIKControllerLayout(armStateManager);
-        ArmManualControllerLayout armManualLayout
-            = ArmManualControllerLayout(armMotorStateManager);
-
-        layouts[FIXED_IK] = &armFixedIKLayout;
-        layouts[VARIABLE_IK] = &armVariableIKLayout;
-        layouts[MANUAL] = &armManualLayout;
+        layouts[FIXED_IK] = new ArmFixedIKControllerLayout(armStateManager);
+        layouts[VARIABLE_IK]
+            = new ArmVariableIKControllerLayout(armStateManager);
+        layouts[MANUAL] = new ArmManualControllerLayout(armMotorStateManager);
 
         currentLayout = FIXED_IK;
     }
@@ -48,10 +40,5 @@ public:
 
 private:
     int currentLayout;
-
-    ArmManualControllerLayout armManualLayout;
-    ArmFixedIKControllerLayout armFixedIKLayout;
-    ArmVariableIKControllerLayout armVariableIKLayout;
-
     ControllerLayout* layouts[3];
 };

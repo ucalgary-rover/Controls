@@ -8,6 +8,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <memory>
+#include <string>
 
 // Used to streamline the struct (Don't keep in final)<<<<<<<<<<<<<<<<<<<<<<<<<
 typedef void (*ControllerFunc)(void* args);
@@ -109,7 +110,7 @@ private:
     // struct for button functions
     buttonFunctions m_buttonFuncs;
 
-    std::unique_ptr<ControllerLayout> controllerLayout;
+    ControllerLayout* controllerLayout;
 
 public:
     // A constructor for making a completely blank controller object
@@ -124,7 +125,7 @@ public:
      *@return None
      *
      */
-    Controller(std::unique_ptr<ControllerLayout> layout);
+    Controller(ControllerLayout* layout);
 
     void leftTriggerUpdate(int16_t axisValue);
     void rightTriggerUpdate(int16_t axisValue);

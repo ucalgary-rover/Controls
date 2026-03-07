@@ -6,16 +6,12 @@
 
 class ArmFixedIKControllerLayout : public ControllerLayout {
 public:
-    ArmFixedIKControllerLayout() { }
-
     ArmFixedIKControllerLayout(ArmStateManager* armStateManager) :
         ControllerLayout("ArmFixedIKController") {
         stateManager = armStateManager;
         if (stateManager)
             armState = stateManager->getState();
     }
-
-    void buttonResponse(uint8_t buttonID); // unused right now
 
     void leftStickResponse(int xValue, int yValue) override;
 

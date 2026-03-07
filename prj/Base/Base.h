@@ -13,6 +13,7 @@
 #include "ArmManualControllerLayout.h"
 #include "ArmVariableIKControllerLayout.h"
 #include "Base/ControllerHandler.h"
+#include "Controller/ControllerLayout.h"
 #include "DriveControllerLayout.h"
 #include "Message.h"
 #include "MessageQueue.h"
@@ -50,11 +51,5 @@ private:
 
     void incrementJoint(int change);
     void changeArmControlType(ArmMessageType type);
-
-    // List of all controllers in use
-    ControllerHandler* controller;
-
-    DriveControllerLayout driveLayout;
-    ArmControllerLayout armLayout;
 };
 #endif

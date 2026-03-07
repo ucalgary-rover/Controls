@@ -6,8 +6,6 @@
 
 class ArmManualControllerLayout : public ControllerLayout {
 public:
-    ArmManualControllerLayout() { }
-
     ArmManualControllerLayout(ArmMotorStateManager* armStateManager) :
         ControllerLayout("ArmManualController") {
         stateManager = armStateManager;

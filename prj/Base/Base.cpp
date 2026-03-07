@@ -4,6 +4,7 @@
 #include "Base/Base.h"
 #include <cmath>
 #include <unistd.h>
+#include <vector>
 
 using namespace std;
 
@@ -28,12 +29,9 @@ Base::Base() {
 
     // Initialize controller layouts
     Logging::logI(file, "Initializing Controller Layouts");
-    driveLayout = DriveControllerLayout(driveStateManager);
-    armLayout = ArmControllerLayout(armStateManager, &armManualChangeManager);
-
     exitLoop = 0;
-
-    controller = new ControllerHandler(*driveLayout, *armLayout);
+    ControllerHandler::initialize(driveStateManager, armStateManager,
+                                  &armManualChangeManager);
 
     Logging::logI(file, "Initializing Base done");
 }
@@ -46,7 +44,7 @@ void Base::start() {
     MessageQueue sendQueue;
     WebSocketServer server(WEBSOCKET_PORT);
 
-    thread controllerThread([&]() { controller->eventLoop(); });
+    thread controllerThread([&]() { ControllerHandler::eventLoop(); });
     thread websocketServerThread([&]() { server.run(sendQueue); });
 
     WheelMessage wheelMsg;
