@@ -3,13 +3,15 @@
 
 #pragma once
 
+#include <thread>
+
 #include "MessageQueue.h"
+#include "MotorStateManager.h"
 #include "Rover/Handlers/ArmHandler.h"
 #include "Rover/Handlers/DriveHandler.h"
 #include "Rover/Systems/Arm.h"
 #include "Rover/Systems/Drive.h"
 #include "pub_rover.h"
-#include <thread>
 
 // #include "Handlers/ArmHandler.h"
 
@@ -28,8 +30,7 @@ public:
      * @return
      * none
      */
-    void startClient(MessageQueue* clientQueue, MessageQueue* armQueue,
-                     MessageQueue* driveQueue);
+    void startClient(MessageQueue* clientQueue);
 
     /** Start the rover
      *
@@ -40,6 +41,11 @@ public:
      * none
      */
     void start();
+
+private:
+    // Chassis state management
+    MotorState defaultState = MotorState(); // Default Position of Rover
+    MotorStateManager desiredStateManager;
 };
 
 #endif

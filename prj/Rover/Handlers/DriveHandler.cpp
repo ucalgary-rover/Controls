@@ -2,6 +2,7 @@
 // Written by Johan Esperida
 
 #include "DriveHandler.h"
+#include "Message.h"
 #include <unistd.h>
 
 const char* file = "DriveHandler";
@@ -82,15 +83,16 @@ const float PI = 3.14;
 #define TO_DEGREES(value) round(value * 180 / PI * 100) / 100
 
 // Constructor
-DriveHandler::DriveHandler(Drive* drive, MessageQueue* driveQueue) {
+DriveHandler::DriveHandler(Drive* drive,
+                           DriveMotorStateManager* driveMotorStateManager) {
 
     // Reference to the Arm object in Rover.cpp
     m_drive = drive;
 
-    // Create a driveQueue object in this file that references the driveQueue in
-    // Rover.cpp (NOT A COPY!!!) This allows us to use the same driveQueue in
-    // this file without shenanigans
-    m_driveQueue = driveQueue;
+    // Create a driveMotorStateManager object in this file that references the
+    // driveMotorStateManager in Rover.cpp (NOT A COPY!!!) This allows us to use
+    // the same driveMotorStateManager in this file without shenanigans
+    m_driveMotorStateManager = driveMotorStateManager;
 
     // Open the file to store angles
     std::ifstream angleFile(BASE_LAST_KNOWN_POS_FILE, std::ifstream::binary);
@@ -483,11 +485,8 @@ void DriveHandler::awaitWheelTargets() {
 
 void DriveHandler::start() {
 
-    Message message;
-
     while (true) {
         // Get message from driveQueue
-        Message msg = m_driveQueue->pop();
 
         // TODO: Handle the message
 

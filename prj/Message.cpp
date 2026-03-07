@@ -46,6 +46,9 @@ Message& Message::operator=(const Message& src) {
 // Get the format of the message
 MessageFormat Message::getFormat() const { return m_format; }
 
+// Get the payload of the message
+MessagePayload Message::getPayload() const { return m_payload; }
+
 // Print Message details
 void Message::printMessage() const {
     std::visit(
@@ -54,25 +57,13 @@ void Message::printMessage() const {
             if constexpr (std::is_same_v<T, Generic>) {
                 std::cout << "Generic - Value: " << payload.value;
             } else if constexpr (std::is_same_v<T, MotorState>) {
-                /*std::cout << "WheelMessage - Velocity: " << payload.velocity
-                          << ", Theta: " << payload.theta
-                          << ", Angle Velocity: " << payload.angle_velocity;
-                std::cout << "ArmMessage - X: " << payload.armXPos
-                          << ", Y: " << payload.armYPos
-                          << ", Z: " << payload.armZPos
-                          << ", Claw X: " << payload.clawXPos
-                          << ", Claw Y: " << payload.clawYPos
-                          << ", Claw Open: " << payload.clawOpen
-                          << ", Claw Rotation: " << payload.clawRotation
-                          << ", Wrist Rotation: " << payload.wristRotation;*/
-                std::cout
-                    << "MotorState: Drive - steer: "
-                    << payload.driveMotorState.steer[0] << " "
-                    << payload.driveMotorState.steer[1] << " "
-                    << payload.driveMotorState.steer[2] << " "
-                    << payload.driveMotorState.steer[3] // TODO: hardcoded for 4
-                                                        // wheels, update later
-                    << std::endl;
+                std::cout << "MotorState: Drive - steer: "
+                          << payload.driveMotorState.steer[0] << " "
+                          << payload.driveMotorState.steer[1] << " "
+                          << payload.driveMotorState.steer[2] << " "
+                          << payload.driveMotorState
+                                 .steer[3] // hardcoded for 4 wheels
+                          << std::endl;
                 std::cout << "Drive - drive: "
                           << payload.driveMotorState.drive[0] << " "
                           << payload.driveMotorState.drive[1] << " "
@@ -84,8 +75,7 @@ void Message::printMessage() const {
                           << payload.armMotorState.motorValues[3] << " "
                           << payload.armMotorState.motorValues[4] << " "
                           << payload.armMotorState.motorValues[5]
-                          << std::endl; // TODO: hardcoded for 6
-                                        // arm motors, update later
+                          << std::endl; // hardcoded for 6 arm motors
             } else if constexpr (std::is_same_v<T, ScienceToolMessage>) {
                 std::cout << "ScienceToolMessage - Move Up/Down: "
                           << payload.moveUpDown
