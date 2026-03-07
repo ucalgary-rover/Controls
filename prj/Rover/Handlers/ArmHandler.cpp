@@ -4,8 +4,8 @@
 static const char* file = "ArmHandler";
 
 // Constructor
-ArmHandler::ArmHandler(Arm& arm, MessageQueue& armQueue) :
-    m_arm(arm), m_armQueue(armQueue) {
+ArmHandler::ArmHandler(Arm& arm, ArmMotorStateManager& armMotorStateManager) :
+    m_arm(arm), m_armMotorStateManager(armMotorStateManager) {
 
     // Open the file to store stepper positions
     std::ifstream angleFile(ARM_LAST_KNOWN_POS_FILE, std::ifstream::binary);
@@ -135,7 +135,7 @@ void ArmHandler::start() {
 
     while (true) {
         // Get message from armQueue
-        Message msg = m_armQueue.pop();
+        // Message msg = m_armQueue.pop();
 
         // TODO: Handle the message
         /*if (msg.getFormat() != MessageFormat::MESSAGE_FORMAT_ARM) {

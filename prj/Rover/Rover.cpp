@@ -73,10 +73,6 @@ void Rover::start() {
 #endif
 }
 
-void Rover::processDesiredMotorState(MotorState desiredMotorState) {
-    // TODO
-}
-
 //---------------------- Instantiation Functions ----------------------//
 
 // Thread instantiation
@@ -110,7 +106,6 @@ void Rover::startClient(MessageQueue* clientQueue) {
             == MESSAGE_FORMAT_MOTOR_STATE) { // Discard invalid messages
             desiredStateManager.updateState(
                 std::get<MotorState>(message.getPayload()));
-            processDesiredMotorState(desiredStateManager.getState());
         }
     }
 }

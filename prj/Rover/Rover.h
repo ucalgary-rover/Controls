@@ -42,8 +42,6 @@ public:
      */
     void start();
 
-    void processDesiredMotorState(MotorState desiredMotorState);
-
 private:
     // Chassis state management
     MotorState defaultState = MotorState(); // Default Position of Rover

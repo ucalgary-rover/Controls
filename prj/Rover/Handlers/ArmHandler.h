@@ -4,6 +4,7 @@
 #pragma once
 
 #include "ArmModel.h"
+#include "ArmMotorStateManager.h"
 #include "HandlerInterface.h"
 #include "Rover/Rover.h"
 #include "Rover/Systems/Arm.h"
@@ -13,7 +14,7 @@
 
 class ArmHandler : public HandlerInterface {
 public:
-    ArmHandler(Arm& arm, MessageQueue& armQueue);
+    ArmHandler(Arm& arm, ArmMotorStateManager& armMotorStateManager);
     ~ArmHandler();
 
     void start() override;
@@ -28,7 +29,9 @@ private:
     Arm& m_arm;
 
     // Arm Queue
-    MessageQueue& m_armQueue; // References the armQueue in Rover.cpp
+    ArmMotorStateManager&
+        m_armMotorStateManager; // References the armMotorStateManager in
+                                // Rover.cpp
 
     Json::Value m_lastKnownPos; // Last known position of the arm
 
