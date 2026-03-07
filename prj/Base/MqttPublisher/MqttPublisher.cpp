@@ -1,5 +1,7 @@
 #include "MqttPublisher.h"
 #include <mqtt/async_client.h>
+#include <memory>
+#include <iostream>
 
 std::unique_ptr<mqtt::async_client> MqttPublisher::client_ = nullptr;
 std::mutex MqttPublisher::mutex_;

@@ -5,14 +5,14 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <stdexcept>
 
 std::string readConfigFile(const std::string& configFile) {
     std::ifstream file(configFile);
 
     if (!file) {
         // Handle error: file not found or could not be opened
-        std::cerr << "Error opening file: " << configFile << std::endl;
-        return ""; // Or throw an exception
+        throw std::runtime_error("Error opening config file: " + configFile);
     }
 
     // Use iterators to read the entire file stream into a string
@@ -40,13 +40,6 @@ Config::Config(std::string configFile) {
 
     *this = boost::json::value_to<Config>(jv);
 
-    std::cout << "address: " << this->mqttConfig.serverUrl << std::endl;
-    std::cout << "client id: " << this->mqttConfig.clientId << std::endl;
-    std::cout << "topic: " << this->mqttConfig.topic << std::endl;
-
-    std::cout << std::endl
-              << "address: " << this->websocketConfig.address << std::endl;
-    std::cout << "port: " << this->websocketConfig.port << std::endl;
 }
 
 // int main() { Config cfg = Config("prj/Config/config.json"); }
