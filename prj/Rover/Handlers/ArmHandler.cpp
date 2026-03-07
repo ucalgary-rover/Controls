@@ -131,11 +131,9 @@ ArmHandler::~ArmHandler() {
 }
 
 void ArmHandler::start() {
-    Message message;
 
     while (true) {
         // Get message from armQueue
-        // Message msg = m_armQueue.pop();
 
         // TODO: Handle the message
         /*if (msg.getFormat() != MessageFormat::MESSAGE_FORMAT_ARM) {

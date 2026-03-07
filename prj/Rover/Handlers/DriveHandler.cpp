@@ -485,11 +485,8 @@ void DriveHandler::awaitWheelTargets() {
 
 void DriveHandler::start() {
 
-    Message message;
-
     while (true) {
         // Get message from driveQueue
-        // Message msg = m_driveQueue->pop();
 
         // TODO: Handle the message
 
