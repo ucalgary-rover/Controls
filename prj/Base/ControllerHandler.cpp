@@ -5,7 +5,7 @@
 
 bool ControllerHandler::is_initialized = false;
 std::vector<Controller> ControllerHandler::controllers = {};
-std::map<int, int> ControllerHandler::controllerAssignment = {};
+int ControllerHandler::controllerAssignment[2] = { -1, -1 };
 
 static const char* file = "ControllerHandler";
 
@@ -119,8 +119,8 @@ bool ControllerHandler::initialize(
     Controller controller2 = Controller(&armLayout);
 
     controllers = { controller1, controller2 };
-    for (size_t i = 0; i < controllers.size(); ++i) {
-        controllerAssignment[-i - 1] = i;
+    for (int i = 0; i < controllerAmount; ++i) {
+        controllerAssignment[i] = -1;
     }
 
     is_initialized = true;
@@ -164,47 +164,36 @@ void ControllerHandler::triggerResponse(int16_t axisValue, int axisID,
 void ControllerHandler::controllerAddedResponse(int controllerID) {
     // checks for which controller object is not active (key < 0), deletes it,
     // and connects the new controller
-    int mapIndex;
-    int vectorIndex;
-    for (auto& [key, value] : controllerAssignment) {
-        if (key < 0) {
-            mapIndex = key;
-            vectorIndex = value;
+
+    for (int i = 0; i < controllerAmount; i++) {
+        if (controllerAssignment[i] < 0) {
+            controllerAssignment[i] = controllerID;
+            SDL_GameControllerOpen(controllerID);
             break;
         }
     }
 
-    SDL_GameControllerOpen(controllerID);
-    controllerAssignment.erase(mapIndex);
-    controllerAssignment[controllerID] = vectorIndex;
-    Logging::logV(file, "Controller added", vectorIndex);
+    Logging::logV(file, "Controller added", controllerID);
 }
 
 void ControllerHandler::controllerRemovedResponse(int controllerID) {
     // matches the current controller
-    int mapIndex;
-    int vectorIndex;
-    for (auto& [key, value] : controllerAssignment) {
-        if (key == controllerID) {
-            mapIndex = key;
-            vectorIndex = value;
+    for (int i = 0; i < controllerAmount; i++) {
+        if (controllerAssignment[i] == controllerID) {
 
-            Logging::logV(file, "Controller removed", value);
+            controllerAssignment[i] = -1;
+
+            // closes the controller in question
+            SDL_GameControllerClose(
+                SDL_GameControllerFromInstanceID(controllerID));
             break;
         }
     }
 
-    // closes the controller in question
-    SDL_GameControllerClose(SDL_GameControllerFromInstanceID(controllerID));
-
-    // sets the key to some invalid value
-    controllerAssignment.erase(mapIndex);
-    controllerAssignment[-1] = vectorIndex;
-
     // sends an update that sets all values to zero to prevent any ghost
     // movement
     for (int j = 0; j < 4; j++) {
-        stickResponse(0, j, mapIndex);
+        stickResponse(0, j, controllerID);
     };
 }
 
@@ -248,10 +237,11 @@ void ControllerHandler::eventLoop() {
         // has to look like this
         while (SDL_PollEvent(&event)) {
 
-            Logging::logV(file, "SDL Event type: %d", event.type);
+            Logging::logI(file, "SDL Event type: %d", event.type);
 
             // checks what kind of event
             switch (event.type) {
+
             case SDL_QUIT:
                 quit = true;
                 break;
@@ -308,19 +298,14 @@ void ControllerHandler::eventLoop() {
                 if (event.cbutton.button == SDL_CONTROLLER_BUTTON_GUIDE)
                     timeElapsed = SDL_GetTicks() - homePressedStartTime;
 
-                if (timeElapsed >= 3000)
+                if (timeElapsed >= 3000) {
                     // switching logic here
-                    for (auto& [key, value] : controllerAssignment) {
-                        switch (value) {
-                        case 1:
-                            value = 2;
-                            break;
+                    int holder = controllerAssignment[0];
+                    controllerAssignment[0] = controllerAssignment[1];
+                    controllerAssignment[1] = holder;
 
-                        case 2:
-                            value = 1;
-                            break;
-                        }
-                    }
+                    timeElapsed = 0;
+                }
 
                 break;
             }
@@ -328,9 +313,10 @@ void ControllerHandler::eventLoop() {
     }
 
     // Clean up >>>>>>>>>>>>>>>>>>>>>> important <<<<<<<<<<<<<<<<<<<<<<
-    for (auto& [key, value] : controllerAssignment) {
-        if (key >= 0) {
-            SDL_GameControllerClose(SDL_GameControllerFromInstanceID(key));
+    for (int i = 0; i < controllerAmount; i++) {
+        if (controllerAssignment[i] >= 0) {
+            SDL_GameControllerClose(
+                SDL_GameControllerFromInstanceID(controllerAssignment[i]));
         }
     }
 

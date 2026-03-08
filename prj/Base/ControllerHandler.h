@@ -19,9 +19,11 @@ private:
     static std::vector<Controller>
         controllers; //- vector<const Controller>: controllers (FROM UML)
 
-    // note that key = SDL_JOYSTICK_ID, value = index in controllers vector
-    static std::map<int, int>
-        controllerAssignment; //- map<int, int>: controllerAssignment (FROM UML)
+    const static int controllerAmount = 2;
+
+    // note that index = vector index, value = SDL_JOYSTICK_ID
+    static int controllerAssignment[controllerAmount]; // Switched to array
+                                                       // because simple is best
 
     static void buttonResponse(uint8_t buttonID, int controllerID);
     static void stickResponse(int16_t axisValue, int axisID, int controllerID);
