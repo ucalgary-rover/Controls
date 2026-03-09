@@ -3,13 +3,11 @@
 
 #pragma once
 
-#include "ArmModel.h"
+// #include "ArmModel.h"
 #include "ArmMotorStateManager.h"
 #include "HandlerInterface.h"
 #include "Rover/Rover.h"
 #include "Rover/Systems/Arm.h"
-#include <jsoncpp/json/json.h>
-#include <mutex>
 #include <string>
 
 class ArmHandler : public HandlerInterface {
@@ -32,8 +30,6 @@ private:
     ArmMotorStateManager&
         m_armMotorStateManager; // References the armMotorStateManager in
                                 // Rover.cpp
-
-    Json::Value m_lastKnownPos; // Last known position of the arm
 
     // Threads
     std::thread m_armQueueThread;

@@ -6,24 +6,6 @@ static const char* file = "ArmHandler";
 // Constructor
 ArmHandler::ArmHandler(Arm& arm, ArmMotorStateManager& armMotorStateManager) :
     m_arm(arm), m_armMotorStateManager(armMotorStateManager) {
-
-    // Open the file to store stepper positions
-    std::ifstream angleFile(ARM_LAST_KNOWN_POS_FILE, std::ifstream::binary);
-    if (!angleFile.is_open()) {
-        Logging::logE(file, "Failed to open angle storage file.");
-    }
-    Json::CharReaderBuilder readerBuilder;
-    std::string errs;
-    Json::parseFromStream(readerBuilder, angleFile, &m_lastKnownPos, &errs);
-    angleFile.close();
-    // Updates for this not set up yet <------------------------------------
-
-    // Initialize static Arm Model Wrapper
-    ArmModel::initialize();
-
-    // for (int i = 0; i < m_arm.getDOF(); i++) {
-    //     calibrateStepper(i);
-    // }
 }
 
 void updateMotorAngle(MotorHandlerReturn* handler, double angle) {
@@ -184,7 +166,7 @@ void ArmHandler::calibrateStepper(int joint_num) {
     double initialAngle = (initialIndex / MAX_ENCODER_POSITIONS) * 360;
 
     // Get the current position of the wheel
-    int lastKnownAngle = m_lastKnownPos[std::to_string(joint_num)].asInt();
+    int lastKnownAngle = 0;
     PhidgetStepper_addPositionOffset(*motorStuct.handler.stepperMotor,
                                      -lastKnownAngle);
 

@@ -16,6 +16,7 @@ void Rover::start() {
     char address[16];
 
     UDPHandler client(ROVER_PORT, BASE_PORT);
+    MessageQueue sendQueue;
 
     // Instantiate the systems for the rover
 #if EXTENTION == EXTENTION_TYPE_ARM
@@ -32,18 +33,26 @@ void Rover::start() {
     // Create queue for rover
     MessageQueue roverQueue;
 
-    // Create state manager
+    // Create desired state manager
     desiredStateManager = MotorStateManager(defaultState);
 
-    DriveMotorStateManager* driveMotorStateManager
-        = desiredStateManager.getDriveStateManager();
-    ArmMotorStateManager* armMotorStateManager
+    desiredDriveMotorStateManager = desiredStateManager.getDriveStateManager();
+    ArmMotorStateManager* desiredArmMotorStateManager
         = desiredStateManager.getArmStateManager();
 
+    // Create current state manager
+    currentStateManager = MotorStateManager(defaultState);
+
+    DriveMotorStateManager* currentDriveMotorStateManager
+        = currentStateManager.getDriveStateManager();
+    ArmMotorStateManager* currentArmMotorStateManager
+        = currentStateManager.getArmStateManager(); // TODO: not yet used
+
     // instantiate handlers
-    DriveHandler driveHandler(&drive, driveMotorStateManager);
+    DriveHandler driveHandler(&drive, desiredDriveMotorStateManager,
+                              currentDriveMotorStateManager);
 #if EXTENTION == EXTENTION_TYPE_ARM
-    ArmHandler armHandler(&arm, &armMotorStateManager);
+    ArmHandler armHandler(&arm, &desiredArmMotorStateManager);
 #endif
     // Start the client thread
     thread clientThread([&]() { startClient(&roverQueue); });
@@ -53,15 +62,46 @@ void Rover::start() {
 #if EXTENTION == EXTENTION_TYPE_ARM
     thread armHandlerThread([&]() { armHandler.start(); });
 #endif
+    thread sendingThread([&]() { client.run(sendQueue); });
+
+    thread currentStateHandlerThread([&]() {
+        while (true) {
+            driveHandler.updateCurrentState();
+
+            Message message = Message(currentStateManager.getState());
+            sendQueue.push(message);
+
+            usleep(0.1 * 1000000); // Sleep
+        }
+    });
 
     while (true) {
         Message reply = client.receive();
-        reply.printMessage(); // Print the received message
+        MessagePayload payload = reply.getPayload();
+
+        std::visit(
+            [this, &payload](auto&& arg) {
+                using T = std::decay_t<decltype(arg)>;
+
+                if constexpr (std::is_same_v<T, MotorState>) {
+                    MotorStateManager newStateManager = MotorStateManager(arg);
+                    desiredDriveMotorStateManager->updateState(
+                        newStateManager.getState().driveMotorState);
+                } else {
+                    // Handles other message payloads
+                    std::cerr << "Non-motor control message received from base!"
+                              << std::endl;
+                }
+            },
+            payload);
+
         roverQueue.push(reply);
     }
 
     driveHandlerThread.join();
     clientThread.join();
+    sendingThread.join();
+    currentStateHandlerThread.join();
 #if EXTENTION_TYPE_ARM
     armHandlerThread.join();
 #endif

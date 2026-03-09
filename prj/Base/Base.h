@@ -19,6 +19,7 @@
 #include "MessageQueue.h"
 #include "MotorStateManager.h"
 #include "RoverStateManager.h"
+#include "UDPHandler.h"
 #include "mission_control.h"
 #include "pub_general.h"
 
@@ -49,9 +50,14 @@ private:
     int exitLoop;
 
     // Desired Motor State Update Methods
-    DriveMotorState
-    processDesiredDriveState(const DriveState& desiredDriveState);
+    DriveMotorState processDesiredDriveState(DriveState& desiredDriveState,
+                                             DriveMotorState& currentState);
     ArmMotorState processDesiredArmState(const ArmState& desiredArmState);
-    MotorState processDesiredRoverState();
+    MotorState
+    processDesiredRoverState(MotorStateManager& currentMotorStateManager);
+
+    // UDP receiving
+    void receive(UDPHandler& receiver,
+                 MotorStateManager& currentMotorStateManager);
 };
 #endif

@@ -73,20 +73,23 @@ ArmMotorState Base::processDesiredArmState(const ArmState& desiredArmState) {
     return armMs;
 }
 
-DriveMotorState Base::processDesiredDriveState(const DriveState& state) {
-
-    return DriveModel::process(state);
+DriveMotorState Base::processDesiredDriveState(DriveState& state,
+                                               DriveMotorState& currentState) {
+    return DriveModel::process(state, currentState);
 }
 
-MotorState Base::processDesiredRoverState() {
+MotorState
+Base::processDesiredRoverState(MotorStateManager& currentMotorStateManager) {
     constexpr bool armManual
         = true; // TODO: Add Controller logic for determining whether to use
                 // armManualState
 
     RoverState desiredState = desiredStateManager.getState();
+    MotorState currentMotorState = currentMotorStateManager.getState();
 
     MotorState desiredMotorstate = {
-        .driveMotorState = processDesiredDriveState(desiredState.driveState),
+        .driveMotorState = processDesiredDriveState(
+            desiredState.driveState, currentMotorState.driveMotorState),
         .armMotorState = armManual
                              ? armManualChangeManager.getState()
                              : processDesiredArmState(desiredState.armState),
@@ -95,27 +98,42 @@ MotorState Base::processDesiredRoverState() {
     return desiredMotorstate;
 }
 
+void Base::receive(UDPHandler& receiver,
+                   MotorStateManager& currentMotorStateManager) {
+    while (true) {
+        Message reply = receiver.receive();
+        reply.printMessage(); // Print the received message
+
+        currentMotorStateManager.updateState(
+            std::get<MotorState>(reply.getPayload()));
+    }
+}
+
 void Base::start() {
     MessageQueue sendQueue;
     UDPHandler server(BASE_PORT, ROVER_PORT);
 
+    MotorStateManager currentMotorStateManager;
+
     thread controllerThread([&]() { ControllerHandler::eventLoop(); });
-    thread udpThread([&]() { server.run(sendQueue); });
+    thread sendingThread([&]() { server.run(sendQueue); });
+    thread receivingThread(
+        [&]() { receive(server, currentMotorStateManager); });
 
     ArmModel::initialize();
     DriveModel::initialize();
 
     while (!exitLoop) {
-        MotorState desiredMotorState = processDesiredRoverState();
+        MotorState desiredMotorState
+            = processDesiredRoverState(currentMotorStateManager);
 
         Message message = Message(desiredMotorState);
         sendQueue.push(message);
-        message.printMessage(); // Makes base output messy with other info
-                                // messages - clean up?
 
         usleep(0.1 * 1000000);
     }
 
     controllerThread.join();
-    udpThread.join();
+    sendingThread.join();
+    receivingThread.join();
 }

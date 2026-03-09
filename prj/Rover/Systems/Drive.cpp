@@ -1,4 +1,5 @@
 #include "Drive.h"
+#define GEAR_RATIO 77
 
 static const char* file = "Drive";
 
@@ -27,7 +28,7 @@ Drive::Drive(float width, float length) : m_width(width), m_length(length) {
             &m_handlesStepper.at(stepper), DRIVE_STEPPER_SERIAL_NUMBER[stepper],
             DRIVE_STEPPER_CHANNEL[stepper], DRIVE_STEPPER_PORT[stepper]);
         PhidgetStepper_setRescaleFactor(m_handlesStepper.at(stepper),
-                                        1.8 / (16 * 77));
+                                        1.8 / (16 * GEAR_RATIO));
         PhidgetStepper_setEngaged(m_handlesStepper.at(stepper), 1);
     }
 

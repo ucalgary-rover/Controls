@@ -36,13 +36,6 @@ public:
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_DOWN, unusedButton);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, unusedButton);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_MISC1, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_PADDLE1, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_PADDLE2, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_PADDLE3, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_PADDLE4, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_TOUCHPAD, unusedButton);
-
         // clang-format on
     }
 

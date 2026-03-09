@@ -65,8 +65,8 @@ void DriveControllerLayout::setAngularVelocity(int X, int Y) {
     if (stateManager)
         driveState = stateManager->getState();
     // get the angular velocity
-    setVal(&driveState.angularVelocity, stickAngle(X, Y), 0, 360,
-           NAMEOF(driveState.angularVelocity));
+    setVal(&driveState.angularVelocity, (X * maxRadialSpeed) / 255,
+           -maxRadialSpeed, maxRadialSpeed, NAMEOF(driveState.angularVelocity));
 
     if (stateManager)
         stateManager->updateState(driveState);
