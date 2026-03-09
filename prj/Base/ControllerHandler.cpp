@@ -106,6 +106,15 @@ covert_stl_axis_to_game_controller(SDL_GameControllerAxis axis) {
     }
 }
 
+int ControllerHandler::vectorIndexFromID(int controllerID) {
+    for (int i = 0; i < controllerAmount; i++) {
+        if (controllerAssignment[i] == controllerID) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 // ControllerHandler definitions -----------------------------------------
 bool ControllerHandler::initialize(
     DriveStateManager* driveStateManager, ArmStateManager* armStateManager,
@@ -131,7 +140,7 @@ bool ControllerHandler::initialize(
 // functions--------------------------------------
 
 void ControllerHandler::buttonResponse(uint8_t buttonID, int controllerID) {
-    controllers[controllerAssignment[controllerID]].buttonUpdate(buttonID);
+    controllers[vectorIndexFromID(controllerID)].buttonUpdate(buttonID);
 }
 
 void ControllerHandler::stickResponse(int16_t axisValue, int axisID,
@@ -141,10 +150,10 @@ void ControllerHandler::stickResponse(int16_t axisValue, int axisID,
     int stickAxisID = axisID % 2;
 
     if (axisID > GAME_CONTROLLER_AXIS_LEFTY) {
-        controllers[controllerAssignment[controllerID]].rightStickUpdate(
+        controllers[vectorIndexFromID(controllerID)].rightStickUpdate(
             axisValue, stickAxisID);
     } else {
-        controllers[controllerAssignment[controllerID]].leftStickUpdate(
+        controllers[vectorIndexFromID(controllerID)].leftStickUpdate(
             axisValue, stickAxisID);
     }
 }
@@ -153,10 +162,10 @@ void ControllerHandler::triggerResponse(int16_t axisValue, int axisID,
                                         int controllerID) {
 
     if (axisID > GAME_CONTROLLER_AXIS_TRIGGERRIGHT) {
-        controllers[controllerAssignment[controllerID]].rightTriggerUpdate(
+        controllers[vectorIndexFromID(controllerID)].rightTriggerUpdate(
             axisValue);
     } else {
-        controllers[controllerAssignment[controllerID]].leftTriggerUpdate(
+        controllers[vectorIndexFromID(controllerID)].leftTriggerUpdate(
             axisValue);
     }
 }

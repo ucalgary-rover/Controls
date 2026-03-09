@@ -37,6 +37,9 @@ public:
                            ArmStateManager* armStateManager,
                            ArmMotorStateManager* armManualChangeManager);
     static void eventLoop();
+
+    // A function for getting the vectors index from controllerAssignemnt
+    static int vectorIndexFromID(int controllerID);
 };
 
 #endif
