@@ -1,4 +1,5 @@
 #include "Message.h"
+// #include "pub_general.h"
 
 #include <array>
 #include <cstring>
@@ -54,25 +55,24 @@ void Message::printMessage() const {
             if constexpr (std::is_same_v<T, Generic>) {
                 std::cout << "Generic - Value: " << payload.value;
             } else if constexpr (std::is_same_v<T, MotorState>) {
-                std::cout << "MotorState: Drive - steer: "
-                          << payload.driveMotorState.steer[0] << " "
-                          << payload.driveMotorState.steer[1] << " "
-                          << payload.driveMotorState.steer[2] << " "
-                          << payload.driveMotorState
-                                 .steer[3] // hardcoded for 4 wheels
-                          << std::endl;
-                std::cout << "Drive - drive: "
-                          << payload.driveMotorState.drive[0] << " "
-                          << payload.driveMotorState.drive[1] << " "
-                          << payload.driveMotorState.drive[2] << " "
-                          << payload.driveMotorState.drive[3] << std::endl;
-                std::cout << "Arm: " << payload.armMotorState.motorValues[0]
-                          << " " << payload.armMotorState.motorValues[1] << " "
-                          << payload.armMotorState.motorValues[2] << " "
-                          << payload.armMotorState.motorValues[3] << " "
-                          << payload.armMotorState.motorValues[4] << " "
-                          << payload.armMotorState.motorValues[5]
-                          << std::endl; // hardcoded for 6 arm motors
+                std::cout << "MotorState: Drive - steer: ";
+                for (int i = 0; i < WHEEL_COUNT; i++) {
+                    std::cout << payload.driveMotorState.steer[i] << " ";
+                }
+                std::cout << std::endl;
+
+                std::cout << "Drive - drive: ";
+                for (int i = 0; i < WHEEL_COUNT; i++) {
+                    std::cout << payload.driveMotorState.drive[i] << " ";
+                }
+                std::cout << std::endl;
+
+                std::cout << "Arm: ";
+                for (int i = 0; i < MOTOR_ID_END; i++) {
+                    std::cout << payload.armMotorState.motorValues[i] << " ";
+                }
+                std::cout << std::endl;
+
             } else if constexpr (std::is_same_v<T, ScienceToolMessage>) {
                 std::cout << "ScienceToolMessage - Move Up/Down: "
                           << payload.moveUpDown
