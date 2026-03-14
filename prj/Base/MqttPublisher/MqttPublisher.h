@@ -1,6 +1,8 @@
 #pragma once
 #include "Config/Config.h"
+#include <memory>
 #include <mqtt/async_client.h>
+#include <mutex>
 
 class MqttPublisher {
 private:
@@ -19,7 +21,7 @@ public:
     ~MqttPublisher() = default;
 
     template <typename T>
-    void publish(const std::string& topic, T data);
+    void publish(const std::string& topic, const T& data);
 
     static void shutdown();
 };

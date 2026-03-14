@@ -1,6 +1,6 @@
 {
     "mqttConfig": {
-        "serverAddress": "tcp://127.0.0.1:1883",
+        "serverUrl": "tcp://127.0.0.1:1883",
         "clientId": "cpp_publisher",
         "topic": "test/topic"
     },

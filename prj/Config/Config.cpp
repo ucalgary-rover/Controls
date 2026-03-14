@@ -1,13 +1,14 @@
 
 #include "Config.h"
 #include <boost/describe.hpp>
+#include <boost/exception/all.hpp>
 #include <boost/json.hpp>
 #include <fstream>
 #include <iostream>
-#include <string>
 #include <stdexcept>
+#include <string>
 
-std::string readConfigFile(const std::string& configFile) {
+static std::string readConfigFile(const std::string& configFile) {
     std::ifstream file(configFile);
 
     if (!file) {
@@ -28,18 +29,22 @@ BOOST_DESCRIBE_STRUCT(MqttConfig, (), (serverUrl, clientId, topic));
 BOOST_DESCRIBE_STRUCT(WebsocketConfig, (), (address, port));
 BOOST_DESCRIBE_STRUCT(Config, (), (mqttConfig, websocketConfig));
 
-Config::Config() {
-    this->mqttConfig = { .serverUrl = "", .clientId = "", .topic = "" };
-    this->websocketConfig = { .address = "", .port = "" };
-}
-
-Config::Config(std::string configFile) {
+Config::Config(const std::string& configFile) {
     std::string content = readConfigFile(configFile);
+    boost::json::value jv;
+    try {
+        jv = boost::json::parse(content);
+    } catch (const std::exception& e) {
+        std::cerr << "Failed to parse config file or match file contents to "
+                     "config structs"
+                  << std::endl;
+        std::cerr << "exception: " << boost::diagnostic_information(e, true)
+                  << std::endl;
 
-    boost::json::value jv = boost::json::parse(content);
+        throw;
+    }
 
     *this = boost::json::value_to<Config>(jv);
-
 }
 
 // int main() { Config cfg = Config("prj/Config/config.json"); }
