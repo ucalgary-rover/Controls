@@ -2,8 +2,8 @@
 // Written by Johan Esperida
 
 #include "DriveHandler.h"
+#include "Message.h"
 #include <unistd.h>
-#include "DriveModel.h"
 
 const char* file = "DriveHandler";
 
@@ -83,15 +83,16 @@ const float PI = 3.14;
 #define TO_DEGREES(value) round(value * 180 / PI * 100) / 100
 
 // Constructor
-DriveHandler::DriveHandler(Drive* drive, MessageQueue* driveQueue) {
+DriveHandler::DriveHandler(Drive* drive,
+                           DriveMotorStateManager* driveMotorStateManager) {
 
     // Reference to the Arm object in Rover.cpp
     m_drive = drive;
 
-    // Create a driveQueue object in this file that references the driveQueue in
-    // Rover.cpp (NOT A COPY!!!) This allows us to use the same driveQueue in
-    // this file without shenanigans
-    m_driveQueue = driveQueue;
+    // Create a driveMotorStateManager object in this file that references the
+    // driveMotorStateManager in Rover.cpp (NOT A COPY!!!) This allows us to use
+    // the same driveMotorStateManager in this file without shenanigans
+    m_driveMotorStateManager = driveMotorStateManager;
 
     // Open the file to store angles
     std::ifstream angleFile(BASE_LAST_KNOWN_POS_FILE, std::ifstream::binary);
@@ -484,13 +485,12 @@ void DriveHandler::awaitWheelTargets() {
 
 void DriveHandler::start() {
 
-    WheelMessage message;
-
     while (true) {
         // Get message from driveQueue
-        Message msg = m_driveQueue->pop();
 
-        if (msg.getFormat() != MessageFormat::MESSAGE_FORMAT_WHEEL) {
+        // TODO: Handle the message
+
+        /*if (msg.getFormat() != MessageFormat::MESSAGE_FORMAT_WHEEL) {
             Logging::logE(file, "Received non-wheel message in driveQueue %d",
                           msg.getFormat());
             continue;
@@ -513,40 +513,36 @@ void DriveHandler::start() {
         bool lateralVelocityOnly
             = (message.theta == 90) || (message.theta == 270);
 
-        // Compute desired motor state from model, then apply to hardware
-        DriveMotorState desired = DriveModel::computeMotorState(
-            message, m_drive->getLength(), m_drive->getWidth());
+        // We're going to disable superimposed radial + strafing turning
+        // For now radial turning should only work when strafing velocity is 0
+        // And strafing should only work when angular velocity is 0
 
-        bool allZero = true;
-        for (int i = 0; i < WHEEL_COUNT; ++i) {
-            if (desired.drive[i] != 0 || desired.steer[i] != 0) {
-                allZero = false;
-                break;
-            }
-        }
-
-        if (allZero) {
+        // Radial turn (angular velocity and velocity forwards or backwards)
+        if (!velocityFlag && !angleVelocityFlag) {
             stopWheels();
-            continue;
-        }
+        } else if (angleVelocityFlag && longitudinalVelocityOnly
+                   && velocityFlag) {
+            Logging::logD(file, "Radial turn");
+            m_spotTurnFlag = false;
+            radialTurn(message.angleVelocity, message.velocity, message.theta);
 
-        // Turn steppers to target steer angles
-        for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
-            turnWheel((DriveIndex)stepper, desired.steer[stepper]);
-        }
+            // Spot turning (angular velocity)
+        } else if (angleVelocityFlag && !velocityFlag) {
+            Logging::logD(file, "Spot turn");
+            spotTurn(message.angleVelocity);
 
-        awaitWheelTargets();
+            // Strafing (angle and velocity)
+        } else if (velocityFlag
+                   && (longitudinalVelocityOnly || lateralVelocityOnly)
+                   && !angleVelocityFlag) {
+            Logging::logD(file, "Strafing");
+            m_spotTurnFlag = false;
+            strafe(message.theta, message.velocity);
 
-        // Set wheel drive velocities (model provides percent [-100,100])
-        for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
-            MotorHandlerReturn motorStuct;
-            m_drive->getDriveDCHandle(&motorStuct, dc);
-            float vel = ((float)desired.drive[dc]) / 100.0f;
-            PhidgetBLDCMotor_setTargetVelocity_async(
-                *motorStuct.handler.bldcMotor, vel, setTargetVelocityDone,
-                NULL);
-            Logging::logD(file, "Setting DC motor %d to speed %f", dc, vel);
-        }
+            // execute stop if no joysticks active
+        } else {
+            stopWheels();
+        }*/
     }
 }
 
