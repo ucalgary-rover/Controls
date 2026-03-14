@@ -1,7 +1,7 @@
 #include "DriveModel.h"
 #include "DriveMotorState.h"
-#include <cmath>
 #include "pub_general.h"
+#include <cmath>
 
 const char* file = "DriveHandler";
 
@@ -65,8 +65,8 @@ DriveMotorState DriveModel::process(const DriveState& state) {
 
         ms.steer[WHEEL_FL] = leftAngle;
         ms.steer[WHEEL_FR] = rightAngle;
-        ms.steer[WHEEL_RL] = 0;
-        ms.steer[WHEEL_RR] = 0;
+        ms.steer[WHEEL_BL] = 0;
+        ms.steer[WHEEL_BR] = 0;
 
         int direction = (state.heading <= 90 || state.heading >= 270) ? 1 : -1;
         float speed
@@ -90,8 +90,8 @@ DriveMotorState DriveModel::process(const DriveState& state) {
 
         ms.steer[WHEEL_FL] = -wheelAngle;
         ms.steer[WHEEL_FR] = wheelAngle;
-        ms.steer[WHEEL_RL] = wheelAngle;
-        ms.steer[WHEEL_RR] = -wheelAngle;
+        ms.steer[WHEEL_BL] = wheelAngle;
+        ms.steer[WHEEL_BR] = -wheelAngle;
 
         for (int i = 0; i < 4; i++) {
             ms.drive[i] = -speed;
