@@ -4,13 +4,14 @@
 
 class DriveModel {
 public:
-    static DriveMotorState convert(const DriveState& state, double roverLength,
-                                   double roverWidth);
+    static void initialize();
+    static DriveMotorState process(const DriveState& state);
 
 private:
-    static float spotTurnSpeed(int stickAngle);
-    static int strafeAngleAdjust(int stickTheta);
-    static float radialTurnHeadingAngle(int stickAngle);
-    static float radialTurnWheelAngle(float headingAngle, double length,
-                                      double width, bool inner);
+    static double roverLength;
+    static double roverWidth;
+    static float spotTurnSpeed(int angularVelocity);
+    static int strafeAngleAdjust(int heading);
+    static float radialTurnHeadingAngle(int angularVelocity);
+    static float radialTurnWheelAngle(float headingAngle, bool inner);
 };

@@ -334,11 +334,7 @@ ArmMotorState Base::processDesiredArmState(const ArmState& desiredArmState) {
 
 DriveMotorState Base::processDesiredDriveState(const DriveState& state) {
 
-    return DriveModel::convert(
-        state,
-        1, // we're suppose to get m_drive->getLength()and getWidth but we don't
-           // have access to it in the model, so just use 1
-        1);
+    return DriveModel::process(state);
 }
 
 MotorState Base::processDesiredRoverState() {
@@ -366,6 +362,7 @@ void Base::start() {
     thread udpThread([&]() { server.run(sendQueue); });
 
     ArmModel::initialize();
+    DriveModel::initialize();
 
     while (!exitLoop) {
         MotorState desiredMotorState = processDesiredRoverState();

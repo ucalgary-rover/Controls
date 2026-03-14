@@ -18,33 +18,38 @@ static constexpr float STRAFE_SPEED_MAX = 1.0f;
 // maximum turning angle for radial turning
 static const int RADIAL_ANGLE_MAX = 45;
 
-DriveMotorState DriveModel::convert(const DriveState& state, double length,
-                                    double width) {
+double DriveModel::roverLength = 0;
+double DriveModel::roverWidth = 0;
+
+void DriveModel::initialize() {
+    roverLength = 1; // TODO: get actual length & width of rover from config
+    roverWidth = 1;
+}
+
+DriveMotorState DriveModel::process(const DriveState& state) {
     DriveMotorState ms = {};
 
-    bool angleVelocityFlag = state.angularVelocity > 0;
-    bool velocityFlag = state.speed != 0;
+    bool hasAngularVelocity = state.angularVelocity > 0;
+    bool hasLinearVelocity = state.speed != 0;
 
     bool longitudinalOnly = (state.heading == 0 || state.heading == 180);
     bool lateralOnly = (state.heading == 90 || state.heading == 270);
 
     // STOP
-    if (!velocityFlag && !angleVelocityFlag) {
+    if (!hasLinearVelocity && !hasAngularVelocity) {
         return ms;
     }
 
     // =====================
     // RADIAL TURN
     // =====================
-    if (angleVelocityFlag && longitudinalOnly && velocityFlag) {
+    if (hasAngularVelocity && longitudinalOnly && hasLinearVelocity) {
 
         float headingAngle = radialTurnHeadingAngle(state.angularVelocity);
 
-        float innerAngle
-            = radialTurnWheelAngle(headingAngle, length, width, true);
+        float innerAngle = radialTurnWheelAngle(headingAngle, true);
 
-        float outerAngle
-            = radialTurnWheelAngle(headingAngle, length, width, false);
+        float outerAngle = radialTurnWheelAngle(headingAngle, false);
 
         float leftAngle;
         float rightAngle;
@@ -76,11 +81,11 @@ DriveMotorState DriveModel::convert(const DriveState& state, double length,
     // =====================
     // SPOT TURN
     // =====================
-    if (angleVelocityFlag && !velocityFlag) {
+    if (hasAngularVelocity && !hasLinearVelocity) {
 
         float speed = spotTurnSpeed(state.angularVelocity);
 
-        float wheelAngle = TO_DEGREES(atan(length / width));
+        float wheelAngle = TO_DEGREES(atan(roverLength / roverWidth));
 
         ms.steer[0] = -wheelAngle;
         ms.steer[1] = wheelAngle;
@@ -97,8 +102,8 @@ DriveMotorState DriveModel::convert(const DriveState& state, double length,
     // =====================
     // STRAFE
     // =====================
-    if (velocityFlag && (longitudinalOnly || lateralOnly)
-        && !angleVelocityFlag) {
+    if (hasLinearVelocity && (longitudinalOnly || lateralOnly)
+        && !hasAngularVelocity) {
 
         int wheelAngle = strafeAngleAdjust(state.heading);
 
@@ -118,43 +123,42 @@ DriveMotorState DriveModel::convert(const DriveState& state, double length,
     return ms;
 }
 
-float DriveModel::spotTurnSpeed(int stickAngle) {
-    if (stickAngle < 30 || stickAngle > 330)
+float DriveModel::spotTurnSpeed(int angularVelocity) {
+    if (angularVelocity < 30 || angularVelocity > 330)
         return 0;
-    if (stickAngle > 180)
-        return -1 + (std::abs(270 - stickAngle) / 60.0f);
-    return 1 - (std::abs(90 - stickAngle) / 60.0f);
+    if (angularVelocity > 180)
+        return -1 + (std::abs(270 - angularVelocity) / 60.0f);
+    return 1 - (std::abs(90 - angularVelocity) / 60.0f);
 }
 
-int DriveModel::strafeAngleAdjust(int stickTheta) {
-    if (stickTheta < 90)
-        return stickTheta;
-    if (stickTheta > 270)
-        return stickTheta - 360;
-    if (stickTheta > 90 && stickTheta < 270)
-        return stickTheta - 180;
+int DriveModel::strafeAngleAdjust(int heading) {
+    if (heading < 90)
+        return heading;
+    if (heading > 270)
+        return heading - 360;
+    if (heading > 90 && heading < 270)
+        return heading - 180;
     return 90; // simplified edge case
 }
 
-float DriveModel::radialTurnHeadingAngle(int stickAngle) {
+float DriveModel::radialTurnHeadingAngle(int angularVelocity) {
     float reportedAngle = 0.0f;
 
-    if (stickAngle < 90) {
-        reportedAngle = (stickAngle * RADIAL_ANGLE_MAX) / 90.0f;
-    } else if (stickAngle > 180) {
-        reportedAngle = ((stickAngle - 360.0f) * RADIAL_ANGLE_MAX) / 90.0f;
+    if (angularVelocity < 90) {
+        reportedAngle = (angularVelocity * RADIAL_ANGLE_MAX) / 90.0f;
+    } else if (angularVelocity > 180) {
+        reportedAngle = ((angularVelocity - 360.0f) * RADIAL_ANGLE_MAX) / 90.0f;
     }
 
     return TO_RADIANS(std::abs(reportedAngle));
 }
 
-float DriveModel::radialTurnWheelAngle(float headingAngle, double length,
-                                       double width, bool inner) {
-    int wheelInt = inner ? 1 : -1;
+float DriveModel::radialTurnWheelAngle(float headingAngle, bool isInnerWheel) {
+    int wheelInt = isInnerWheel ? 1 : -1;
 
-    float angle = atan(2 * length * sin(headingAngle)
-                       / (2 * length * cos(headingAngle)
-                          - wheelInt * width * sin(headingAngle)));
+    float angle = atan(2 * roverLength * sin(headingAngle)
+                       / (2 * roverLength * cos(headingAngle)
+                          - wheelInt * roverWidth * sin(headingAngle)));
 
     return TO_DEGREES(angle);
 }
