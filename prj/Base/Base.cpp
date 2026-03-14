@@ -5,6 +5,7 @@
 #include "Base.h"
 #include "Base/Models/ArmModel.h"
 #include "UDPHandler.h"
+#include "Base/Models/DriveModel.h"
 #include <cmath>
 #include <unistd.h>
 
@@ -300,12 +301,6 @@ void Base::changeArmControlType(ArmMessageType type) {
 
 void Base::quit() { this->exitLoop = 1; }
 
-DriveMotorState
-Base::processDesiredDriveState(const DriveState& desiredDriveState) {
-    // TODO: Add logic for drive state processing
-    return DriveMotorState();
-}
-
 ArmMotorState Base::processDesiredArmState(const ArmState& desiredArmState) {
     ArmMotorState armMs = {};
 
@@ -337,6 +332,11 @@ ArmMotorState Base::processDesiredArmState(const ArmState& desiredArmState) {
     return armMs;
 }
 
+DriveMotorState Base::processDesiredDriveState(const DriveState& state) {
+
+    return DriveModel::process(state);
+}
+
 MotorState Base::processDesiredRoverState() {
     constexpr bool armManual
         = true; // TODO: Add Controller logic for determining whether to use
@@ -362,6 +362,7 @@ void Base::start() {
     thread udpThread([&]() { server.run(sendQueue); });
 
     ArmModel::initialize();
+    DriveModel::initialize();
 
     while (!exitLoop) {
         MotorState desiredMotorState = processDesiredRoverState();
