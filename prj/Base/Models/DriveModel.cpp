@@ -1,6 +1,7 @@
 #include "DriveModel.h"
 #include "DriveMotorState.h"
 #include <cmath>
+#include "pub_general.h"
 
 const char* file = "DriveHandler";
 
@@ -62,10 +63,10 @@ DriveMotorState DriveModel::process(const DriveState& state) {
             rightAngle = -innerAngle;
         }
 
-        ms.steer[0] = leftAngle;
-        ms.steer[1] = rightAngle;
-        ms.steer[2] = 0;
-        ms.steer[3] = 0;
+        ms.steer[WHEEL_FL] = leftAngle;
+        ms.steer[WHEEL_FR] = rightAngle;
+        ms.steer[WHEEL_RL] = 0;
+        ms.steer[WHEEL_RR] = 0;
 
         int direction = (state.heading <= 90 || state.heading >= 270) ? 1 : -1;
         float speed
@@ -87,10 +88,10 @@ DriveMotorState DriveModel::process(const DriveState& state) {
 
         float wheelAngle = TO_DEGREES(atan(roverLength / roverWidth));
 
-        ms.steer[0] = -wheelAngle;
-        ms.steer[1] = wheelAngle;
-        ms.steer[2] = wheelAngle;
-        ms.steer[3] = -wheelAngle;
+        ms.steer[WHEEL_FL] = -wheelAngle;
+        ms.steer[WHEEL_FR] = wheelAngle;
+        ms.steer[WHEEL_RL] = wheelAngle;
+        ms.steer[WHEEL_RR] = -wheelAngle;
 
         for (int i = 0; i < 4; i++) {
             ms.drive[i] = -speed;
@@ -112,7 +113,7 @@ DriveMotorState DriveModel::process(const DriveState& state) {
         float speed
             = (float)state.speed / 100.0f * direction * STRAFE_SPEED_MAX;
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < WHEEL_COUNT; i++) {
             ms.steer[i] = wheelAngle;
             ms.drive[i] = (i % 2 == 0) ? speed : -speed;
         }
