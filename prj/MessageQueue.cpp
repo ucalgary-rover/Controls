@@ -2,10 +2,6 @@
 
 static const char* file = "MessageQueue";
 
-MessageQueue::MessageQueue() { }
-
-MessageQueue::~MessageQueue() { }
-
 //-------------------------------//
 /* DATA CREATION AND DESTRUCTION */
 //-------------------------------//

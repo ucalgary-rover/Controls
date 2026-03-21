@@ -27,7 +27,7 @@ using namespace std;
 class Base {
 public:
     Base();
-    ~Base();
+    ~Base() = default;
 
     // Start the loops to have Base working
     void start();

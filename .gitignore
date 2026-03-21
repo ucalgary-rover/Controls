@@ -8,3 +8,8 @@ prj/boost
 test/build/
 out/
 logs/
+
+# ClangD files
+.clangd
+.cache
+**/compile_commands.json

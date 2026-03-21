@@ -9,12 +9,6 @@ static const char* file = "Rover";
 
 using namespace std;
 
-// Regular Constructor
-Rover::Rover() { }
-
-// Destructor
-Rover::~Rover() { }
-
 //---------------------- Start/Stop Functions ----------------------//
 // Note: Only the start() and stop() functions have their own thread //
 

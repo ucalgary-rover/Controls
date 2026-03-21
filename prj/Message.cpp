@@ -31,9 +31,6 @@ Message::Message() :
 Message::Message(Message const& src) :
     m_payload(src.m_payload), m_format(src.m_format) { }
 
-// Destructor
-Message::~Message() { }
-
 // Assignment Operator
 Message& Message::operator=(const Message& src) {
     if (this != &src) {

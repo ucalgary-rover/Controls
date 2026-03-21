@@ -35,7 +35,7 @@ public:
     Message();
     Message(Message const& src);
     Message& operator=(const Message& src);
-    ~Message();
+    ~Message() = default;
 
     /** prints contents of Message
      *

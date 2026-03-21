@@ -279,8 +279,6 @@ Base::Base() {
     Logging::logI(file, "Initializing Base done");
 }
 
-Base::~Base() { }
-
 void Base::changeArmControlType(ArmMessageType type) {
     mtx.lock();
     Logging::logI(file, "Setting Arm Control Type to %d", type);

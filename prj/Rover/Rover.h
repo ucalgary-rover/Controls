@@ -18,9 +18,10 @@
 class Rover {
 public:
     // Regular Constructor
-    Rover();
+    Rover() = default;
 
-    ~Rover();
+    // Destructor
+    ~Rover() = default;
 
     /** Instantiate the threads for each queue
      *
