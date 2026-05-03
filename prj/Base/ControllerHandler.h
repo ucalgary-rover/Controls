@@ -7,6 +7,7 @@
 #include "DriveControllerLayout.h"
 #include <cstdint>
 #include <map>
+#include <memory>
 #include <vector>
 
 // A class for initializing controllers and running the pollEvent loop
@@ -18,6 +19,8 @@ private:
 
     static std::vector<Controller>
         controllers; //- vector<const Controller>: controllers (FROM UML)
+
+    static std::vector<std::shared_ptr<ControllerLayout>> layouts;
 
     const static int controllerAmount = 2;
 

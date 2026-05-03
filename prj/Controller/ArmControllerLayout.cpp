@@ -1,17 +1,23 @@
 #include "ArmControllerLayout.h"
 
+static const char* file = "ArmControllerLayout";
+
 void ArmControllerLayout::buttonResponse(uint8_t buttonID) {
     switch (buttonID) {
-    case SDL_CONTROLLER_BUTTON_BACK:
+    case SDL_CONTROLLER_BUTTON_X:
         currentLayout = FIXED_IK;
+        Logging::logI(file, "Fixed_IK");
         break;
 
-    case SDL_CONTROLLER_BUTTON_GUIDE:
+    case SDL_CONTROLLER_BUTTON_Y:
         currentLayout = MANUAL;
+        Logging::logI(file, "Manual");
         break;
 
-    case SDL_CONTROLLER_BUTTON_START:
+    case SDL_CONTROLLER_BUTTON_B:
         currentLayout = VARIABLE_IK;
+        Logging::logI(file, "Variable_IK");
+        break;
 
     default:
         layouts[currentLayout]->buttonResponse(buttonID);

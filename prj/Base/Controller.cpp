@@ -92,7 +92,7 @@ void Trigger::triggerUpdate(Sint16 axisValue) {
 
 // Controller definitions---------------------------------------------------
 
-Controller::Controller(ControllerLayout* layout) {
+Controller::Controller(std::shared_ptr<ControllerLayout> layout) {
 
     controllerLayout = layout;
     m_rightStick

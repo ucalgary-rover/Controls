@@ -4,6 +4,7 @@
 #include "ArmManualControllerLayout.h"
 #include "ArmVariableIKControllerLayout.h"
 #include <map>
+#include <memory>
 #include <string>
 
 enum layout {
@@ -16,10 +17,12 @@ class ArmControllerLayout : public ControllerLayout {
 public:
     ArmControllerLayout(ArmStateManager* armStateManager,
                         ArmMotorStateManager* armMotorStateManager) {
-        layouts[FIXED_IK] = new ArmFixedIKControllerLayout(armStateManager);
+        layouts[FIXED_IK]
+            = std::make_shared<ArmFixedIKControllerLayout>(armStateManager);
         layouts[VARIABLE_IK]
-            = new ArmVariableIKControllerLayout(armStateManager);
-        layouts[MANUAL] = new ArmManualControllerLayout(armMotorStateManager);
+            = std::make_shared<ArmVariableIKControllerLayout>(armStateManager);
+        layouts[MANUAL]
+            = std::make_shared<ArmManualControllerLayout>(armMotorStateManager);
 
         currentLayout = FIXED_IK;
     }
@@ -39,6 +42,6 @@ public:
     void rightTriggerResponse(int16_t axisValue) override;
 
 private:
-    int currentLayout;
-    ControllerLayout* layouts[3];
+    enum layout currentLayout;
+    std::shared_ptr<ControllerLayout> layouts[3];
 };

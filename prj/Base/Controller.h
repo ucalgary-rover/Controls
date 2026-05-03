@@ -110,7 +110,7 @@ private:
     // struct for button functions
     buttonFunctions m_buttonFuncs;
 
-    ControllerLayout* controllerLayout;
+    std::shared_ptr<ControllerLayout> controllerLayout;
 
 public:
     // A constructor for making a completely blank controller object
@@ -125,7 +125,7 @@ public:
      *@return None
      *
      */
-    Controller(ControllerLayout* layout);
+    Controller(std::shared_ptr<ControllerLayout> layout);
 
     void leftTriggerUpdate(int16_t axisValue);
     void rightTriggerUpdate(int16_t axisValue);
