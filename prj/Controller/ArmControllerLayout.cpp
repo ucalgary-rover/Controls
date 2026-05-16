@@ -6,17 +6,17 @@ void ArmControllerLayout::buttonResponse(uint8_t buttonID) {
     switch (buttonID) {
     case SDL_CONTROLLER_BUTTON_X:
         currentLayout = FIXED_IK;
-        Logging::logI(file, "Fixed_IK");
+        Logging::logI(file, "Fixed_IK active");
         break;
 
     case SDL_CONTROLLER_BUTTON_Y:
         currentLayout = MANUAL;
-        Logging::logI(file, "Manual");
+        Logging::logI(file, "Manual active");
         break;
 
     case SDL_CONTROLLER_BUTTON_B:
         currentLayout = VARIABLE_IK;
-        Logging::logI(file, "Variable_IK");
+        Logging::logI(file, "Variable_IK active");
         break;
 
     default:

@@ -81,6 +81,18 @@ static const char* getButtonName(Uint8 button) {
         return "D-Pad Left";
     case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
         return "D-Pad Right";
+    case SDL_CONTROLLER_BUTTON_MISC1:
+        return "Misc1";
+    case SDL_CONTROLLER_BUTTON_PADDLE1:
+        return "Paddle 1";
+    case SDL_CONTROLLER_BUTTON_PADDLE2:
+        return "Paddle 2";
+    case SDL_CONTROLLER_BUTTON_PADDLE3:
+        return "Paddle 3";
+    case SDL_CONTROLLER_BUTTON_PADDLE4:
+        return "Paddle 4";
+    case SDL_CONTROLLER_BUTTON_TOUCHPAD:
+        return "Touchpad";
 
     // yet to trigger for some reason
     default:

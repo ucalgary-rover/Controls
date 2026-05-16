@@ -1,4 +1,5 @@
 #include "ArmVariableIKControllerLayout.h"
+static const char* file = "ArmVariableIKControllerLayout";
 
 void ArmVariableIKControllerLayout::leftStickResponse(int xValue, int yValue) {
     if (stateManager)
@@ -37,23 +38,7 @@ void ArmVariableIKControllerLayout::rightTriggerResponse(int16_t axisValue) {
 }
 
 void ArmVariableIKControllerLayout::buttonResponse(uint8_t buttonID) {
-    switch (buttonID) {
-    case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-        incrementRoll(-5);
-        break;
-
-    case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-        incrementRoll(5);
-        break;
-
-    case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-        incrementPitch(-5);
-        break;
-
-    case SDL_CONTROLLER_BUTTON_DPAD_UP:
-        incrementPitch(5);
-        break;
-    }
+    buttonCallbacks[buttonID](buttonID);
 }
 
 void ArmVariableIKControllerLayout::incrementPitch(int value) {
