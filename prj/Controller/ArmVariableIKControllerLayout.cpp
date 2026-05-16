@@ -37,10 +37,6 @@ void ArmVariableIKControllerLayout::rightTriggerResponse(int16_t axisValue) {
         stateManager->updateState(armState);
 }
 
-void ArmVariableIKControllerLayout::buttonResponse(uint8_t buttonID) {
-    buttonCallbacks[buttonID](buttonID);
-}
-
 void ArmVariableIKControllerLayout::incrementPitch(int value) {
     if (stateManager)
         armState = stateManager->getState();
@@ -55,4 +51,13 @@ void ArmVariableIKControllerLayout::incrementRoll(int value) {
     incrementVal(&armState.roll, value, -maxRoll, maxRoll, "clawPitch");
     if (stateManager)
         stateManager->updateState(armState);
+}
+
+void ArmVariableIKControllerLayout::buttonResponse(uint8_t buttonID) {
+    if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
+        || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {
+        return;
+    }
+
+    buttonCallbacks[buttonID](buttonID);
 }
