@@ -8,10 +8,12 @@
 #include <unistd.h>
 #include <vector>
 
+#include "ArmControllerLayout.h"
 #include "ArmFixedIKControllerLayout.h"
 #include "ArmManualControllerLayout.h"
 #include "ArmVariableIKControllerLayout.h"
 #include "Base/ControllerHandler.h"
+#include "Controller/ControllerLayout.h"
 #include "DriveControllerLayout.h"
 #include "Message.h"
 #include "MessageQueue.h"
@@ -46,27 +48,10 @@ private:
 
     int exitLoop;
 
-    void incrementJoint(int change);
-    void changeArmControlType(ArmMessageType type);
-
     // Desired Motor State Update Methods
     DriveMotorState
     processDesiredDriveState(const DriveState& desiredDriveState);
     ArmMotorState processDesiredArmState(const ArmState& desiredArmState);
     MotorState processDesiredRoverState();
-
-    // List of all controllers in use
-    ControllerHandler* controller;
-
-    DriveControllerLayout driveLayout;
-    ArmManualControllerLayout armManualLayout;
-    ArmFixedIKControllerLayout armFixedIKLayout;
-    ArmVariableIKControllerLayout armVariableIKLayout;
-
-    buttonFunctions* drive_control;
-    buttonFunctions* arm_manual_control;
-    buttonFunctions* arm_fixed_ik_control;
-    buttonFunctions* arm_variable_ik_control;
 };
-
 #endif

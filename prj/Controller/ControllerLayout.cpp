@@ -60,16 +60,17 @@ float ControllerLayout::degreeToRadian(int n) { return n * PI / 180; }
 // does the opposite
 int ControllerLayout::radianToDegree(float n) { return n * 180 / PI; }
 
-void ControllerLayout::unusedButton() {
+void ControllerLayout::unusedButton(uint8_t buttonID) {
     Logging::logV(filename.c_str(), "Button Unused\n");
 }
 
-void ControllerLayout::unusedStick(int X, int Y) {
-    Logging::logV(filename.c_str(), "Unused Stick X: %d, Y: %d", X, Y);
+void ControllerLayout::unusedStick(int xValue, int yValue) {
+    Logging::logV(filename.c_str(), "Unused Stick X: %d, Y: %d", xValue,
+                  yValue);
 }
 
-void ControllerLayout::unusedTrigger(int X) {
-    Logging::logV(filename.c_str(), "Unused Trigger X: %d", X);
+void ControllerLayout::unusedTrigger(int axisValue) {
+    Logging::logV(filename.c_str(), "Unused Trigger X: %d", axisValue);
 }
 
 void ControllerLayout::triggerToIncrement(int triggerValue, int* compare,

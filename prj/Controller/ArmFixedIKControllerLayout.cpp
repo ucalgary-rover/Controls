@@ -1,6 +1,6 @@
 #include "ArmFixedIKControllerLayout.h"
 
-void ArmFixedIKControllerLayout::handleLeftJoyStick(int xValue, int yValue) {
+void ArmFixedIKControllerLayout::leftStickResponse(int xValue, int yValue) {
     if (stateManager)
         armState = stateManager->getState();
     stickChangeAxis(xValue, yValue, &armState.x, &armState.y, 0.0001, 0.0001, 1,
@@ -9,7 +9,7 @@ void ArmFixedIKControllerLayout::handleLeftJoyStick(int xValue, int yValue) {
         stateManager->updateState(armState);
 }
 
-void ArmFixedIKControllerLayout::handleRightJoyStick(int xValue, int yValue) {
+void ArmFixedIKControllerLayout::rightStickResponse(int xValue, int yValue) {
     if (stateManager)
         armState = stateManager->getState();
     stickChangeAxis(xValue, yValue, &armState.z, nullptr, 0.0001, 0, 1, 0,
@@ -18,20 +18,29 @@ void ArmFixedIKControllerLayout::handleRightJoyStick(int xValue, int yValue) {
         stateManager->updateState(armState);
 }
 
-void ArmFixedIKControllerLayout::handleLeftTrigger(int xValue) {
+void ArmFixedIKControllerLayout::leftTriggerResponse(int16_t axisValue) {
     if (stateManager)
         armState = stateManager->getState();
-    triggerToIncrement(xValue, &lastleftTriggerValue, &armState.clawOpen, -5, 0,
-                       100, "clawOpen");
+    triggerToIncrement(axisValue, &lastleftTriggerValue, &armState.clawOpen, -5,
+                       0, 100, "clawOpen");
     if (stateManager)
         stateManager->updateState(armState);
 }
 
-void ArmFixedIKControllerLayout::handleRightTrigger(int xValue) {
+void ArmFixedIKControllerLayout::rightTriggerResponse(int16_t axisValue) {
     if (stateManager)
         armState = stateManager->getState();
-    triggerToIncrement(xValue, &lastrightTriggerValue, &armState.clawOpen, 5, 0,
-                       100, "clawOpen");
+    triggerToIncrement(axisValue, &lastrightTriggerValue, &armState.clawOpen, 5,
+                       0, 100, "clawOpen");
     if (stateManager)
         stateManager->updateState(armState);
+}
+
+void ArmFixedIKControllerLayout::buttonResponse(uint8_t buttonID) {
+    if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
+        || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {
+        return;
+    }
+
+    buttonCallbacks[buttonID](buttonID);
 }

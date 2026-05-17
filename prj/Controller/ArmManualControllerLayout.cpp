@@ -1,4 +1,22 @@
 #include "ArmManualControllerLayout.h"
+#include <string>
+
+void ArmManualControllerLayout::leftTriggerResponse(int16_t axisValue) {
+    triggerToincrementJointValue(axisValue, -5);
+}
+
+void ArmManualControllerLayout::rightTriggerResponse(int16_t axisValue) {
+    triggerToincrementJointValue(axisValue, 5);
+}
+
+void ArmManualControllerLayout::buttonResponse(uint8_t buttonID) {
+    if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
+        || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {
+        return;
+    }
+
+    buttonCallbacks[buttonID](buttonID);
+}
 
 void ArmManualControllerLayout::triggerToincrementJointValue(int triggerVal,
                                                              int increment) {

@@ -3,6 +3,12 @@
 #include <iostream>
 #include <string>
 
+bool ControllerHandler::is_initialized = false;
+std::vector<Controller> ControllerHandler::controllers = {};
+std::vector<std::shared_ptr<ControllerLayout>> ControllerHandler::layouts = {};
+
+int ControllerHandler::controllerAssignment[2] = { -1, -1 };
+
 static const char* file = "ControllerHandler";
 
 // Code for the testing window for adjusting controller deadzones
@@ -42,7 +48,8 @@ void renderCross(SDL_Surface* screenSurface, int x, int y, float x1, float x2) {
 //------------------------------------------------------------------
 
 // Helper function to get button names
-std::string getButtonName(Uint8 button) {
+// using const char because logging doesn't like std::string apparently
+static const char* getButtonName(Uint8 button) {
     switch (button) {
     case SDL_CONTROLLER_BUTTON_A:
         return "Cross (A)";
@@ -74,10 +81,67 @@ std::string getButtonName(Uint8 button) {
         return "D-Pad Left";
     case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
         return "D-Pad Right";
+    case SDL_CONTROLLER_BUTTON_MISC1:
+        return "Misc1";
+    case SDL_CONTROLLER_BUTTON_PADDLE1:
+        return "Paddle 1";
+    case SDL_CONTROLLER_BUTTON_PADDLE2:
+        return "Paddle 2";
+    case SDL_CONTROLLER_BUTTON_PADDLE3:
+        return "Paddle 3";
+    case SDL_CONTROLLER_BUTTON_PADDLE4:
+        return "Paddle 4";
+    case SDL_CONTROLLER_BUTTON_TOUCHPAD:
+        return "Touchpad";
 
     // yet to trigger for some reason
     default:
         return "Unknown Button";
+    }
+}
+
+static const char* eventTypeToString(Uint32 eventType) {
+    switch (eventType) {
+    case SDL_QUIT:
+        return "SDL_QUIT";
+    case SDL_APP_TERMINATING:
+        return "SDL_APP_TERMINATING";
+    case SDL_JOYAXISMOTION:
+        return "SDL_JOYAXISMOTION";
+    case SDL_JOYBALLMOTION:
+        return "SDL_JOYBALLMOTION";
+    case SDL_JOYHATMOTION:
+        return "SDL_JOYHATMOTION";
+    case SDL_JOYBUTTONDOWN:
+        return "SDL_JOYBUTTONDOWN";
+    case SDL_JOYBUTTONUP:
+        return "SDL_JOYBUTTONUP";
+    case SDL_JOYDEVICEADDED:
+        return "SDL_JOYDEVICEADDED";
+    case SDL_JOYDEVICEREMOVED:
+        return "SDL_JOYDEVICEREMOVED";
+    case SDL_JOYBATTERYUPDATED:
+        return "SDL_JOYBATTERYUPDATED";
+    case SDL_CONTROLLERAXISMOTION:
+        return "SDL_CONTROLLERAXISMOTION";
+    case SDL_CONTROLLERBUTTONDOWN:
+        return "SDL_CONTROLLERBUTTONDOWN";
+    case SDL_CONTROLLERBUTTONUP:
+        return "SDL_CONTROLLERBUTTONUP";
+    case SDL_CONTROLLERDEVICEADDED:
+        return "SDL_CONTROLLERDEVICEADDED";
+    case SDL_CONTROLLERDEVICEREMOVED:
+        return "SDL_CONTROLLERDEVICEREMOVED";
+    case SDL_CONTROLLERDEVICEREMAPPED:
+        return "SDL_CONTROLLERDEVICEREMAPPED";
+    case SDL_CONTROLLERTOUCHPADDOWN:
+        return "SDL_CONTROLLERTOUCHPADDOWN";
+    case SDL_CONTROLLERTOUCHPADMOTION:
+        return "SDL_CONTROLLERTOUCHPADMOTION";
+    case SDL_CONTROLLERTOUCHPADUP:
+        return "SDL_CONTROLLERTOUCHPADUP";
+    default:
+        return "SDL_UNKNOWN_EVENT";
     }
 }
 
@@ -102,154 +166,128 @@ covert_stl_axis_to_game_controller(SDL_GameControllerAxis axis) {
     }
 }
 
-// ControllerHandler definitions -----------------------------------------
-
-ControllerHandler::ControllerHandler(buttonFunctions functionStruct1,
-                                     buttonFunctions functionStruct2) {
-
-    // storing the structs in a list
-    m_buttonFuncList[0] = functionStruct1;
-    m_buttonFuncList[1] = functionStruct2;
+int ControllerHandler::vectorIndexFromID(int controllerID) {
+    for (int i = 0; i < controllerAmount;
+         i++) { // should never return an index too large for the vector
+        if (controllerAssignment[i] == controllerID) {
+            return i;
+        }
+    }
+    return -1;
 }
 
-void ControllerHandler::setControllerButtonFuncs(
-    int index, buttonFunctions functionStruct) {
+// ControllerHandler definitions -----------------------------------------
+bool ControllerHandler::initialize(
+    DriveStateManager* driveStateManager, ArmStateManager* armStateManager,
+    ArmMotorStateManager* armManualChangeManager) {
 
-    // setting the button functions for each controller
-    m_controllerList[index].setButtonFuncs(functionStruct);
+    layouts.push_back(
+        std::make_shared<DriveControllerLayout>(driveStateManager));
+    layouts.push_back(std::make_shared<ArmControllerLayout>(
+        armStateManager, armManualChangeManager));
+
+    for (const auto& layout : layouts) {
+        controllers.push_back(Controller(layout));
+    }
+
+    for (int i = 0; i < controllerAmount; ++i) {
+        controllerAssignment[i] = -1;
+    }
+
+    is_initialized = true;
+    return true;
 }
 
 // Controllerholder eventloop and response
 // functions--------------------------------------
 
-void ControllerHandler::buttonResponse(Uint8 buttonID, int controllerIndex) {
+void ControllerHandler::buttonResponse(uint8_t buttonID, int controllerID) {
+    // check if ID is valid:
+    int index = vectorIndexFromID(controllerID);
 
-    std::string buttonName = getButtonName(buttonID);
-    Logging::logV(file, "Button press %d %d", controllerIndex, buttonID);
-
-    for (int i = 0; i < 2; i++) {
-        if ((int)m_controllerList[i].getInstanceID() == controllerIndex) {
-            controllerIndex = i;
-            break;
-        }
+    if (index < 0) {
+        Logging::logI(file, "Invalid controllerID: %d", controllerID);
+        return;
     }
 
-    // searches thru the dictionary to execute the appropriate function
-    m_controllerList[controllerIndex].getButtonFuncs().buttonArray[buttonID]();
+    Logging::logI(file, "ControllerID: %d", controllerID);
+    Logging::logI(file, "VectorIndex: %d", index);
+
+    controllers[index].buttonUpdate(buttonID);
 }
 
-void ControllerHandler::stickResponse(Sint16 axisValue, int axisID,
-                                      int controllerIndex) {
-    // Identifying which stick is in play
-    for (int i = 0; i < 2; i++) {
-        if ((int)m_controllerList[i].getInstanceID() == controllerIndex) {
-            controllerIndex = i;
-            break;
-        }
+void ControllerHandler::stickResponse(int16_t axisValue, int axisID,
+                                      int controllerID) {
+
+    // check if ID is valid
+    int index = vectorIndexFromID(controllerID);
+
+    if (index < 0) {
+        Logging::logI(file, "Invalid controllerID: %d", controllerID);
+        return;
     }
-    // setting which controller to update for this event
-    Controller* activeController = &m_controllerList[controllerIndex];
 
-    // Making temp sticks
-    Stick leftStick = (*activeController).getLeftStick();
-    Stick rightStick = (*activeController).getRightStick();
+    // convert axisID to 0 or 1 (0 = x-Axis, 1 = y-Axis)
+    int stickAxisID = axisID % 2;
 
-    // an axis ID to pass into the stick update function
-    int stickAxisID = (axisID == (int)leftStick.getXAxis()
-                       || axisID == (int)rightStick.getXAxis())
-                          ? 0
-                          : 1;
-
-    // identifies if left stick
-
-    if (axisID == (int)leftStick.getXAxis()
-        || axisID == (int)leftStick.getYAxis()) {
-        // updating temp stick
-        leftStick.stickUpdate(axisValue, stickAxisID);
-
-        // saving updated stick
-        (*activeController).setLeftStick(leftStick);
-
-        // otherwise it is right stick
+    if (axisID > GAME_CONTROLLER_AXIS_LEFTY) {
+        controllers[index].rightStickUpdate(axisValue, stickAxisID);
     } else {
-        // updating temp stick
-        rightStick.stickUpdate(axisValue, stickAxisID);
-
-        // saving updated stick
-        (*activeController).setRightStick(rightStick);
+        controllers[index].leftStickUpdate(axisValue, stickAxisID);
     }
 }
 
-void ControllerHandler::triggerResponse(Sint16 axisValue, int axisID,
-                                        int controllerIndex) {
-    // Identifying which trigger is in play
-    for (int i = 0; i < 2; i++) {
-        if ((int)m_controllerList[i].getInstanceID() == controllerIndex) {
-            controllerIndex = i;
-            break;
-        }
+void ControllerHandler::triggerResponse(int16_t axisValue, int axisID,
+                                        int controllerID) {
+
+    // check if ID is valid
+    int index = vectorIndexFromID(controllerID);
+
+    if (index < 0) {
+        Logging::logI(file, "Invalid controllerID: %d", controllerID);
+        return;
     }
-    // setting which controller to update for this event
-    Controller* activeController = &m_controllerList[controllerIndex];
 
-    // Making temp triggers
-    Trigger leftTrigger = (*activeController).getLeftTrigger();
-    Trigger rightTrigger = (*activeController).getRightTrigger();
-
-    // identifies if left trigger
-    if (axisID == (int)leftTrigger.getAxis()) {
-        // updating temp trigger
-        leftTrigger.triggerUpdate(axisValue);
-
-        // saving updated trigger
-        (*activeController).setLeftTrigger(leftTrigger);
-
-        // otherwise it is right trigger
-    } else if (axisID == (int)rightTrigger.getAxis()) {
-        // updating temp trigger
-        rightTrigger.triggerUpdate(axisValue);
-
-        // saving updated trigger
-        (*activeController).setRightTrigger(rightTrigger);
+    if (axisID > GAME_CONTROLLER_AXIS_TRIGGERRIGHT) {
+        controllers[index].rightTriggerUpdate(axisValue);
+    } else {
+        controllers[index].leftTriggerUpdate(axisValue);
     }
 }
 
-void ControllerHandler::controllerAddedResponse(int controllerIndex) {
-    // checks for which controller object is not active and connects
-    // the new controller there
-    for (int i = 0; i < 3; i++) {
+void ControllerHandler::controllerAddedResponse(int controllerID) {
+    // checks for which controller object is not active (key < 0), deletes it,
+    // and connects the new controller
 
-        // have to do this since nullptrs are special little
-        // snowflakes they don't play nice with "!" I guess
-        if (!((bool)m_controllerList[i].getPointerID())) {
-            m_controllerList[i]
-                = Controller(SDL_GameControllerOpen(controllerIndex));
+    for (int i = 0; i < controllerAmount; i++) {
+        if (controllerAssignment[i] < 0) {
 
-            // sets buttonfuncs based on the position the connected
-            // controller is assigned
-            m_controllerList[i].setButtonFuncs(m_buttonFuncList[i]);
-
-            Logging::logV(file, "Controller added", i);
+            SDL_GameControllerOpen(controllerID);
+            int assignedControllerID
+                = SDL_JoystickInstanceID(SDL_JoystickOpen(controllerID));
+            controllerAssignment[i] = assignedControllerID;
+            Logging::logI(file, "Added contoller: %d", assignedControllerID);
             break;
         }
     }
 }
 
-void ControllerHandler::controllerRemovedResponse(int controllerIndex) {
-    // checks if there is a controller id and the controller id
+void ControllerHandler::controllerRemovedResponse(int controllerID) {
     // matches the current controller
-    for (int i = 0; i < 3; i++) {
-        if (m_controllerList[i].getInstanceID() == controllerIndex) {
-
-            // closes the controller in question
-            SDL_GameControllerClose(m_controllerList[i].getPointerID());
-            m_controllerList[i] = Controller();
+    for (int i = 0; i < controllerAmount; i++) {
+        if (controllerAssignment[i] == controllerID) {
 
             // sends an update that sets all values to zero to prevent any ghost
             // movement
             for (int j = 0; j < 4; j++) {
-                stickResponse(0, j, i);
+                stickResponse(0, j, controllerID);
             };
+
+            controllerAssignment[i] = -1;
+
+            // closes the controller in question
+            SDL_GameControllerClose(
+                SDL_GameControllerFromInstanceID(controllerID));
             break;
         }
     }
@@ -282,6 +320,12 @@ void ControllerHandler::eventLoop() {
     }
 
     SDL_Event event;
+    GameControllerAxis axis;
+    int vectorIndexHolder;
+
+    // Currently doesn't differentiate between controllers
+    // Create a second array of button timers to separate controllers if needed
+    int buttonHoldTimers[SDL_CONTROLLER_BUTTON_MAX] = { 0 };
 
     // the main update loop
     // reads events and updates accordingly per loop
@@ -292,10 +336,13 @@ void ControllerHandler::eventLoop() {
         // has to look like this
         while (SDL_PollEvent(&event)) {
 
-            Logging::logV(file, "SDL Event type: %d", event.type);
+            Logging::logI(file, "SDL Event type: %s (%d), From controllerID %d",
+                          eventTypeToString(event.type), event.type,
+                          event.cdevice.which);
 
             // checks what kind of event
             switch (event.type) {
+
             case SDL_QUIT:
                 quit = true;
                 break;
@@ -314,26 +361,33 @@ void ControllerHandler::eventLoop() {
             // featuring dante from devil may cry! /satire
             case SDL_JOYAXISMOTION:
                 // for now, making sure triggers don't cause problems
-                {
-                    GameControllerAxis axis
-                        = covert_stl_axis_to_game_controller(
-                            (SDL_GameControllerAxis)event.jaxis.axis);
-                    Logging::logV(file,
-                                  "Axis motion. Axis was: %d Axis is now: %d",
-                                  (int)event.jaxis.axis, axis);
 
-                    if (axis <= GAME_CONTROLLER_AXIS_LAST_JOYSTICK) {
-                        stickResponse(event.jaxis.value, axis,
-                                      event.cdevice.which);
-                    } else if (axis < GAME_CONTROLLER_AXIS_MAX) {
-                        triggerResponse(event.jaxis.value, axis,
-                                        event.cdevice.which);
-                    }
+                axis = covert_stl_axis_to_game_controller(
+                    (SDL_GameControllerAxis)event.jaxis.axis);
+                Logging::logV(file, "Axis motion. Axis was: %d Axis is now: %d",
+                              (int)event.jaxis.axis, axis);
 
-                    break;
+                if (axis <= GAME_CONTROLLER_AXIS_LAST_JOYSTICK) {
+                    stickResponse(event.jaxis.value, axis, event.cdevice.which);
+                } else if (axis < GAME_CONTROLLER_AXIS_MAX) {
+                    triggerResponse(event.jaxis.value, axis,
+                                    event.cdevice.which);
                 }
 
+                break;
+
             case SDL_CONTROLLERBUTTONDOWN:
+                Logging::logI(file, "BUTTON: %s (%d)",
+                              getButtonName(event.cbutton.button),
+                              event.cbutton.button);
+
+                // time the duration SDL_CONTROLLER_BUTTON_START is held
+                switch (event.cbutton.button) {
+                case SDL_CONTROLLER_BUTTON_START:
+                    buttonHoldTimers[SDL_CONTROLLER_BUTTON_START]
+                        = SDL_GetTicks();
+                    break;
+                }
 
                 buttonResponse(event.cbutton.button, event.cdevice.which);
 
@@ -344,14 +398,46 @@ void ControllerHandler::eventLoop() {
                 // }
 
                 break;
+
+            case SDL_CONTROLLERBUTTONUP:
+                // deactivates the hold timer
+                buttonHoldTimers[event.cbutton.button] = 0;
+                break;
+            }
+        }
+
+        // check button timers and execute actions if needed
+        for (int button = 0; button < SDL_CONTROLLER_BUTTON_MAX; button++) {
+
+            // button has been held for 1.5s
+            if (buttonHoldTimers[button] != 0
+                && SDL_GetTicks() - buttonHoldTimers[button] >= 1500) {
+
+                switch (button) {
+
+                case SDL_CONTROLLER_BUTTON_START:
+                    Logging::logI(file, "Switch from controllerID %d",
+                                  event.cdevice.which);
+
+                    // switching logic here
+                    vectorIndexHolder = controllerAssignment[0];
+                    controllerAssignment[0] = controllerAssignment[1];
+                    controllerAssignment[1] = vectorIndexHolder;
+
+                    // start time no longer needed
+                    buttonHoldTimers[button] = 0;
+
+                    break;
+                }
             }
         }
     }
 
+    Logging::logI(file, "Quitting!: %d", event.type);
     // Clean up >>>>>>>>>>>>>>>>>>>>>> important <<<<<<<<<<<<<<<<<<<<<<
-    for (Controller controller : m_controllerList) {
-        if (controller.getPointerID()) {
-            SDL_GameControllerClose(controller.getPointerID());
+    for (int i = 0; i < controllerAmount; i++) {
+        if (controllerAssignment[i] >= 0) {
+            controllerRemovedResponse(controllerAssignment[i]);
         }
     }
 
@@ -359,115 +445,3 @@ void ControllerHandler::eventLoop() {
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-void ControllerHandler::testingEventLoop() {
-
-    bool quit = false;
-
-    SDL_Window* window = makeWindow();
-
-    // initializing SDL sub systems`
-    // This combo works, it is a little strange tho
-    // -> SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER
-
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
-        fprintf(stderr, "could not initialize sdl2: %s\n", SDL_GetError());
-        SDL_Quit();
-    }
-
-    // Check for game controllers
-    if (SDL_NumJoysticks() < 1) {
-        Logging::logV(file, "No controllers connected! Number of joysticks: %d",
-                      SDL_NumJoysticks());
-    }
-
-    SDL_Event event;
-
-    // the main update loop
-    // reads events and updates accordingly per loop
-    while (!quit) {
-
-        // pulls an event from the queue (crucial for updating literally
-        // anything!) this is the event loop yet to figure out why event loop
-        // has to look like this
-        while (SDL_PollEvent(&event)) {
-
-            // checks what kind of event
-            switch (event.type) {
-            case SDL_QUIT:
-                quit = true;
-                break;
-
-            case SDL_CONTROLLERDEVICEADDED:
-
-                controllerAddedResponse(event.cdevice.which);
-                break;
-
-            case SDL_CONTROLLERDEVICEREMOVED:
-
-                controllerRemovedResponse(event.cdevice.which);
-                break;
-
-            // working now!
-            // featuring dante from devil may cry! /satire
-            case SDL_JOYAXISMOTION: {
-
-                // for now, making sure triggers don't cause problems
-
-                GameControllerAxis axis = covert_stl_axis_to_game_controller(
-                    (SDL_GameControllerAxis)event.jaxis.axis);
-                Logging::logV(file, "Axis motion", (int)event.jaxis.axis);
-                Logging::logV(file, "Axis motion", (int)axis);
-
-                if (axis < 4) {
-                    stickResponse(event.jaxis.value, axis, event.cdevice.which);
-                }
-
-                break;
-            }
-
-            case SDL_CONTROLLERBUTTONDOWN:
-
-                buttonResponse(event.cbutton.button, event.cdevice.which);
-
-                //-------------------------------------------------------------
-                // Hardcoding a button that quits the loop
-                if (SDL_CONTROLLER_BUTTON_START == event.cbutton.button) {
-                    std::cout << "Quitting";
-                    quit = true;
-                }
-
-                break;
-            }
-        }
-
-        // Testing code!!!
-        //  --------------------------------------------------------------------------
-        //  rendering the crosses
-
-        SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
-        SDL_FillRect(screenSurface, nullptr,
-                     SDL_MapRGB(screenSurface->format, 0x33, 0x33, 0x33));
-
-        renderCross(screenSurface, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2,
-                    m_controllerList[0].getLeftStick().getPosX() / 255,
-                    m_controllerList[0].getLeftStick().getPosY() / 255);
-        renderCross(screenSurface, 3 * SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2,
-                    m_controllerList[0].getRightStick().getPosX() / 255,
-                    m_controllerList[0].getRightStick().getPosY() / 255);
-
-        // must be used to update window
-        SDL_UpdateWindowSurface(window);
-    }
-
-    // Clean up >>>>>>>>>>>>>>>>>>>>>> important <<<<<<<<<<<<<<<<<<<<<<
-    for (Controller controller : m_controllerList) {
-        if (controller.getPointerID()) {
-            SDL_GameControllerClose(controller.getPointerID());
-        }
-    }
-
-    quit = false;
-
-    SDL_Quit();
-}

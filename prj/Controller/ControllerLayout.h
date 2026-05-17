@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
-
 #include "Logging.h"
+#include <cstdint>
+#include <string>
 
 #define NAMEOF(var) #var
 
@@ -12,9 +12,24 @@ public:
 
     ControllerLayout(std::string file) { this->filename = file; }
 
-    void unusedButton();
+    void unusedButton(uint8_t buttonID);
     void unusedStick(int X, int Y);
-    void unusedTrigger(int X);
+    void unusedTrigger(int axisValue);
+    std::string getName() { return filename; }
+
+    virtual void buttonResponse(uint8_t buttonID) { unusedButton(buttonID); }
+    virtual void leftStickResponse(int xValue, int yValue) {
+        unusedStick(xValue, yValue);
+    }
+    virtual void rightStickResponse(int xValue, int yValue) {
+        unusedStick(xValue, yValue);
+    }
+    virtual void leftTriggerResponse(int16_t axisValue) {
+        unusedTrigger(axisValue);
+    }
+    virtual void rightTriggerResponse(int16_t axisValue) {
+        unusedTrigger(axisValue);
+    }
 
 protected:
     std::string filename = "DefaultController";
@@ -45,7 +60,8 @@ protected:
 
     static int radianToDegree(float n);
 
-    template <typename T> static T clampVal(T val, T min, T max) {
+    template <typename T>
+    static T clampVal(T val, T min, T max) {
         if (val < min) {
             val = min;
         } else if (val > max) {

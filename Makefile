@@ -44,8 +44,8 @@ run_test:
 > cd test/build && ctest
 
 controller_test:
-> g++ -I"prj" prj/Base/ControllerTesting.cpp -o ControllerTesting -I"C:/mingw-dev-lib/include/SDL2" -L"C:/mingw-dev-lib/lib" -lmingw32 -lSDL2main -lSDL2
-> ./ControllerTesting
+> g++ $(CPP_STD) $(CMPL_SDL) test/controllerTest.cpp -o out/ControllerTest
+> ./ControllerTest
 
 build_dir:
 > mkdir -p out
