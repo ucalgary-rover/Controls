@@ -81,19 +81,6 @@ static const char* getButtonName(Uint8 button) {
         return "D-Pad Left";
     case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
         return "D-Pad Right";
-    case SDL_CONTROLLER_BUTTON_MISC1:
-        return "Misc1";
-    case SDL_CONTROLLER_BUTTON_PADDLE1:
-        return "Paddle 1";
-    case SDL_CONTROLLER_BUTTON_PADDLE2:
-        return "Paddle 2";
-    case SDL_CONTROLLER_BUTTON_PADDLE3:
-        return "Paddle 3";
-    case SDL_CONTROLLER_BUTTON_PADDLE4:
-        return "Paddle 4";
-    case SDL_CONTROLLER_BUTTON_TOUCHPAD:
-        return "Touchpad";
-
     // yet to trigger for some reason
     default:
         return "Unknown Button";
@@ -120,8 +107,6 @@ static const char* eventTypeToString(Uint32 eventType) {
         return "SDL_JOYDEVICEADDED";
     case SDL_JOYDEVICEREMOVED:
         return "SDL_JOYDEVICEREMOVED";
-    case SDL_JOYBATTERYUPDATED:
-        return "SDL_JOYBATTERYUPDATED";
     case SDL_CONTROLLERAXISMOTION:
         return "SDL_CONTROLLERAXISMOTION";
     case SDL_CONTROLLERBUTTONDOWN:
@@ -134,12 +119,6 @@ static const char* eventTypeToString(Uint32 eventType) {
         return "SDL_CONTROLLERDEVICEREMOVED";
     case SDL_CONTROLLERDEVICEREMAPPED:
         return "SDL_CONTROLLERDEVICEREMAPPED";
-    case SDL_CONTROLLERTOUCHPADDOWN:
-        return "SDL_CONTROLLERTOUCHPADDOWN";
-    case SDL_CONTROLLERTOUCHPADMOTION:
-        return "SDL_CONTROLLERTOUCHPADMOTION";
-    case SDL_CONTROLLERTOUCHPADUP:
-        return "SDL_CONTROLLERTOUCHPADUP";
     default:
         return "SDL_UNKNOWN_EVENT";
     }

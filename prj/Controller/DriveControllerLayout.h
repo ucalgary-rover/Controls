@@ -30,4 +30,6 @@ private:
 
     int presentMaxSpeed = 80;  // present maximum speed of chassis
     int absoluteMaxSpeed = 80; // Absolute max speed of the chassis
+
+    int maxRadialSpeed = 45; // degrees per second
 };

@@ -7,7 +7,7 @@
 
 #include "MessageQueue.h"
 #include "MotorStateManager.h"
-#include "Rover/Handlers/ArmHandler.h"
+// #include "Rover/Handlers/ArmHandler.h"
 #include "Rover/Handlers/DriveHandler.h"
 #include "Rover/Systems/Arm.h"
 #include "Rover/Systems/Drive.h"
@@ -47,6 +47,8 @@ private:
     // Chassis state management
     MotorState defaultState = MotorState(); // Default Position of Rover
     MotorStateManager desiredStateManager;
+    MotorStateManager currentStateManager;
+    DriveMotorStateManager* desiredDriveMotorStateManager;
 };
 
 #endif

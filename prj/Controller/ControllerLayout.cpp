@@ -12,46 +12,11 @@ int ControllerLayout::stickMagnitude(int axisX, int axisY) {
 }
 
 int ControllerLayout::stickAngle(int axisX, int axisY) {
-    int angle;         // the reference angle
-    int reportedAngle; // the actual angle
-
-    // check if magnitude is zero and return a -1 value if so
-    if (axisX == axisY and axisX == 0) {
-        return -1;
+    int angle = (int)radianToDegree(atan2(-(double)axisX, -(double)axisY));
+    if (angle < 0) {
+        angle += 360;
     }
-
-    if (axisY != 0) {
-        // note how the axes have to be switched since we are measuring from the
-        // y axis
-        angle = (int)radianToDegree(atan((double)axisX / (double)axisY));
-
-        // don't change reference angle (positive angle)
-        if (axisX < 0 && axisY < 0) {
-            reportedAngle = angle;
-
-            // only y is negative (negative angle or zero angle)
-        } else if (axisY < 0) {
-
-            // make sure to report zero instead of 360 when possible
-            if (angle == 0) {
-                reportedAngle = 0;
-
-            } else {
-                reportedAngle = angle + 360;
-            }
-
-            // y is positive, x is negative or positive (positive or negative
-            // angle)
-        } else {
-            reportedAngle = angle + 180;
-        }
-
-        // either angle of 90 or 270
-    } else {
-        reportedAngle = (axisX < 0) ? 90 : 270;
-    }
-
-    return reportedAngle;
+    return angle;
 }
 
 // Converts degrees (0 - 360) to radian (0-2pi)
