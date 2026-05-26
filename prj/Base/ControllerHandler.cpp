@@ -157,11 +157,13 @@ int ControllerHandler::vectorIndexFromID(int controllerID) {
 
 // ControllerHandler definitions -----------------------------------------
 bool ControllerHandler::initialize(
-    DriveStateManager* driveStateManager, ArmStateManager* armStateManager,
+    DriveStateManager* driveStateManager,
+    DriveMotorStateManager* driveMotorStateManager,
+    ArmStateManager* armStateManager,
     ArmMotorStateManager* armManualChangeManager) {
 
-    layouts.push_back(
-        std::make_shared<DriveControllerLayout>(driveStateManager));
+    layouts.push_back(std::make_shared<DriveControllerLayout>(
+        driveStateManager, driveMotorStateManager));
     layouts.push_back(std::make_shared<ArmControllerLayout>(
         armStateManager, armManualChangeManager));
 

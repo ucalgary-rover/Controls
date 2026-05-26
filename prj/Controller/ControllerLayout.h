@@ -72,8 +72,14 @@ protected:
     }
 
     // General getter, setter, and incrementor for int member variables
-    void triggerToIncrement(int triggerValue, int* compare, int* var, int n,
-                            int min, int max, const char* name);
+    template <typename T>
+    void triggerToIncrement(int triggerValue, int* compare, T* var, T n, T min,
+                            T max, const char* name) {
+        if (triggerValue > 0 && *compare < 0) {
+            incrementVal(var, n, min, max, name);
+        }
+        *compare = triggerValue;
+    }
 
     void stickChangeAxis(int axisX, int axisY, float* varX, float* varY,
                          float maxChangeX, float maxChangeY, float rangeX,

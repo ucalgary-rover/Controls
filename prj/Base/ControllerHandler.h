@@ -37,6 +37,7 @@ private:
 
 public:
     static bool initialize(DriveStateManager* driveStateManager,
+                           DriveMotorStateManager* driveMotorStateManager,
                            ArmStateManager* armStateManager,
                            ArmMotorStateManager* armManualChangeManager);
     static void eventLoop();

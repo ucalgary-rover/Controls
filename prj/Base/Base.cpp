@@ -28,14 +28,15 @@ Base::Base() {
         = desiredStateManager.getDriveStateManager();
     ArmStateManager* armStateManager = desiredStateManager.getArmStateManager();
 
-    // Initialize Motor State Manager
+    // Initialize Motor State Managers
     armManualChangeManager = ArmMotorStateManager();
+    driveManualChangeManager = DriveMotorStateManager();
 
     // Initialize controller layouts
     Logging::logI(file, "Initializing Controller Layouts");
     exitLoop = 0;
-    ControllerHandler::initialize(driveStateManager, armStateManager,
-                                  &armManualChangeManager);
+    ControllerHandler::initialize(driveStateManager, &driveManualChangeManager,
+                                  armStateManager, &armManualChangeManager);
 
     Logging::logI(file, "Initializing Base done");
 }

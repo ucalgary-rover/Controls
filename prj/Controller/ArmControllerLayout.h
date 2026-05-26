@@ -13,6 +13,9 @@ enum layout {
     MANUAL
 };
 
+#define REGISTER_ARM_BUTTON(callbacks, buttonID, buttonCallback)               \
+    callbacks[buttonID] = [this](uint8_t buttonID) { buttonCallback(buttonID); }
+
 class ArmControllerLayout : public ControllerLayout {
 public:
     ArmControllerLayout(ArmStateManager* armStateManager,
@@ -25,6 +28,25 @@ public:
             = std::make_shared<ArmManualControllerLayout>(armMotorStateManager);
 
         currentLayout = FIXED_IK;
+
+        // Initialize button callbacks
+        // clang-format off
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_A, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_B, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_Y, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_BACK, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_GUIDE, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_START, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSTICK, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSTICK, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSHOULDER, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_UP, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_DOWN, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, unusedButton);
+        REGISTER_ARM_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, unusedButton);
+        // clang-format on
     }
 
     //
@@ -44,4 +66,5 @@ public:
 private:
     enum layout currentLayout;
     std::shared_ptr<ControllerLayout> layouts[3];
+    std::function<void(uint8_t)> buttonCallbacks[SDL_CONTROLLER_BUTTON_MAX];
 };

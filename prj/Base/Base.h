@@ -43,6 +43,7 @@ private:
     RoverState defaultState = RoverState(); // Default Position of Rover
     RoverStateManager desiredStateManager;
     ArmMotorStateManager armManualChangeManager;
+    DriveMotorStateManager driveManualChangeManager;
 
     // Variables for state of rover arm
     ArmMessageType armControlType;

@@ -3,25 +3,12 @@
 static const char* file = "ArmControllerLayout";
 
 void ArmControllerLayout::buttonResponse(uint8_t buttonID) {
-    switch (buttonID) {
-    case SDL_CONTROLLER_BUTTON_X:
-        currentLayout = FIXED_IK;
-        Logging::logI(file, "Fixed_IK active");
-        break;
-
-    case SDL_CONTROLLER_BUTTON_Y:
-        currentLayout = MANUAL;
-        Logging::logI(file, "Manual active");
-        break;
-
-    case SDL_CONTROLLER_BUTTON_B:
-        currentLayout = VARIABLE_IK;
-        Logging::logI(file, "Variable_IK active");
-        break;
-
-    default:
-        layouts[currentLayout]->buttonResponse(buttonID);
+    if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
+        || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {
+        return;
     }
+
+    buttonCallbacks[buttonID](buttonID);
 }
 
 void ArmControllerLayout::leftStickResponse(int xValue, int yValue) {
