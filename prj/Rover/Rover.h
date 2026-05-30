@@ -31,7 +31,7 @@ public:
      * @return
      * none
      */
-    void startClient(MessageQueue* clientQueue);
+    void startClient(MessageQueue* clientQueue, DriveHandler* driveHandler);
 
     /** Start the rover
      *

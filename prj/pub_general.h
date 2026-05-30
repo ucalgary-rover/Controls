@@ -10,6 +10,7 @@
 enum MessageFormat : int {
     MESSAGE_FORMAT_MOTOR_STATE,
     MESSAGE_FORMAT_SCIENCE_TOOL,
+    MESSAGE_FORMAT_DRIVE_ZERO,
     MESSAGE_FORMAT_GENERIC
 };
 
@@ -98,6 +99,10 @@ struct ScienceToolMessage {
 
     int xPos;
     int yPos;
+};
+
+struct DriveZeroMessage {
+    bool set;
 };
 
 #endif

@@ -43,6 +43,9 @@ public:
      */
     void stopWheels();
 
+    void setWheelZeroState();
+    void applyWheelZeroState();
+
     /**
      * @brief Pops messages out of the queue and calls other functions
      * @return None
@@ -60,6 +63,8 @@ private:
         m_currentDriveMotorStateManager; // References the (current) drive state
                                          // Manager in Rover.cpp
 
+    DriveMotorState
+        wheelZeroState; // Direct hardware values, not consistent with software DriveModel
     // Variables corresponding to conditions during operation
 };
 

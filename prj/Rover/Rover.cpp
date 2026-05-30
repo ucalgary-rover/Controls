@@ -55,7 +55,7 @@ void Rover::start() {
     ArmHandler armHandler(&arm, &desiredArmMotorStateManager);
 #endif
     // Start the client thread
-    thread clientThread([&]() { startClient(&roverQueue); });
+    thread clientThread([&]() { startClient(&roverQueue, &driveHandler); });
 
     // start thread for handlers
     thread driveHandlerThread([&]() { driveHandler.start(); });
@@ -110,7 +110,7 @@ void Rover::start() {
 //---------------------- Instantiation Functions ----------------------//
 
 // Thread instantiation
-void Rover::startClient(MessageQueue* clientQueue) {
+void Rover::startClient(MessageQueue* clientQueue, DriveHandler* driveHandler) {
 
     Message message;
     auto last_reception = std::chrono::system_clock::now();
@@ -140,6 +140,14 @@ void Rover::startClient(MessageQueue* clientQueue) {
             == MESSAGE_FORMAT_MOTOR_STATE) { // Discard invalid messages
             desiredStateManager.updateState(
                 std::get<MotorState>(message.getPayload()));
+        } else if (message.getFormat() == MESSAGE_FORMAT_DRIVE_ZERO) {
+            DriveZeroMessage zeroMessage
+                = std::get<DriveZeroMessage>(message.getPayload());
+            if (zeroMessage.set) { // currently setting zero
+                driveHandler->setWheelZeroState();
+            } else { // currently getting zero
+                driveHandler->applyWheelZeroState();
+            }
         }
     }
 }

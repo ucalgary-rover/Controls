@@ -95,6 +95,10 @@ DriveHandler::DriveHandler(
     // the same DriveMotorStateManager in this file without shenanigans
     m_desiredDriveMotorStateManager = desiredDriveMotorStateManager;
     m_currentDriveMotorStateManager = currentDriveMotorStateManager;
+
+    for (int i = 0; i < WHEEL_COUNT; i++) {
+        wheelZeroState.drive[i] = 0; // stopped
+    }
 }
 
 void DriveHandler::setWheelAngle(DriveIndex wheel, float angle) {
@@ -205,6 +209,21 @@ void DriveHandler::translateSpeedAndAngle(DriveMotorState desiredState,
     } else {
         throw std::runtime_error(
             "Invalid angle detected: outside of 0-360 degree range.");
+    }
+}
+
+void DriveHandler::setWheelZeroState() {
+    for (int index = 0; index < WHEEL_COUNT; index++) {
+        DriveIndex i = static_cast<DriveIndex>(index);
+        wheelZeroState.steer[index] = getWheelAngle(i);
+    }
+}
+
+void DriveHandler::applyWheelZeroState() {
+    for (int index = 0; index < WHEEL_COUNT; index++) {
+        DriveIndex i = static_cast<DriveIndex>(index);
+        stopWheels();
+        setWheelAngle(i, wheelZeroState.steer[i]);
     }
 }
 
