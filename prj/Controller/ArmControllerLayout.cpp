@@ -5,17 +5,17 @@ static const char* file = "ArmControllerLayout";
 void ArmControllerLayout::buttonResponse(uint8_t buttonID) {
     switch (buttonID) {
     case SDL_CONTROLLER_BUTTON_X:
-        currentLayout = FIXED_IK;
+        currentLayout = ARM_FIXED_IK;
         Logging::logI(file, "Fixed_IK active");
         break;
 
     case SDL_CONTROLLER_BUTTON_Y:
-        currentLayout = MANUAL;
+        currentLayout = ARM_MANUAL;
         Logging::logI(file, "Manual active");
         break;
 
     case SDL_CONTROLLER_BUTTON_B:
-        currentLayout = VARIABLE_IK;
+        currentLayout = ARM_VARIABLE_IK;
         Logging::logI(file, "Variable_IK active");
         break;
 

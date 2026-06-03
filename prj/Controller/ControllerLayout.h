@@ -15,7 +15,7 @@ public:
     void unusedButton(uint8_t buttonID);
     void unusedStick(int X, int Y);
     void unusedTrigger(int axisValue);
-    std::string getName() { return filename; }
+    virtual std::string getName() { return filename; }
 
     virtual void buttonResponse(uint8_t buttonID) { unusedButton(buttonID); }
     virtual void leftStickResponse(int xValue, int yValue) {

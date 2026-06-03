@@ -2,9 +2,8 @@
 #define CONTROLLER_HANDLER_H
 
 #pragma once
-#include "ArmControllerLayout.h"
+
 #include "Controller.h"
-#include "DriveControllerLayout.h"
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -36,9 +35,8 @@ private:
     static void controllerRemovedResponse(int controllerID);
 
 public:
-    static bool initialize(DriveStateManager* driveStateManager,
-                           ArmStateManager* armStateManager,
-                           ArmMotorStateManager* armManualChangeManager);
+    static bool initialize(
+        std::vector<std::shared_ptr<ControllerLayout>> controllerLayouts);
     static void eventLoop();
 
     // A function for getting the vectors index from controllerAssignemnt

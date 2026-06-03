@@ -47,8 +47,7 @@ void DriveControllerLayout::checkState(SDL_GameControllerButton button) {
 }
 
 void DriveControllerLayout::setVelocity(int X, int Y) {
-    if (stateManager)
-        driveState = stateManager->getState();
+    DriveState driveState = driveStateManager.getState();
     // get the speed
     setVal(&driveState.speed, stickMagnitude(X, Y), 0, presentMaxSpeed,
            NAMEOF(driveState.speed));
@@ -57,25 +56,20 @@ void DriveControllerLayout::setVelocity(int X, int Y) {
     setVal(&driveState.heading, stickAngle(X, Y), 0, 360,
            NAMEOF(driveState.heading));
 
-    if (stateManager)
-        stateManager->updateState(driveState);
+    driveStateManager.updateState(driveState);
 }
 
 void DriveControllerLayout::setAngularVelocity(int X, int Y) {
-    if (stateManager)
-        driveState = stateManager->getState();
+    DriveState driveState = driveStateManager.getState();
     // get the angular velocity
     setVal(&driveState.angularVelocity, (X * maxRadialSpeed) / 255,
            -maxRadialSpeed, maxRadialSpeed, NAMEOF(driveState.angularVelocity));
 
-    if (stateManager)
-        stateManager->updateState(driveState);
+    driveStateManager.updateState(driveState);
 }
 
 void DriveControllerLayout::incrementMaxSpeed(int val) {
-    if (stateManager)
-        driveState = stateManager->getState();
+    DriveState driveState = driveStateManager.getState();
     incrementVal(&presentMaxSpeed, val, 0, absoluteMaxSpeed, "chassisMaxSpeed");
-    if (stateManager)
-        stateManager->updateState(driveState);
+    driveStateManager.updateState(driveState);
 }
