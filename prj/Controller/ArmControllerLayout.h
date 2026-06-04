@@ -21,11 +21,11 @@ public:
     ArmControllerLayout(ProcessArmStateFunc processFunc) :
         ControllerLayout("ArmController") {
         layouts[ARM_FIXED_IK]
-            = std::make_shared<ArmFixedIKControllerLayout>(&armStateManager);
+            = std::make_shared<ArmFixedIKControllerLayout>(armStateManager);
         layouts[ARM_VARIABLE_IK]
-            = std::make_shared<ArmVariableIKControllerLayout>(&armStateManager);
+            = std::make_shared<ArmVariableIKControllerLayout>(armStateManager);
         layouts[ARM_MANUAL] = std::make_shared<ArmManualControllerLayout>(
-            &armManualStateManager);
+            armManualStateManager);
 
         process = processFunc;
     }

@@ -10,7 +10,7 @@ class ControllerLayout {
 public:
     ControllerLayout() { }
 
-    ControllerLayout(std::string file) { this->filename = file; }
+    ControllerLayout(const std::string& file) { this->filename = file; }
 
     void unusedButton(uint8_t buttonID);
     void unusedStick(int X, int Y);

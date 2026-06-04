@@ -12,11 +12,8 @@ typedef std::function<void(uint8_t)> ButtonCallback;
 
 class ArmManualControllerLayout : public ControllerLayout {
 public:
-    ArmManualControllerLayout(ArmMotorStateManager* armStateManager) :
-        ControllerLayout("ArmManualController") {
-        stateManager = armStateManager;
-        if (stateManager)
-            armState = stateManager->getState();
+    ArmManualControllerLayout(ArmMotorStateManager& armStateManager) :
+        ControllerLayout("ArmManualController"), stateManager(armStateManager) {
 
         // Initialize Layout API
         // clang-format off
@@ -46,8 +43,7 @@ public:
     void rightTriggerResponse(int16_t axisValue) override;
 
 private:
-    ArmMotorStateManager* stateManager;
-    ArmMotorState armState = {};
+    ArmMotorStateManager& stateManager;
 
     ButtonCallback buttonCallbacks[SDL_CONTROLLER_BUTTON_MAX];
 

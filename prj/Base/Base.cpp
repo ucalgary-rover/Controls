@@ -1,28 +1,23 @@
 // Schulich Space Program Controls Software Division (2025)
 // Written by Gavin Grubert
 
+#include "Base.h"
+
 #include <chrono>
 #include <cmath>
 #include <unistd.h>
 #include <vector>
 
 #include "ArmControllerLayout.h"
-#include "Base.h"
-#include "Base/Base.h"
-#include "Base/Models/ArmModel.h"
-#include "Base/Models/DriveModel.h"
 #include "DriveControllerLayout.h"
+#include "Models/ArmModel.h"
+#include "Models/DriveModel.h"
 #include "UDPHandler.h"
-
-using namespace std;
-
-// Create object for mutex (thread locks)
-mutex mtx;
 
 static const char* file = "Base";
 
 // Chassis state management
-RoverStateManager Base::desiredStateManager;
+MotorStateManager Base::desiredMotorStateManager;
 MotorStateManager Base::currentMotorStateManager;
 
 // Variables for state of rover arm
@@ -38,12 +33,8 @@ void Base::initialize() {
 
     // Initialize Rover State Manager
     Logging::logI(file, "Initializing State Managers");
-    desiredStateManager = RoverStateManager();
+    desiredMotorStateManager = MotorStateManager();
     currentMotorStateManager = MotorStateManager();
-
-    DriveStateManager* driveStateManager
-        = desiredStateManager.getDriveStateManager();
-    ArmStateManager* armStateManager = desiredStateManager.getArmStateManager();
 
     // Initialize controller layouts
     Logging::logI(file, "Initializing Controller Layouts");
@@ -59,7 +50,7 @@ void Base::initialize() {
     Logging::logI(file, "Initializing Base done");
 }
 
-void Base::quit() { exitLoop = 1; }
+void Base::quit() { exitLoop = true; }
 
 ArmMotorState Base::processDesiredArmState(const ArmState& desiredArmState) {
     ArmMotorState armMs = {};
@@ -98,13 +89,13 @@ DriveMotorState Base::processDesiredDriveState(const DriveState& state) {
     return DriveModel::process(state, currentMotorState);
 }
 
-MotorState Base::getDesiredRoverState(uint64_t elapsed_ms) {
+void Base::updateDesiredRoverState(uint64_t elapsed_ms) {
     MotorState desiredMotorstate = {
         .driveMotorState = driveController->getDriveMotorState(elapsed_ms),
         .armMotorState = armController->getArmMotorState(elapsed_ms),
     };
 
-    return desiredMotorstate;
+    desiredMotorStateManager.updateState(desiredMotorstate);
 }
 
 void Base::receive(UDPHandler& receiver) {
@@ -121,9 +112,9 @@ void Base::start() {
     MessageQueue sendQueue;
     UDPHandler server(BASE_PORT, ROVER_PORT);
 
-    thread controllerThread([&]() { ControllerHandler::eventLoop(); });
-    thread sendingThread([&]() { server.run(sendQueue); });
-    thread receivingThread([&]() { receive(server); });
+    std::thread controllerThread([&]() { ControllerHandler::eventLoop(); });
+    std::thread sendingThread([&]() { server.run(sendQueue); });
+    std::thread receivingThread([&]() { receive(server); });
 
     ArmModel::initialize();
     DriveModel::initialize();
@@ -141,11 +132,12 @@ void Base::start() {
 
         previous = now;
 
-        MotorState desiredMotorState = getDesiredRoverState(elapsed_ms);
-        Message message(desiredMotorState);
+        updateDesiredRoverState(elapsed_ms);
+
+        Message message(desiredMotorStateManager.getState());
         sendQueue.push(message);
 
-        usleep(0.1 * 1000000);
+        usleep(0.1 * 1000 * 1000); // Sleep 0.1s
     }
     controllerThread.join();
     sendingThread.join();

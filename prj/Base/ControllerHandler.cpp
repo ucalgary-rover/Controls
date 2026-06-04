@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <string>
+#include <unistd.h> // Include for sleep and getpid
 
 bool ControllerHandler::is_initialized = false;
 std::vector<Controller> ControllerHandler::controllers = {};
@@ -406,6 +407,8 @@ void ControllerHandler::eventLoop() {
                 }
             }
         }
+
+        usleep(0.01 * 1000 * 1000); // Sleep 0.01s
     }
 
     Logging::logI(file, "Quitting!: %d", event.type);

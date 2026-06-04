@@ -12,16 +12,12 @@ typedef std::function<void(uint8_t)> ButtonCallback;
 
 class ArmVariableIKControllerLayout : public ControllerLayout {
 public:
-    ArmVariableIKControllerLayout(ArmStateManager* armStateManager) :
-        ControllerLayout("ArmVariableIKController") {
-        stateManager = armStateManager;
-        if (stateManager)
-            armState = stateManager->getState();
+    ArmVariableIKControllerLayout(ArmStateManager& armStateManager) :
+        ControllerLayout("ArmVariableIKController"),
+        stateManager(armStateManager) {
 
         // Initialize Layout API
         // clang-format off
-        
-
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_A, unusedButton);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_B, unusedButton);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X, unusedButton);
@@ -51,8 +47,7 @@ public:
     void rightTriggerResponse(int16_t axisValue) override;
 
 private:
-    ArmStateManager* stateManager;
-    ArmState armState = {};
+    ArmStateManager& stateManager;
 
     ButtonCallback buttonCallbacks[SDL_CONTROLLER_BUTTON_MAX];
 
