@@ -2,20 +2,11 @@
 #include <string>
 
 void DriveManualControllerLayout::leftTriggerResponse(int16_t axisValue) {
-    triggerToincrementWheelValue(axisValue, -1);
+    triggerToincrementWheelAngle(axisValue, -1);
 }
 
 void DriveManualControllerLayout::rightTriggerResponse(int16_t axisValue) {
-    triggerToincrementWheelValue(axisValue, 1);
-}
-
-void DriveManualControllerLayout::leftStickResponse(int xValue, int yValue) {
-    float angle = stickAngle(xValue, yValue);
-    if (stateManager)
-        driveState = stateManager->getState();
-    std::string logMessage = "wheel: " + std::to_string(wheel);
-    setVal(&driveState.steer[wheel], angle, (float)0, (float)360,
-           logMessage.c_str());
+    triggerToincrementWheelAngle(axisValue, 1);
 }
 
 void DriveManualControllerLayout::buttonResponse(uint8_t buttonID) {
@@ -27,7 +18,17 @@ void DriveManualControllerLayout::buttonResponse(uint8_t buttonID) {
     buttonCallbacks[buttonID](buttonID);
 }
 
-void DriveManualControllerLayout::triggerToincrementWheelValue(
+void DriveManualControllerLayout::incrementWheelAngle(float increment) {
+    if (stateManager)
+        driveState = stateManager->getState();
+    std::string logMessage = "wheel: " + std::to_string(wheel);
+    incrementVal(&driveState.steer[wheel], increment, (float)0, (float)360,
+                 logMessage.c_str());
+    if (stateManager)
+        stateManager->updateState(driveState);
+}
+
+void DriveManualControllerLayout::triggerToincrementWheelAngle(
     int triggerVal, float increment) {
     if (stateManager)
         driveState = stateManager->getState();

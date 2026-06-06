@@ -40,3 +40,13 @@ void ArmManualControllerLayout::incrementJoint(int change) {
     if (stateManager)
         stateManager->updateState(armState);
 }
+
+void ArmManualControllerLayout::incrementJointValue(int increment) {
+    if (stateManager)
+        armState = stateManager->getState();
+    std::string logMessage = "motor: " + std::to_string(joint);
+    incrementVal(&armState.motorValues[joint], increment, -20, 20,
+                 logMessage.c_str());
+    if (stateManager)
+        stateManager->updateState(armState);
+}

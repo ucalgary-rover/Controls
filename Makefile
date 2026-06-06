@@ -45,7 +45,7 @@ run_test:
 
 controller_test:
 > g++ $(CPP_STD) $(CMPL_SDL) test/controllerTest.cpp -o out/ControllerTest
-> ./ControllerTest
+> ./out/ControllerTest
 
 build_dir:
 > mkdir -p out
@@ -55,7 +55,7 @@ base: build_dir
 > g++ $(CPP_STD) -DSIDE_TO_BUILD=1 $(BASE_INC_FILES) $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_IK) $(CMPL_PHIDETS) $(CMPL_PTHREAD) -o out/base
 
 rover: build_dir
-> g++ $(CPP_STD) -DSIDE_TO_BUILD=2 -I"prj" $(CMPL_IK) $(ROVER_SRC_FILES) $(ROVER_INC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_JSON) $(CMPL_PTHREAD) -o out/rover
+> g++ $(CPP_STD) -DSIDE_TO_BUILD=2 -I"prj" $(ROVER_SRC_FILES) $(ROVER_INC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_JSON) $(CMPL_PTHREAD) -o out/rover
 
 run_base: base
 > ./base 
