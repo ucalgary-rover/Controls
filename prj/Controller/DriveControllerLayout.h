@@ -1,19 +1,24 @@
 #pragma once
 
+#include <SDL2/SDL.h>
+#include <functional>
+
 #include "ControllerLayout.h"
+#include "DriveMotorStateManager.h"
 #include "DriveStateManager.h"
 
-#include <SDL2/SDL.h>
+using ProcessDriveStateFunc = std::function<DriveMotorState(const DriveState&)>;
 
 class DriveControllerLayout : public ControllerLayout {
 public:
-    DriveControllerLayout() { }
-
-    DriveControllerLayout(DriveStateManager* driveStateManager) :
+    DriveControllerLayout(ProcessDriveStateFunc processFunc) :
         ControllerLayout("DriveController") {
-        stateManager = driveStateManager;
-        if (stateManager)
-            driveState = stateManager->getState();
+        process = processFunc;
+    }
+
+    DriveMotorState getDriveMotorState(uint64_t elapsed_ms) {
+        desiredMotorState = process(driveStateManager.getState());
+        return desiredMotorState;
     }
 
     void checkState(SDL_GameControllerButton button);
@@ -25,8 +30,10 @@ public:
     void incrementMaxSpeed(int val);
 
 private:
-    DriveStateManager* stateManager;
-    DriveState driveState;
+    DriveStateManager driveStateManager;
+    DriveMotorState desiredMotorState;
+
+    ProcessDriveStateFunc process;
 
     int presentMaxSpeed = 80;  // present maximum speed of chassis
     int absoluteMaxSpeed = 80; // Absolute max speed of the chassis

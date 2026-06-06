@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <string>
+#include <unistd.h> // Include for sleep and getpid
 
 bool ControllerHandler::is_initialized = false;
 std::vector<Controller> ControllerHandler::controllers = {};
@@ -157,13 +158,9 @@ int ControllerHandler::vectorIndexFromID(int controllerID) {
 
 // ControllerHandler definitions -----------------------------------------
 bool ControllerHandler::initialize(
-    DriveStateManager* driveStateManager, ArmStateManager* armStateManager,
-    ArmMotorStateManager* armManualChangeManager) {
+    std::vector<std::shared_ptr<ControllerLayout>> controllerLayouts) {
 
-    layouts.push_back(
-        std::make_shared<DriveControllerLayout>(driveStateManager));
-    layouts.push_back(std::make_shared<ArmControllerLayout>(
-        armStateManager, armManualChangeManager));
+    layouts = controllerLayouts;
 
     for (const auto& layout : layouts) {
         controllers.push_back(Controller(layout));
@@ -410,6 +407,8 @@ void ControllerHandler::eventLoop() {
                 }
             }
         }
+
+        usleep(0.01 * 1000 * 1000); // Sleep 0.01s
     }
 
     Logging::logI(file, "Quitting!: %d", event.type);

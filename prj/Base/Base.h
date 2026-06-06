@@ -1,63 +1,46 @@
 #ifndef BASE_H
 #define BASE_H
 
-#include <initializer_list>
-#include <iostream>
-#include <mutex>
-#include <thread>
-#include <unistd.h>
-#include <vector>
-
 #include "ArmControllerLayout.h"
-#include "ArmFixedIKControllerLayout.h"
-#include "ArmManualControllerLayout.h"
-#include "ArmVariableIKControllerLayout.h"
 #include "Base/ControllerHandler.h"
 #include "Controller/ControllerLayout.h"
 #include "DriveControllerLayout.h"
-#include "Message.h"
-#include "MessageQueue.h"
 #include "MotorStateManager.h"
-#include "RoverStateManager.h"
 #include "UDPHandler.h"
-#include "mission_control.h"
-#include "pub_general.h"
-
-using namespace std;
 
 #pragma once
 
 class Base {
 public:
-    Base();
-    ~Base() = default;
+    static void initialize();
 
     // Start the loops to have Base working
-    void start();
+    static void start();
 
     // Exit the loops that base runs through
-    void quit();
+    static void quit();
 
 private:
     // Chassis state management
-    RoverState defaultState = RoverState(); // Default Position of Rover
-    RoverStateManager desiredStateManager;
-    ArmMotorStateManager armManualChangeManager;
+    static MotorStateManager desiredMotorStateManager;
+    static MotorStateManager currentMotorStateManager;
 
     // Variables for state of rover arm
-    ArmMessageType armControlType;
+    static ArmMessageType armControlType;
 
-    int exitLoop;
+    static bool exitLoop;
+
+    static std::shared_ptr<DriveControllerLayout> driveController;
+    static std::shared_ptr<ArmControllerLayout> armController;
 
     // Desired Motor State Update Methods
-    DriveMotorState processDesiredDriveState(DriveState& desiredDriveState,
-                                             DriveMotorState& currentState);
-    ArmMotorState processDesiredArmState(const ArmState& desiredArmState);
-    MotorState
-    processDesiredRoverState(MotorStateManager& currentMotorStateManager);
+    static DriveMotorState
+    processDesiredDriveState(const DriveState& desiredDriveState);
+    static ArmMotorState
+    processDesiredArmState(const ArmState& desiredArmState);
+    static void updateDesiredRoverState(uint64_t elapsed_ms);
 
     // UDP receiving
-    void receive(UDPHandler& receiver,
-                 MotorStateManager& currentMotorStateManager);
+    static void receive(UDPHandler& receiver);
 };
 #endif

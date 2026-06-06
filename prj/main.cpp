@@ -20,9 +20,8 @@ int main(int argc, char* argv[]) {
 
 #if SIDE_TO_BUILD == BUILD_SIDE_BASE
     Logging::logI(file, "Running Base Side: %d", EXTENTION);
-    Base base;
-
-    base.start();
+    Base::initialize();
+    Base::start();
 
 #endif
 #if SIDE_TO_BUILD == BUILD_SIDE_ROVER
