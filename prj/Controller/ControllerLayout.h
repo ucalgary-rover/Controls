@@ -1,16 +1,44 @@
 #pragma once
 
 #include "Logging.h"
+#include <SDL2/SDL.h>
 #include <cstdint>
+#include <functional>
 #include <string>
 
 #define NAMEOF(var) #var
+
+typedef std::function<void(uint8_t)> ButtonCallback;
+
+#define REGISTER_BUTTON(callbacks, buttonID, buttonCallback)                   \
+    callbacks[buttonID] = [this](uint8_t buttonID) { buttonCallback(buttonID); }
 
 class ControllerLayout {
 public:
     ControllerLayout() { }
 
-    ControllerLayout(const std::string& file) { this->filename = file; }
+    ControllerLayout(const std::string& file) {
+        this->filename = file;
+        // Initialize Layout API
+        // clang-format off
+
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_A, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_B, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_Y, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_BACK, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_GUIDE, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_START, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSTICK, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSTICK, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSHOULDER, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_UP, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_DOWN, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, unusedButton);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, unusedButton);
+        // clang-format on
+    }
 
     void unusedButton(uint8_t buttonID);
     void unusedStick(int X, int Y);
@@ -33,6 +61,8 @@ public:
 
 protected:
     std::string filename = "DefaultController";
+
+    ButtonCallback buttonCallbacks[SDL_CONTROLLER_BUTTON_MAX];
 
     /**
      * Calculates the magnitude of the stick's position from the center
@@ -71,9 +101,15 @@ protected:
         return val;
     }
 
-    // General getter, setter, and incrementor for int member variables
-    void triggerToIncrement(int triggerValue, int* compare, int* var, int n,
-                            int min, int max, const char* name);
+    // General getter, setter, and incrementor for member variables
+    template <typename T>
+    void triggerToIncrement(int triggerValue, int* compare, T* var, T n, T min,
+                            T max, const char* name) {
+        if (triggerValue > 0 && *compare < 0) {
+            incrementVal(var, n, min, max, name);
+        }
+        *compare = triggerValue;
+    }
 
     void stickChangeAxis(int axisX, int axisY, float* varX, float* varY,
                          float maxChangeX, float maxChangeY, float rangeX,

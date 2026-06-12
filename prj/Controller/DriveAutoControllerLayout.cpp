@@ -2,7 +2,7 @@
 
 #include "Logging.h"
 
-void DriveAutoControllerLayout::checkState(SDL_GameControllerButton button) {
+void DriveAutoControllerLayout::checkState(uint8_t button) {
     // Create array length 11 with desired input chain
     static int desiredInputChain[11]
         = { SDL_CONTROLLER_BUTTON_DPAD_UP,   SDL_CONTROLLER_BUTTON_DPAD_UP,
@@ -47,7 +47,7 @@ void DriveAutoControllerLayout::checkState(SDL_GameControllerButton button) {
 }
 
 void DriveAutoControllerLayout::setVelocity(int X, int Y) {
-    DriveState driveState = driveStateManager.getState();
+    DriveState driveState = stateManager.getState();
     // get the speed
     setVal(&driveState.speed, stickMagnitude(X, Y), 0, presentMaxSpeed,
            NAMEOF(driveState.speed));
@@ -56,20 +56,39 @@ void DriveAutoControllerLayout::setVelocity(int X, int Y) {
     setVal(&driveState.heading, stickAngle(X, Y), 0, 360,
            NAMEOF(driveState.heading));
 
-    driveStateManager.updateState(driveState);
+    stateManager.updateState(driveState);
 }
 
 void DriveAutoControllerLayout::setAngularVelocity(int X, int Y) {
-    DriveState driveState = driveStateManager.getState();
+    DriveState driveState = stateManager.getState();
     // get the angular velocity
     setVal(&driveState.angularVelocity, (X * maxRadialSpeed) / 255,
            -maxRadialSpeed, maxRadialSpeed, NAMEOF(driveState.angularVelocity));
 
-    driveStateManager.updateState(driveState);
+    stateManager.updateState(driveState);
 }
 
 void DriveAutoControllerLayout::incrementMaxSpeed(int val) {
-    DriveState driveState = driveStateManager.getState();
+    DriveState driveState = stateManager.getState();
     incrementVal(&presentMaxSpeed, val, 0, absoluteMaxSpeed, "chassisMaxSpeed");
-    driveStateManager.updateState(driveState);
+    stateManager.updateState(driveState);
+}
+
+void DriveAutoControllerLayout::buttonResponse(uint8_t buttonID) {
+    if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
+        || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {
+        return;
+    }
+
+    //make sure to update the state
+    checkState(buttonID);
+    buttonCallbacks[buttonID](buttonID);
+}
+
+void DriveAutoControllerLayout::leftStickResponse(int xValue, int yValue) {
+    setVelocity(xValue, yValue);
+}
+
+void DriveAutoControllerLayout::rightStickResponse(int xValue, int yValue) {
+    setAngularVelocity(xValue, yValue);
 }

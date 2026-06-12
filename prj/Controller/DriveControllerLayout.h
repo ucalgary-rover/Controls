@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DriveDefaultControllerLayout.h"
+#include "DriveAutoControllerLayout.h"
 #include "DriveManualControllerLayout.h"
 #include <SDL2/SDL.h>
 #include <functional>
@@ -8,44 +8,36 @@
 #include <memory>
 #include <string>
 
-enum drivelayout {
-    DRIVE_DEFAULT,
+enum DriveLayout {
+    DRIVE_AUTO,
     DRIVE_MANUAL
 };
 
-#define REGISTER_BUTTON(callbacks, buttonID, buttonCallback)                   \
-    callbacks[buttonID] = [this](uint8_t buttonID) { buttonCallback(buttonID); }
+using ProcessDriveStateFunc = std::function<DriveMotorState(const DriveState&)>;
 
 class DriveControllerLayout : public ControllerLayout {
 public:
-    DriveControllerLayout(DriveStateManager* driveStateManager,
-                          DriveMotorStateManager* driveMotorStateManager) {
-        drivelayouts[DRIVE_DEFAULT]
-            = std::make_shared<DriveDefaultControllerLayout>(driveStateManager);
+    DriveControllerLayout(ProcessDriveStateFunc processFunc) {
+        drivelayouts[DRIVE_AUTO]
+            = std::make_shared<DriveAutoControllerLayout>(driveStateManager);
         drivelayouts[DRIVE_MANUAL]
             = std::make_shared<DriveManualControllerLayout>(
-                driveMotorStateManager);
+                driveManualStateManager);
 
-        currentLayout = DRIVE_DEFAULT;
+        process = processFunc;
 
         // Initialize button callbacks
         // clang-format off
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_A, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_B, unusedButton);
+
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X, swtichToDefault);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_Y, swtichToManual);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_BACK, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_GUIDE, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_START, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSTICK, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSTICK, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSHOULDER, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_UP, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_DOWN, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, unusedButton);
+
         // clang-format on
+    }
+
+    DriveMotorState getDriveMotorState(uint64_t elapsed_ms) {
+        desiredMotorState = process(driveStateManager.getState());
+        return desiredMotorState;
     }
 
     //
@@ -64,10 +56,16 @@ public:
 
     //buton callbacks
     void swtichToManual(uint8_t buttonID) { currentLayout = DRIVE_MANUAL; }
-    void swtichToDefault(uint8_t buttonID) { currentLayout = DRIVE_DEFAULT; }
+    void swtichToDefault(uint8_t buttonID) { currentLayout = DRIVE_AUTO; }
 
 private:
-    enum drivelayout currentLayout;
+    DriveStateManager driveStateManager = {};
+    DriveMotorStateManager driveManualStateManager = {};
+    DriveMotorState desiredMotorState = {};
+
+    ProcessDriveStateFunc process;
+
+    DriveLayout currentLayout = DriveLayout::DRIVE_AUTO;
     std::shared_ptr<ControllerLayout> drivelayouts[3];
     std::function<void(uint8_t)> buttonCallbacks[SDL_CONTROLLER_BUTTON_MAX];
 };

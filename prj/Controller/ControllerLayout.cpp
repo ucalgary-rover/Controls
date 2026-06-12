@@ -38,16 +38,6 @@ void ControllerLayout::unusedTrigger(int axisValue) {
     Logging::logV(filename.c_str(), "Unused Trigger X: %d", axisValue);
 }
 
-void ControllerLayout::triggerToIncrement(int triggerValue, int* compare,
-                                          int* var, int n, int min, int max,
-                                          const char* name) {
-    if (triggerValue > 0 && *compare < 0) {
-        incrementVal(var, n, min, max, name);
-    }
-    *compare
-        = triggerValue; // Update the compare value to the current trigger value
-}
-
 void ControllerLayout::stickChangeAxis(int axisX, int axisY, float* varX,
                                        float* varY, float maxChangeX,
                                        float maxChangeY, float rangeX,

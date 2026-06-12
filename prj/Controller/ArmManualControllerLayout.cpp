@@ -34,3 +34,12 @@ void ArmManualControllerLayout::incrementJoint(int change) {
     Logging::logI(filename.c_str(), "Changing to joint: %d", joint);
     manualAngleChange = 0; // Reset manual angle change when changing joint
 }
+
+void ArmManualControllerLayout::incrementJointValue(int increment) {
+
+    ArmMotorState armState = stateManager.getState();
+    std::string logMessage = "motor: " + std::to_string(joint);
+    incrementVal(&armState.motorValues[joint], increment, -20, 20,
+                 logMessage.c_str());
+    stateManager.updateState(armState);
+}

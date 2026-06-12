@@ -20,6 +20,7 @@ class ArmControllerLayout : public ControllerLayout {
 public:
     ArmControllerLayout(ProcessArmStateFunc processFunc) :
         ControllerLayout("ArmController") {
+
         layouts[ARM_FIXED_IK]
             = std::make_shared<ArmFixedIKControllerLayout>(armStateManager);
         layouts[ARM_VARIABLE_IK]
@@ -28,6 +29,13 @@ public:
             armManualStateManager);
 
         process = processFunc;
+
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_B,
+                        switchLayoutVariableIK);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X,
+                        switchLayoutFixedIK);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_Y,
+                        switchLayoutManual);
     }
 
     ArmMotorState getArmMotorState(uint64_t elapsed_ms) {
@@ -65,4 +73,14 @@ private:
 
     ArmLayout currentLayout = ArmLayout::ARM_FIXED_IK;
     std::shared_ptr<ControllerLayout> layouts[3];
+
+    //helper function
+    void switchLayout(ArmLayout layout) { currentLayout = layout; }
+
+    //button callbacks
+    void switchLayoutManual(uint8_t buttonID) { switchLayout(ARM_MANUAL); }
+    void switchLayoutVariableIK(uint8_t buttonID) {
+        switchLayout(ARM_VARIABLE_IK);
+    }
+    void switchLayoutFixedIK(uint8_t buttonID) { switchLayout(ARM_FIXED_IK); }
 };
