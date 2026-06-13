@@ -69,9 +69,11 @@ void DriveAutoControllerLayout::setAngularVelocity(int X, int Y) {
 }
 
 void DriveAutoControllerLayout::incrementMaxSpeed(int val) {
-    DriveState driveState = stateManager.getState();
     incrementVal(&presentMaxSpeed, val, 0, absoluteMaxSpeed, "chassisMaxSpeed");
-    stateManager.updateState(driveState);
+}
+
+void DriveAutoControllerLayout::incrementLightLevel(uint8_t val) {
+    incrementVal(&lightLevel, val, (uint8_t)0, (uint8_t)100, "chassisMaxSpeed");
 }
 
 void DriveAutoControllerLayout::buttonResponse(uint8_t buttonID) {
@@ -91,4 +93,15 @@ void DriveAutoControllerLayout::leftStickResponse(int xValue, int yValue) {
 
 void DriveAutoControllerLayout::rightStickResponse(int xValue, int yValue) {
     setAngularVelocity(xValue, yValue);
+}
+
+void DriveAutoControllerLayout::leftTriggerResponse(int16_t axisValue) {
+    if (axisValue >= INT16_MAX)
+        setVal(&lightLevel, (uint8_t)0, (uint8_t)0, (uint8_t)100, "lightLevel");
+}
+
+void DriveAutoControllerLayout::rightTriggerResponse(int16_t axisValue) {
+    if (axisValue >= INT16_MAX)
+        setVal(&lightLevel, (uint8_t)100, (uint8_t)0, (uint8_t)100,
+               "lightLevel");
 }
