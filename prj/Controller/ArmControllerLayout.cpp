@@ -25,8 +25,10 @@ ArmControlState ArmControllerLayout::getControlState(uint64_t elapsed_ms) {
         armManualStateIncrementManager.updateAndUnlock({});
 
         // Compute and update arm state
+        ArmState currentArmState = armAutomaticStateManager.getAndLock();
         desiredArm = motorToArmState(desiredMotor);
-        armAutomaticStateManager.updateState(desiredArm);
+        desiredArm.clawOpen = currentArmState.clawOpen; // Preserve claw
+        armAutomaticStateManager.updateAndUnlock(desiredArm);
     } else { // Compute motor state and update
         desiredArm = armAutomaticStateManager.getState();
         desiredMotor = armToMotorState(desiredArm);
@@ -72,9 +74,11 @@ void ArmControllerLayout::switchLayout(ArmLayout layout) {
     }
 
     if (currentLayout == ArmLayout::ARM_MANUAL) {
+        ArmState currentArmState = armAutomaticStateManager.getAndLock();
         ArmState armState
             = motorToArmState(desiredMotorStateManager.getState());
-        armAutomaticStateManager.updateState(armState);
+        armState.clawOpen = currentArmState.clawOpen; // Preserve claw
+        armAutomaticStateManager.updateAndUnlock(armState);
     } else {
         ArmMotorState armMotorState
             = armToMotorState(armAutomaticStateManager.getState());
