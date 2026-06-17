@@ -7,12 +7,13 @@
 
 class ArmManualControllerLayout : public ControllerLayout {
 public:
-    ArmManualControllerLayout(ArmMotorStateManager& armStateManager) :
-        ControllerLayout("ArmManualController"), stateManager(armStateManager) {
+    ArmManualControllerLayout(ArmMotorStateManager& armIncrementManager,
+                              ArmMotorStateManager& armDeltaManager) :
+        ControllerLayout("ArmManualController"),
+        incrementManager(armIncrementManager), deltaManager(armDeltaManager) {
 
         // Initialize Layout API
         // clang-format off
-
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSHOULDER, decrementJointValueOnce);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, incrementJointValueOnce);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, decrementJointOnce);
@@ -27,7 +28,8 @@ public:
     void rightTriggerResponse(int16_t axisValue) override;
 
 private:
-    ArmMotorStateManager& stateManager;
+    ArmMotorStateManager& incrementManager;
+    ArmMotorStateManager& deltaManager;
 
     int lastleftTriggerValue = 0;
     int lastrightTriggerValue = 0;
@@ -36,7 +38,7 @@ private:
     MotorID joint = MOTOR_ID_BASE;
 
     // helper functions
-    void triggerToincrementJointValue(int triggerVal, int increment);
+    void triggerToDeltaJointValue(int triggerVal);
 
     void incrementJoint(int change);
 

@@ -2,6 +2,45 @@
 
 static const char* file = "ArmControllerLayout";
 
+ArmControlState ArmControllerLayout::getControlState(uint64_t elapsed_ms) {
+    ArmState desiredArm;
+    ArmMotorState desiredMotor;
+
+    if (currentLayout
+        == ARM_MANUAL) { // Sum motor state and back compute arm state
+        desiredMotor = desiredMotorStateManager.getAndLock();
+        ArmMotorState increment = armManualStateIncrementManager.getAndLock();
+        ArmMotorState delta = armManualStateDeltaManager.getState();
+
+        for (int motor = 0; motor < MOTOR_ID_END; motor++) {
+            desiredMotor.motorValues[motor]
+                += increment.motorValues[motor]
+                   + delta.motorValues[motor] * elapsed_ms;
+        }
+
+        // Update and unlock desired motor state
+        desiredMotorStateManager.updateAndUnlock(desiredMotor);
+
+        // Clear increment after handling
+        armManualStateIncrementManager.updateAndUnlock({});
+
+        // Compute and update arm state
+        desiredArm = motorToArmState(desiredMotor);
+        armAutomaticStateManager.updateState(desiredArm);
+    } else { // Compute motor state and update
+        desiredArm = armAutomaticStateManager.getState();
+        desiredMotor = armToMotorState(desiredArm);
+        desiredMotorStateManager.updateState(desiredMotor);
+    }
+
+    ArmControlState control = {
+        .armState = desiredArm,
+        .armMotorState = desiredMotor,
+    };
+
+    return control;
+}
+
 void ArmControllerLayout::buttonResponse(uint8_t buttonID) {
     if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
         || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {
@@ -25,4 +64,20 @@ void ArmControllerLayout::leftTriggerResponse(int16_t axisValue) {
 
 void ArmControllerLayout::rightTriggerResponse(int16_t axisValue) {
     layouts[currentLayout]->rightTriggerResponse(axisValue);
+}
+
+void ArmControllerLayout::switchLayout(ArmLayout layout) {
+    if (currentLayout == layout) {
+        return;
+    }
+
+    if (currentLayout == ArmLayout::ARM_MANUAL) {
+        ArmState armState
+            = motorToArmState(desiredMotorStateManager.getState());
+        armAutomaticStateManager.updateState(armState);
+    } else {
+        ArmMotorState armMotorState
+            = armToMotorState(armAutomaticStateManager.getState());
+        desiredMotorStateManager.updateState(armMotorState);
+    }
 }

@@ -15,8 +15,10 @@ std::array<double, 3> vector3d2array(const Eigen::Vector3d& vector) {
     return array;
 }
 
-std::array<double, 6> int2DoubleArray(const std::array<int, 6>& intArray) {
-    std::array<double, 6> doubleArray = {};
+template <size_t size>
+std::array<double, size>
+int2DoubleArray(const std::array<int, size>& intArray) {
+    std::array<double, size> doubleArray = {};
 
     for (int i = 0; i < intArray.max_size(); i++) {
         doubleArray[i] = (double)intArray[i];
@@ -25,8 +27,10 @@ std::array<double, 6> int2DoubleArray(const std::array<int, 6>& intArray) {
     return doubleArray;
 }
 
-std::array<int, 6> double2IntArray(const std::array<double, 6>& doubleArray) {
-    std::array<int, 6> intArray = {};
+template <size_t size>
+std::array<int, size>
+double2IntArray(const std::array<double, size>& doubleArray) {
+    std::array<int, size> intArray = {};
 
     for (int i = 0; i < doubleArray.max_size(); i++) {
         intArray[i] = (int)doubleArray[i];
@@ -99,6 +103,23 @@ bool ArmModel::updateJointAngles(std::array<int, 6> new_angles) {
     auto doubleArray = int2DoubleArray(new_angles);
 
     return armModel->UpdateJointAngles(doubleArray);
+}
+
+ArmFKOutput ArmModel::forwardsKinematics(std::array<int, 6> motor_angles) {
+    if (!is_initialized) {
+        return {};
+    }
+
+    SSRTArm2025::TargetPose pose
+        = armModel->ForwardsKinematics(int2DoubleArray(motor_angles));
+
+    ArmFKOutput out = {
+        .wrist_position = vector3d2array(pose.position),
+        .claw_pitch = pose.pitch,
+        .claw_roll = pose.roll,
+    };
+
+    return out;
 }
 
 std::array<int, 6>

@@ -2,43 +2,43 @@
 static const char* file = "ArmVariableIKControllerLayout";
 
 void ArmVariableIKControllerLayout::leftStickResponse(int xValue, int yValue) {
-    ArmState armState = stateManager.getState();
+    ArmState armState = stateManager.getAndLock();
     stickChangeAxis(xValue, yValue, &armState.x, &armState.y, 0.0001, 0.0001, 1,
                     1, "wristX", "wristY");
-    stateManager.updateState(armState);
+    stateManager.updateAndUnlock(armState);
 }
 
 void ArmVariableIKControllerLayout::rightStickResponse(int xValue, int yValue) {
-    ArmState armState = stateManager.getState();
+    ArmState armState = stateManager.getAndLock();
     stickChangeAxis(xValue, yValue, &armState.z, nullptr, 0.0001, 0, 1, 0,
                     "wristZ", "");
-    stateManager.updateState(armState);
+    stateManager.updateAndUnlock(armState);
 }
 
 void ArmVariableIKControllerLayout::leftTriggerResponse(int16_t axisValue) {
-    ArmState armState = stateManager.getState();
+    ArmState armState = stateManager.getAndLock();
     triggerToIncrement(axisValue, &lastleftTriggerValue, &armState.clawOpen, -5,
                        0, 100, "clawOpen");
-    stateManager.updateState(armState);
+    stateManager.updateAndUnlock(armState);
 }
 
 void ArmVariableIKControllerLayout::rightTriggerResponse(int16_t axisValue) {
-    ArmState armState = stateManager.getState();
+    ArmState armState = stateManager.getAndLock();
     triggerToIncrement(axisValue, &lastrightTriggerValue, &armState.clawOpen, 5,
                        0, 100, "clawOpen");
-    stateManager.updateState(armState);
+    stateManager.updateAndUnlock(armState);
 }
 
 void ArmVariableIKControllerLayout::incrementPitch(int value) {
-    ArmState armState = stateManager.getState();
+    ArmState armState = stateManager.getAndLock();
     incrementVal(&armState.pitch, value, -maxPitch, maxPitch, "clawPitch");
-    stateManager.updateState(armState);
+    stateManager.updateAndUnlock(armState);
 }
 
 void ArmVariableIKControllerLayout::incrementRoll(int value) {
-    ArmState armState = stateManager.getState();
+    ArmState armState = stateManager.getAndLock();
     incrementVal(&armState.roll, value, -maxRoll, maxRoll, "clawPitch");
-    stateManager.updateState(armState);
+    stateManager.updateAndUnlock(armState);
 }
 
 void ArmVariableIKControllerLayout::buttonResponse(uint8_t buttonID) {

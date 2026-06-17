@@ -15,6 +15,11 @@ enum DriveLayout {
 
 using ProcessDriveStateFunc = std::function<DriveMotorState(const DriveState&)>;
 
+struct DriveControlState {
+    DriveState driveState;
+    DriveMotorState driveMotorState;
+};
+
 class DriveControllerLayout : public ControllerLayout {
 public:
     DriveControllerLayout(ProcessDriveStateFunc processFunc) {
@@ -35,12 +40,8 @@ public:
         // clang-format on
     }
 
-    DriveMotorState getDriveMotorState(uint64_t elapsed_ms) {
-        desiredMotorState = process(driveStateManager.getState());
-        return desiredMotorState;
-    }
+    DriveControlState getControlState(uint64_t elapsed_ms);
 
-    //
     std::string getName() { return drivelayouts[currentLayout]->getName(); }
 
     // button layout here (do the drivelayout switching)

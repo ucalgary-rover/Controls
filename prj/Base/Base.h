@@ -38,6 +38,7 @@ private:
     processDesiredDriveState(const DriveState& desiredDriveState);
     static ArmMotorState
     processDesiredArmState(const ArmState& desiredArmState);
+    static ArmState armForwardsKinematics(const ArmMotorState& motorState);
     static void updateDesiredRoverState(uint64_t elapsed_ms);
 
     // UDP receiving

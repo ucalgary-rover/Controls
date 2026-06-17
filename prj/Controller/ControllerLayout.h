@@ -146,7 +146,7 @@ protected:
      */
     template <typename T>
     void incrementVal(T* val, T n, T min, T max, const char* name) {
-        *val = clampVal(*val + n, min, max);
+        *val = clampVal((T)(*val + n), min, max);
         if (std::is_same<T, int>::value) {
             Logging::logI(filename.c_str(), "Setting %s to %d", name, *val);
         } else if (std::is_same<T, float>::value) {
