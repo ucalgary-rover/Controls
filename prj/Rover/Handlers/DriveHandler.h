@@ -15,6 +15,7 @@
 
 class DriveHandler : public HandlerInterface {
 public:
+    bool currentlyGettingZeroState = false;
     DriveHandler(Drive* drive,
                  DriveMotorStateManager* desiredDriveMotorStateManager,
                  DriveMotorStateManager* currentDriveMotorStateManager);
@@ -44,7 +45,6 @@ public:
     void stopWheels();
 
     void setWheelZeroState();
-    void applyWheelZeroState();
 
     /**
      * @brief Pops messages out of the queue and calls other functions
@@ -53,6 +53,7 @@ public:
     void start();
 
 private:
+    bool zeroAngleSet = false;
     Drive* m_drive;
 
     // Drive state manager

@@ -146,7 +146,8 @@ void Rover::startClient(MessageQueue* clientQueue, DriveHandler* driveHandler) {
             if (zeroMessage.set) { // currently setting zero
                 driveHandler->setWheelZeroState();
             } else { // currently getting zero
-                driveHandler->applyWheelZeroState();
+                driveHandler->stopWheels();
+                driveHandler->currentlyGettingZeroState = true;
             }
         }
     }
