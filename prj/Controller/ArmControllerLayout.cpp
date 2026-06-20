@@ -2,26 +2,60 @@
 
 static const char* file = "ArmControllerLayout";
 
-void ArmControllerLayout::buttonResponse(uint8_t buttonID) {
-    switch (buttonID) {
-    case SDL_CONTROLLER_BUTTON_X:
-        currentLayout = ARM_FIXED_IK;
-        Logging::logI(file, "Fixed_IK active");
-        break;
+ArmControlState ArmControllerLayout::getControlState(uint64_t elapsed_ms) {
+    ArmState desiredArm;
+    ArmMotorState desiredMotor;
 
-    case SDL_CONTROLLER_BUTTON_Y:
-        currentLayout = ARM_MANUAL;
-        Logging::logI(file, "Manual active");
-        break;
+    if (currentLayout
+        == ARM_MANUAL) { // Sum motor state and back compute arm state
+        desiredMotor = desiredMotorStateManager.getAndLock();
+        ArmMotorState increment = armManualStateIncrementManager.getAndLock();
+        ArmMotorState delta = armManualStateDeltaManager.getState();
 
-    case SDL_CONTROLLER_BUTTON_B:
-        currentLayout = ARM_VARIABLE_IK;
-        Logging::logI(file, "Variable_IK active");
-        break;
+        for (int motor = 0; motor < MOTOR_ID_END; motor++) {
+            desiredMotor.motorValues[motor]
+                += increment.motorValues[motor]
+                   + delta.motorValues[motor] * elapsed_ms;
+        }
 
-    default:
-        layouts[currentLayout]->buttonResponse(buttonID);
+        // Update and unlock desired motor state
+        desiredMotorStateManager.updateAndUnlock(desiredMotor);
+
+        // Clear increment after handling
+        armManualStateIncrementManager.updateAndUnlock({});
+
+        // Compute and update arm state
+        ArmState currentArmState = armAutomaticStateManager.getAndLock();
+        desiredArm = motorToArmState(desiredMotor);
+        desiredArm.clawOpen = currentArmState.clawOpen; // Preserve claw
+        armAutomaticStateManager.updateAndUnlock(desiredArm);
+    } else { // Compute motor state and update
+        desiredArm = armAutomaticStateManager.getState();
+        desiredMotor = armToMotorState(desiredArm);
+        desiredMotorStateManager.updateState(desiredMotor);
     }
+
+    ArmControlState control = {
+        .armState = desiredArm,
+        .armMotorState = desiredMotor,
+    };
+
+    return control;
+}
+
+void ArmControllerLayout::buttonResponse(uint8_t buttonID) {
+    if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
+        || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {
+        return;
+    }
+
+    //prioritize top layout if a callback is set
+    if (buttonCallbacks[buttonID]) {
+        buttonCallbacks[buttonID](buttonID);
+        return;
+    }
+
+    layouts[currentLayout]->buttonResponse(buttonID);
 }
 
 void ArmControllerLayout::leftStickResponse(int xValue, int yValue) {
@@ -38,4 +72,26 @@ void ArmControllerLayout::leftTriggerResponse(int16_t axisValue) {
 
 void ArmControllerLayout::rightTriggerResponse(int16_t axisValue) {
     layouts[currentLayout]->rightTriggerResponse(axisValue);
+}
+
+void ArmControllerLayout::switchLayout(ArmLayout layout) {
+    if (currentLayout == layout) {
+        return;
+    }
+
+    Logging::logI(file, "Switching to %s", layouts[layout]->getName());
+
+    if (currentLayout == ArmLayout::ARM_MANUAL) {
+        ArmState currentArmState = armAutomaticStateManager.getAndLock();
+        ArmState armState
+            = motorToArmState(desiredMotorStateManager.getState());
+        armState.clawOpen = currentArmState.clawOpen; // Preserve claw
+        armAutomaticStateManager.updateAndUnlock(armState);
+    } else {
+        ArmMotorState armMotorState
+            = armToMotorState(armAutomaticStateManager.getState());
+        desiredMotorStateManager.updateState(armMotorState);
+    }
+
+    currentLayout = layout;
 }

@@ -15,22 +15,23 @@ void ArmFixedIKControllerLayout::rightStickResponse(int xValue, int yValue) {
 }
 
 void ArmFixedIKControllerLayout::leftTriggerResponse(int16_t axisValue) {
-    ArmState armState = stateManager.getState();
+    ArmState armState = stateManager.getAndLock();
     triggerToIncrement(axisValue, &lastleftTriggerValue, &armState.clawOpen, -5,
                        0, 100, "clawOpen");
-    stateManager.updateState(armState);
+    stateManager.updateAndUnlock(armState);
 }
 
 void ArmFixedIKControllerLayout::rightTriggerResponse(int16_t axisValue) {
-    ArmState armState = stateManager.getState();
+    ArmState armState = stateManager.getAndLock();
     triggerToIncrement(axisValue, &lastrightTriggerValue, &armState.clawOpen, 5,
                        0, 100, "clawOpen");
-    stateManager.updateState(armState);
+    stateManager.updateAndUnlock(armState);
 }
 
 void ArmFixedIKControllerLayout::buttonResponse(uint8_t buttonID) {
     if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
-        || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {
+        || buttonID >= SDL_CONTROLLER_BUTTON_MAX
+        || !buttonCallbacks[buttonID]) {
         return;
     }
 

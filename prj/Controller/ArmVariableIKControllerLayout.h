@@ -5,11 +5,6 @@
 #include "pub_general.h"
 #include <functional>
 
-typedef std::function<void(uint8_t)> ButtonCallback;
-
-#define REGISTER_BUTTON(callbacks, buttonID, buttonCallback)                   \
-    callbacks[buttonID] = [this](uint8_t buttonID) { buttonCallback(buttonID); }
-
 class ArmVariableIKControllerLayout : public ControllerLayout {
 public:
     ArmVariableIKControllerLayout(ArmStateManager& armStateManager) :
@@ -18,17 +13,6 @@ public:
 
         // Initialize Layout API
         // clang-format off
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_A, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_B, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_Y, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_BACK, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_GUIDE, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_START, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSTICK, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSTICK, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSHOULDER, unusedButton);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, unusedButton);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_UP, pitchUp);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_DOWN, pitchDown);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, rollLeft);
@@ -48,8 +32,6 @@ public:
 
 private:
     ArmStateManager& stateManager;
-
-    ButtonCallback buttonCallbacks[SDL_CONTROLLER_BUTTON_MAX];
 
     int lastleftTriggerValue = 0;
     int lastrightTriggerValue = 0;

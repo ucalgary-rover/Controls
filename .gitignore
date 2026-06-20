@@ -8,6 +8,7 @@ prj/boost
 test/build/
 out/
 logs/
+/build
 
 # ClangD files
 .clangd

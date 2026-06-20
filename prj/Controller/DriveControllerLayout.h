@@ -1,42 +1,74 @@
 #pragma once
 
+#include "DriveAutoControllerLayout.h"
+#include "DriveManualControllerLayout.h"
 #include <SDL2/SDL.h>
 #include <functional>
+#include <map>
+#include <memory>
+#include <string>
 
-#include "ControllerLayout.h"
-#include "DriveMotorStateManager.h"
-#include "DriveStateManager.h"
+enum DriveLayout {
+    DRIVE_AUTO,
+    DRIVE_MANUAL
+};
 
 using ProcessDriveStateFunc = std::function<DriveMotorState(const DriveState&)>;
 
+struct DriveControlState {
+    DriveState driveState;
+    DriveMotorState driveMotorState;
+};
+
 class DriveControllerLayout : public ControllerLayout {
 public:
-    DriveControllerLayout(ProcessDriveStateFunc processFunc) :
-        ControllerLayout("DriveController") {
+    DriveControllerLayout(ProcessDriveStateFunc processFunc) {
+        drivelayouts[DRIVE_AUTO]
+            = std::make_shared<DriveAutoControllerLayout>(driveStateManager);
+        drivelayouts[DRIVE_MANUAL]
+            = std::make_shared<DriveManualControllerLayout>(
+                driveManualStateManager);
+
         process = processFunc;
+
+        // Initialize button callbacks
+        // clang-format off
+
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X, swtichToDefault);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_Y, swtichToManual);
+
+        // clang-format on
     }
 
-    DriveMotorState getDriveMotorState(uint64_t elapsed_ms) {
-        desiredMotorState = process(driveStateManager.getState());
-        return desiredMotorState;
-    }
+    DriveControlState getControlState(uint64_t elapsed_ms);
 
-    void checkState(SDL_GameControllerButton button);
+    std::string getName() { return drivelayouts[currentLayout]->getName(); }
 
-    void setVelocity(int X, int Y);
+    // button layout here (do the drivelayout switching)
+    void buttonResponse(uint8_t buttonID) override;
 
-    void setAngularVelocity(int X, int Y);
+    void leftStickResponse(int xValue, int yValue) override;
 
-    void incrementMaxSpeed(int val);
+    void rightStickResponse(int xValue, int yValue) override;
+
+    void leftTriggerResponse(int16_t axisValue) override;
+
+    void rightTriggerResponse(int16_t axisValue) override;
+
+    //helper function
+    void switchLayout(DriveLayout layout);
+
+    //button callbacks
+    void swtichToManual(uint8_t buttonID) { switchLayout(DRIVE_MANUAL); }
+    void swtichToDefault(uint8_t buttonID) { switchLayout(DRIVE_AUTO); }
 
 private:
-    DriveStateManager driveStateManager;
-    DriveMotorState desiredMotorState;
+    DriveStateManager driveStateManager = {};
+    DriveMotorStateManager driveManualStateManager = {};
+    DriveMotorState desiredMotorState = {};
 
     ProcessDriveStateFunc process;
 
-    int presentMaxSpeed = 80;  // present maximum speed of chassis
-    int absoluteMaxSpeed = 80; // Absolute max speed of the chassis
-
-    int maxRadialSpeed = 45; // degrees per second
+    DriveLayout currentLayout = DriveLayout::DRIVE_AUTO;
+    std::shared_ptr<ControllerLayout> drivelayouts[3];
 };

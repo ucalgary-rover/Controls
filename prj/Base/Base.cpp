@@ -42,8 +42,8 @@ void Base::initialize() {
 
     driveController
         = std::make_shared<DriveControllerLayout>(processDesiredDriveState);
-    armController
-        = std::make_shared<ArmControllerLayout>(processDesiredArmState);
+    armController = std::make_shared<ArmControllerLayout>(
+        processDesiredArmState, armForwardsKinematics);
 
     ControllerHandler::initialize({ driveController, armController });
 
@@ -83,6 +83,26 @@ ArmMotorState Base::processDesiredArmState(const ArmState& desiredArmState) {
     return armMs;
 }
 
+ArmState Base::armForwardsKinematics(const ArmMotorState& motorState) {
+
+    std::array<int, 6> motorValues = {};
+    for (int i = 0; i <= MOTOR_ID_CLAW_PITCH; i++) {
+        motorValues[i] = motorState.motorValues[i];
+    }
+
+    ArmFKOutput fkOut = ArmModel::forwardsKinematics(motorValues);
+
+    ArmState out = {
+        .x = (float)fkOut.wrist_position[0],
+        .y = (float)fkOut.wrist_position[1],
+        .z = (float)fkOut.wrist_position[2],
+        .pitch = (int)fkOut.claw_pitch,
+        .roll = (int)fkOut.claw_roll,
+    };
+
+    return out;
+}
+
 DriveMotorState Base::processDesiredDriveState(const DriveState& state) {
     DriveMotorState currentMotorState
         = currentMotorStateManager.getState().driveMotorState;
@@ -91,8 +111,10 @@ DriveMotorState Base::processDesiredDriveState(const DriveState& state) {
 
 void Base::updateDesiredRoverState(uint64_t elapsed_ms) {
     MotorState desiredMotorstate = {
-        .driveMotorState = driveController->getDriveMotorState(elapsed_ms),
-        .armMotorState = armController->getArmMotorState(elapsed_ms),
+        .driveMotorState
+        = driveController->getControlState(elapsed_ms).driveMotorState,
+        .armMotorState
+        = armController->getControlState(elapsed_ms).armMotorState,
     };
 
     desiredMotorStateManager.updateState(desiredMotorstate);
