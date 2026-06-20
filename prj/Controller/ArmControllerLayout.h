@@ -39,12 +39,12 @@ public:
         armToMotorState = armToMotorStateFunc;
         motorToArmState = motorToArmStateFunc;
 
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_B,
-                        switchLayoutVariableIK);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X,
-                        switchLayoutFixedIK);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_Y,
-                        switchLayoutManual);
+        // Initialize button callbacks
+        // clang-format off
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_B, switchLayoutVariableIK);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X, switchLayoutFixedIK);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_Y, switchLayoutManual);
+        // clang-format on
     }
 
     ArmControlState getControlState(uint64_t elapsed_ms);

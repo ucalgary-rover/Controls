@@ -46,7 +46,7 @@ private:
 
     // Button Callbacks
     void decrementJointValueOnce(uint8_t buttonID) { incrementJointValue(-1); }
-    void incrementJointValueOnce(uint8_t buttonID) { incrementJointValue(-1); }
+    void incrementJointValueOnce(uint8_t buttonID) { incrementJointValue(1); }
     void decrementJointOnce(uint8_t buttonID) { incrementJoint(-1); }
     void incrementJointOnce(uint8_t buttonID) { incrementJoint(1); }
 };

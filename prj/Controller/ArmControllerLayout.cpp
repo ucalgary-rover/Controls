@@ -1,6 +1,8 @@
 #include "ArmControllerLayout.h"
 
 static const char* file = "ArmControllerLayout";
+static const char* layoutNames[]
+    = { NAMEOF(ARM_FIXED_IK), NAMEOF(ARM_VARIABLE_IK), NAMEOF(ARM_MANUAL) };
 
 ArmControlState ArmControllerLayout::getControlState(uint64_t elapsed_ms) {
     ArmState desiredArm;
@@ -49,7 +51,13 @@ void ArmControllerLayout::buttonResponse(uint8_t buttonID) {
         return;
     }
 
-    buttonCallbacks[buttonID](buttonID);
+    //prioritize top layout if a callback is set
+    if (buttonCallbacks[buttonID]) {
+        buttonCallbacks[buttonID](buttonID);
+        return;
+    }
+
+    layouts[currentLayout]->buttonResponse(buttonID);
 }
 
 void ArmControllerLayout::leftStickResponse(int xValue, int yValue) {
@@ -73,6 +81,8 @@ void ArmControllerLayout::switchLayout(ArmLayout layout) {
         return;
     }
 
+    Logging::logI(file, "Switching to %s", layoutNames[layout]);
+
     if (currentLayout == ArmLayout::ARM_MANUAL) {
         ArmState currentArmState = armAutomaticStateManager.getAndLock();
         ArmState armState
@@ -84,4 +94,6 @@ void ArmControllerLayout::switchLayout(ArmLayout layout) {
             = armToMotorState(armAutomaticStateManager.getState());
         desiredMotorStateManager.updateState(armMotorState);
     }
+
+    currentLayout = layout;
 }

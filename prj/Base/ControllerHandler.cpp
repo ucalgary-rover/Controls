@@ -224,7 +224,7 @@ void ControllerHandler::triggerResponse(int16_t axisValue, int axisID,
         return;
     }
 
-    if (axisID > GAME_CONTROLLER_AXIS_TRIGGERRIGHT) {
+    if (axisID == GAME_CONTROLLER_AXIS_TRIGGERRIGHT) {
         controllers[index].rightTriggerUpdate(axisValue);
     } else {
         controllers[index].leftTriggerUpdate(axisValue);

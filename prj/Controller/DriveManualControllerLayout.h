@@ -37,7 +37,8 @@ private:
     WheelID wheel = WHEEL_FR;
 
     // helper functions
-    void triggerToincrementWheelAngle(int triggerVal, float increment);
+    void triggerToincrementWheelAngle(int triggerVal, float increment,
+                                      int* lastTriggerValue);
 
     void incrementWheel(int change);
 

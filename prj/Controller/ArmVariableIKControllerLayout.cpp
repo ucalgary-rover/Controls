@@ -43,7 +43,8 @@ void ArmVariableIKControllerLayout::incrementRoll(int value) {
 
 void ArmVariableIKControllerLayout::buttonResponse(uint8_t buttonID) {
     if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
-        || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {
+        || buttonID >= SDL_CONTROLLER_BUTTON_MAX
+        || !buttonCallbacks[buttonID]) {
         return;
     }
 

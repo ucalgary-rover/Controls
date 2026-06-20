@@ -78,12 +78,14 @@ void DriveAutoControllerLayout::incrementLightLevel(uint8_t val) {
 
 void DriveAutoControllerLayout::buttonResponse(uint8_t buttonID) {
     if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
-        || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {
+        || buttonID >= SDL_CONTROLLER_BUTTON_MAX
+        || !buttonCallbacks[buttonID]) {
         return;
     }
 
     //make sure to update the state
     checkState(buttonID);
+
     buttonCallbacks[buttonID](buttonID);
 }
 

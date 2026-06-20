@@ -11,7 +11,8 @@ void ArmManualControllerLayout::rightTriggerResponse(int16_t axisValue) {
 
 void ArmManualControllerLayout::buttonResponse(uint8_t buttonID) {
     if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
-        || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {
+        || buttonID >= SDL_CONTROLLER_BUTTON_MAX
+        || !buttonCallbacks[buttonID]) {
         return;
     }
 

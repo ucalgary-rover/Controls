@@ -1,6 +1,7 @@
 #include "DriveControllerLayout.h"
 
 static const char* file = "DriveControllerLayout";
+static const char* layoutNames[] = { NAMEOF(DRIVE_AUTO), NAMEOF(DRIVE_MANUAL) };
 
 DriveControlState DriveControllerLayout::getControlState(uint64_t elapsed_ms) {
     DriveControlState control;
@@ -16,7 +17,13 @@ void DriveControllerLayout::buttonResponse(uint8_t buttonID) {
         return;
     }
 
-    buttonCallbacks[buttonID](buttonID);
+    //prioritize top layout if a callback is set
+    if (buttonCallbacks[buttonID]) {
+        buttonCallbacks[buttonID](buttonID);
+        return;
+    }
+
+    drivelayouts[currentLayout]->buttonResponse(buttonID);
 }
 
 void DriveControllerLayout::leftStickResponse(int xValue, int yValue) {
@@ -33,4 +40,9 @@ void DriveControllerLayout::leftTriggerResponse(int16_t axisValue) {
 
 void DriveControllerLayout::rightTriggerResponse(int16_t axisValue) {
     drivelayouts[currentLayout]->rightTriggerResponse(axisValue);
+}
+
+void DriveControllerLayout::switchLayout(DriveLayout layout) {
+    currentLayout = layout;
+    Logging::logI(file, "Switching to %s", layoutNames[layout]);
 }

@@ -2,16 +2,17 @@
 #include <string>
 
 void DriveManualControllerLayout::leftTriggerResponse(int16_t axisValue) {
-    triggerToincrementWheelAngle(axisValue, -1);
+    triggerToincrementWheelAngle(axisValue, -1.0, &lastleftTriggerValue);
 }
 
 void DriveManualControllerLayout::rightTriggerResponse(int16_t axisValue) {
-    triggerToincrementWheelAngle(axisValue, 1);
+    triggerToincrementWheelAngle(axisValue, 1.0, &lastrightTriggerValue);
 }
 
 void DriveManualControllerLayout::buttonResponse(uint8_t buttonID) {
     if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
-        || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {
+        || buttonID >= SDL_CONTROLLER_BUTTON_MAX
+        || !buttonCallbacks[buttonID]) {
         return;
     }
 
@@ -27,12 +28,11 @@ void DriveManualControllerLayout::incrementWheelAngle(float increment) {
 }
 
 void DriveManualControllerLayout::triggerToincrementWheelAngle(
-    int triggerVal, float increment) {
+    int triggerVal, float increment, int* lastTriggerValue) {
     DriveMotorState driveState = stateManager.getAndLock();
     std::string logMessage = "wheel: " + std::to_string(wheel);
-    triggerToIncrement(triggerVal, &lastleftTriggerValue,
-                       &driveState.steer[wheel], increment, (float)0,
-                       (float)360, logMessage.c_str());
+    triggerToIncrement(triggerVal, lastTriggerValue, &driveState.steer[wheel],
+                       increment, (float)0, (float)360, logMessage.c_str());
     stateManager.updateAndUnlock(driveState);
 }
 
