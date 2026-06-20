@@ -45,6 +45,10 @@
 #define BASE_LAST_KNOWN_POS_FILE "./prj/Rover/Handlers/LastKnowPosBase.json"
 #define ARM_LAST_KNOWN_POS_FILE "./prj/Rover/Handlers/LastKnowPosArm.json"
 
+// Allow inaccuracy in sensor data for drive systems to still be parsed correctly
+#define DRIVE_THRESHOLD 0.1 // TODO: configure
+#define STEER_THRESHOLD 1.0 // TODO: configure
+
 // Configuration file to set serial numbers and channels for each of the motors
 
 // Following consts should follow the order of

@@ -1,13 +1,10 @@
 #pragma once
 #include "DriveMotorState.h"
 #include "DriveState.h"
+#include "pub_general.h"
 
 #define ANGULAR_VELOCITY_FACTOR                                                \
     45 // TODO: Find mapping for angular speed (experimentally)
-
-// Allow inaccuracy in sensor data to still be parsed correctly
-#define DRIVE_THRESHOLD 0.1 // TODO: configure
-#define STEER_THRESHOLD 1.0 // TODO: configure
 
 // At which angle to desired the rover can start moving
 #define ACCEPTABLE_ANGLE_FOR_MOTION 5.0 // TODO: configure

@@ -3,6 +3,7 @@
 
 #include "DriveHandler.h"
 #include "Message.h"
+#include "pub_general.h"
 #include <unistd.h>
 
 const char* file = "DriveHandler";
@@ -95,6 +96,10 @@ DriveHandler::DriveHandler(
     // the same DriveMotorStateManager in this file without shenanigans
     m_desiredDriveMotorStateManager = desiredDriveMotorStateManager;
     m_currentDriveMotorStateManager = currentDriveMotorStateManager;
+
+    for (int i = 0; i < WHEEL_COUNT; i++) {
+        wheelZeroState.drive[i] = 0; // stopped
+    }
 }
 
 void DriveHandler::setWheelAngle(DriveIndex wheel, float angle) {
@@ -208,6 +213,14 @@ void DriveHandler::translateSpeedAndAngle(DriveMotorState desiredState,
     }
 }
 
+void DriveHandler::setWheelZeroState() {
+    for (int index = 0; index < WHEEL_COUNT; index++) {
+        DriveIndex i = static_cast<DriveIndex>(index);
+        wheelZeroState.steer[index] = getWheelAngle(i);
+    }
+    zeroAngleSet = true;
+}
+
 void DriveHandler::start() {
 
     bool stopped = false;
@@ -218,15 +231,35 @@ void DriveHandler::start() {
             = m_desiredDriveMotorStateManager->getState();
 
         try {
-            for (int index = 0; index < WHEEL_COUNT; index++) {
-                DriveIndex i = static_cast<DriveIndex>(index);
+            if (!currentlyGettingZeroState) {
+                for (int index = 0; index < WHEEL_COUNT; index++) {
+                    DriveIndex i = static_cast<DriveIndex>(index);
 
-                // Translate into hardware specific angles and speed
-                translateSpeedAndAngle(desiredState, i);
+                    // Translate into hardware specific angles and speed
+                    translateSpeedAndAngle(desiredState, i);
 
-                // Update wheel speed and angle
-                setWheelAngle(i, desiredState.steer[i]);
-                setWheelSpeed(i, desiredState.drive[i]);
+                    // Update wheel speed and angle
+                    setWheelAngle(i, desiredState.steer[i]);
+                    setWheelSpeed(i, desiredState.drive[i]);
+                }
+            } else {
+                if (zeroAngleSet) {
+                    for (int index = 0; index < WHEEL_COUNT; index++) {
+                        DriveIndex i = static_cast<DriveIndex>(index);
+                        setWheelAngle(i, wheelZeroState.steer[i]);
+                    }
+                }
+
+                // Check if we are done getting the zero state
+                bool doneGettingZeroState = true;
+                for (int index = 0; index < WHEEL_COUNT; index++) {
+                    DriveIndex i = static_cast<DriveIndex>(index);
+                    if (abs(getWheelAngle(i) - wheelZeroState.steer[index])
+                        > STEER_THRESHOLD) {
+                        doneGettingZeroState = false;
+                    }
+                }
+                currentlyGettingZeroState = !doneGettingZeroState;
             }
         } catch (const std::runtime_error& e) {
             // Erroneous angle detected

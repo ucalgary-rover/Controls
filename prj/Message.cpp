@@ -15,6 +15,8 @@ Message::Message(MessagePayload payload) : m_payload(std::move(payload)) {
                 m_format = MESSAGE_FORMAT_MOTOR_STATE;
             else if constexpr (std::is_same_v<T, ScienceToolMessage>)
                 m_format = MESSAGE_FORMAT_SCIENCE_TOOL;
+            else if constexpr (std::is_same_v<T, DriveZeroMessage>)
+                m_format = MESSAGE_FORMAT_DRIVE_ZERO;
             else
                 m_format = static_cast<MessageFormat>(
                     MESSAGE_FORMAT_GENERIC); // Or a GENERIC/UNKNOWN value if
@@ -79,6 +81,8 @@ void Message::printMessage() const {
                           << ", Move Left/Right: " << payload.moveLeftRight
                           << ", X Pos: " << payload.xPos
                           << ", Y Pos: " << payload.yPos;
+            } else if constexpr (std::is_same_v<T, DriveZeroMessage>) {
+                std::cout << "DriveZeroMessage - set: " << payload.set;
             }
         },
         m_payload);
@@ -95,6 +99,10 @@ std::vector<std::byte> Message::serialize() const {
     }
     case MESSAGE_FORMAT_SCIENCE_TOOL: {
         payloadLength += sizeof(ScienceToolMessage);
+        break;
+    }
+    case MESSAGE_FORMAT_DRIVE_ZERO: {
+        payloadLength += sizeof(DriveZeroMessage);
         break;
     }
     default: { // Generic or unknown
@@ -138,6 +146,10 @@ Message Message::deserialize(const std::vector<std::byte> data, size_t size) {
     }
     case MESSAGE_FORMAT_SCIENCE_TOOL: {
         payload = parseMessage<ScienceToolMessage>(data, size);
+        break;
+    }
+    case MESSAGE_FORMAT_DRIVE_ZERO: {
+        payload = parseMessage<DriveZeroMessage>(data, size);
         break;
     }
     case MESSAGE_FORMAT_GENERIC: { // Generic or unknown

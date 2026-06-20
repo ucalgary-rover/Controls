@@ -15,6 +15,7 @@
 
 class DriveHandler : public HandlerInterface {
 public:
+    bool currentlyGettingZeroState = false;
     DriveHandler(Drive* drive,
                  DriveMotorStateManager* desiredDriveMotorStateManager,
                  DriveMotorStateManager* currentDriveMotorStateManager);
@@ -43,6 +44,8 @@ public:
      */
     void stopWheels();
 
+    void setWheelZeroState();
+
     /**
      * @brief Pops messages out of the queue and calls other functions
      * @return None
@@ -50,6 +53,7 @@ public:
     void start();
 
 private:
+    bool zeroAngleSet = false;
     Drive* m_drive;
 
     // Drive state manager
@@ -60,6 +64,8 @@ private:
         m_currentDriveMotorStateManager; // References the (current) drive state
                                          // Manager in Rover.cpp
 
+    DriveMotorState
+        wheelZeroState; // Direct hardware values, not consistent with software DriveModel
     // Variables corresponding to conditions during operation
 };
 
