@@ -166,13 +166,42 @@ void DriveHandler::updateCurrentState() {
                                          // not too bad (degrees)
 
         currentState.drive[wheelIndex] = getWheelAngle(wheelIndex);
+        // Translate into software specific angles and speed
+        translateSpeedAndAngleToSoftware(desiredState, wheelIndex);
     }
 
     m_currentDriveMotorStateManager->updateState(currentState);
 }
 
-void DriveHandler::translateSpeedAndAngle(DriveMotorState desiredState,
-                                          DriveIndex wheelIndex) {
+void DriveHandler::translateSpeedAndAngleToSoftware(
+    DriveMotorState desiredState, DriveIndex wheelIndex) {
+    // Directly updates the given desiredState so return type is void
+    double angle = desiredState.steer[wheelIndex];
+    double speed = desiredState.drive[wheelIndex];
+
+    if (angle <= 180 && angle >= -180) { // Check valid hardware range
+        if (wheelIndex % 2 == 0) { // WHEEL_FL/WHEEL_BL (mounted to drive fwds)
+            if (angle < 0) {       // Angle between -90 -> 0
+                if (speed < 0) {   // Driving backwards
+                }
+            } else {             // Angle between 0 -> +90
+                if (speed < 0) { // Driving backwards
+                    desiredState.steer[wheelIndex] = 180 + angle;
+                    desiredState.drive[wheelIndex] = -speed;
+                } // else, driving forwards (no change)
+            }
+        } else { // WHEEL_FR/WHEEL_BR (mounted to drive bkwds)
+            // TODO!!!!
+        }
+    } else {
+        throw std::runtime_error("Invalid hardware angle detected: outside of "
+                                 "-180-180 degree range.");
+    }
+}
+
+void DriveHandler::translateSpeedAndAngleToHardware(
+    DriveMotorState desiredState, DriveIndex wheelIndex) {
+    // Directly updates the given desiredState so return type is void
     double angle = desiredState.steer[wheelIndex];
     double speed = desiredState.drive[wheelIndex];
 
@@ -204,7 +233,7 @@ void DriveHandler::translateSpeedAndAngle(DriveMotorState desiredState,
         }
     } else {
         throw std::runtime_error(
-            "Invalid angle detected: outside of 0-360 degree range.");
+            "Invalid software angle detected: outside of 0-360 degree range.");
     }
 }
 
@@ -222,7 +251,7 @@ void DriveHandler::start() {
                 DriveIndex i = static_cast<DriveIndex>(index);
 
                 // Translate into hardware specific angles and speed
-                translateSpeedAndAngle(desiredState, i);
+                translateSpeedAndAngleToHardware(desiredState, i);
 
                 // Update wheel speed and angle
                 setWheelAngle(i, desiredState.steer[i]);

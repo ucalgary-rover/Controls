@@ -34,8 +34,10 @@ public:
 
     void updateCurrentState();
 
-    void translateSpeedAndAngle(DriveMotorState desiredState,
-                                DriveIndex wheelIndex);
+    void translateSpeedAndAngleToHardware(DriveMotorState desiredState,
+                                          DriveIndex wheelIndex);
+    void translateSpeedAndAngleToSoftware(DriveMotorState desiredState,
+                                          DriveIndex wheelIndex);
 
     /**
      * @brief Stops all wheel movement
