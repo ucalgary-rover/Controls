@@ -1,8 +1,6 @@
 #include "ArmControllerLayout.h"
 
 static const char* file = "ArmControllerLayout";
-static const char* layoutNames[]
-    = { NAMEOF(ARM_FIXED_IK), NAMEOF(ARM_VARIABLE_IK), NAMEOF(ARM_MANUAL) };
 
 ArmControlState ArmControllerLayout::getControlState(uint64_t elapsed_ms) {
     ArmState desiredArm;
@@ -81,7 +79,7 @@ void ArmControllerLayout::switchLayout(ArmLayout layout) {
         return;
     }
 
-    Logging::logI(file, "Switching to %s", layoutNames[layout]);
+    Logging::logI(file, "Switching to %s", layouts[layout]->getName());
 
     if (currentLayout == ArmLayout::ARM_MANUAL) {
         ArmState currentArmState = armAutomaticStateManager.getAndLock();
