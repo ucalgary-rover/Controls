@@ -66,8 +66,6 @@ void Rover::start() {
 
     thread currentStateHandlerThread([&]() {
         while (true) {
-            driveHandler.updateCurrentState();
-
             Message message = Message(currentStateManager.getState());
             sendQueue.push(message);
 

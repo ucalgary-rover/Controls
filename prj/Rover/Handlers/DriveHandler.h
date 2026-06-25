@@ -32,7 +32,7 @@ public:
     void setWheelSpeed(DriveIndex wheel, float speed);
     double getWheelSpeed(DriveIndex wheelIndex);
 
-    void updateCurrentState();
+    void updateCurrentState(DriveMotorState desiredState);
 
     void translateSpeedAndAngleToHardware(DriveMotorState desiredState,
                                           DriveIndex wheelIndex);

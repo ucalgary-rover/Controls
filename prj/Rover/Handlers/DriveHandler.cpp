@@ -154,7 +154,7 @@ void DriveHandler::stopWheels() {
     usleep(STOP_WHEEL_WAIT * 1000000);
 }
 
-void DriveHandler::updateCurrentState() {
+void DriveHandler::updateCurrentState(DriveMotorState desiredState) {
     DriveMotorState currentState; // Construct the current state struct
 
     // Get values for each wheel
@@ -183,6 +183,10 @@ void DriveHandler::translateSpeedAndAngleToSoftware(
         if (wheelIndex % 2 == 0) { // WHEEL_FL/WHEEL_BL (mounted to drive fwds)
             if (angle < 0) {       // Angle between -90 -> 0
                 if (speed < 0) {   // Driving backwards
+                    desiredState.steer[wheelIndex] = 180 + angle;
+                    desiredState.drive[wheelIndex] = -speed;
+                } else { // Driving forwards
+                    desiredState.steer[wheelIndex] = 360 + angle;
                 }
             } else {             // Angle between 0 -> +90
                 if (speed < 0) { // Driving backwards
@@ -190,8 +194,22 @@ void DriveHandler::translateSpeedAndAngleToSoftware(
                     desiredState.drive[wheelIndex] = -speed;
                 } // else, driving forwards (no change)
             }
-        } else { // WHEEL_FR/WHEEL_BR (mounted to drive bkwds)
-            // TODO!!!!
+        } else {                 // WHEEL_FR/WHEEL_BR (mounted to drive bkwds)
+            if (angle < 0) {     // Angle between -90 -> 0
+                if (speed < 0) { // Driving backwards
+                    desiredState.steer[wheelIndex] = 360 + angle;
+                    desiredState.drive[wheelIndex] = -speed;
+                } else { // Driving forwards
+                    desiredState.steer[wheelIndex] = 180 + angle;
+                }
+            } else {             // Angle between 0 -> +90
+                if (speed < 0) { // Driving backwards
+                    desiredState.drive[wheelIndex] = -speed;
+                    // no change in steer
+                } else { // Driving forwards
+                    desiredState.steer[wheelIndex] = 180 + angle;
+                }
+            }
         }
     } else {
         throw std::runtime_error("Invalid hardware angle detected: outside of "
@@ -269,7 +287,7 @@ void DriveHandler::start() {
         }
 
         // Update current state for sending back to base
-        updateCurrentState();
+        updateCurrentState(desiredState);
     }
 }
 
