@@ -68,7 +68,7 @@ void Rover::start() {
         while (true) {
             driveHandler.updateCurrentState();
 
-            Message message = Message(currentStateManager.getState());
+            Message message = Message(desiredStateManager.getState());
             sendQueue.push(message);
 
             usleep(0.1 * 1000000); // Sleep
