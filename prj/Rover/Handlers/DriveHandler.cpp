@@ -67,8 +67,8 @@ fit within the range
 Stepper motors turn wheels and report when their targets are hit afterwards
 
 */
-static void CCONV onButtonPressedHandler(PhidgetDigitalInputHandle pdih,
-                                         void* ctx, int state);
+static void CCONV onButtonPressedHandler(PhidgetEncoderHandle pdih, void* ctx,
+                                         int state);
 static void CCONV onAngleReached(PhidgetHandle pdih, void* ctx,
                                  PhidgetReturnCode returnCode);
 
@@ -277,8 +277,8 @@ void DriveHandler::start() {
     }
 }
 
-static void CCONV onButtonPressedHandler(PhidgetDigitalInputHandle pdih,
-                                         void* ctx, int state) {
+static void CCONV onButtonPressedHandler(PhidgetEncoderHandle pdih, void* ctx,
+                                         int state) {
     int* myIntPtr = (int*)ctx;
     *myIntPtr = 1;
 }

@@ -53,15 +53,15 @@ public:
     bool getDriveStepperHandle(MotorHandlerReturn* retVal, int index);
 
     /**
-     * @brief Edits retVal to contain the motor type (in this case digital
-     * input) and the phidgets handler for that motor.
+     * @brief Edits retVal to contain the motor type (in this case encoder
+     * and the phidgets handler for that motor.
      * @param retVal Pointer to a stuct that will get updated with the motor
      * handler and motor type.
      * @param index Valid value from DriveMotorIndex to specify what wheel you
-     * want the digital input handler for.
+     * want the encoder handler for.
      * @return True is successful, false otherwise.
      */
-    bool getDriveDigitalInputHandle(MotorHandlerReturn* retVal, int index);
+    bool getDriveEncoderHandle(MotorHandlerReturn* retVal, int index);
 
     /**
      * @brief Gets the width of the rover between motors
@@ -80,7 +80,7 @@ public:
 private:
     std::vector<PhidgetBLDCMotorHandle> m_handlesDC = {};
     std::vector<PhidgetStepperHandle> m_handlesStepper = {};
-    std::vector<PhidgetDigitalInputHandle> m_handlesDigitalInput = {};
+    std::vector<PhidgetEncoderHandle> m_handlesDriveEncoder = {};
 
     // if true, the wheels are in spot turning configuration
     bool m_spotTurnFlag = false;

@@ -52,16 +52,16 @@
 // Configuration file to set serial numbers and channels for each of the motors
 
 // Following consts should follow the order of
-// DriveMotorIndex in pub_rover.cpp
-const int DRIVE_DC_SERIAL_NUMBER[4] = { 697178, 697178, 697178, 697178 };
+// DriveMotorIndex in pub_rover.cpp -> FL, FR, BL, BR
+const int DRIVE_DC_SERIAL_NUMBER[4] = { 697178, 697178, 697270, 697270 };
 const int DRIVE_DC_CHANNEL[4] = { 0, 0, 0, 0 };
-const int DRIVE_DC_PORT[4] = { 4, 0, 5, 1 };
-const int DRIVE_STEPPER_SERIAL_NUMBER[4] = { 697270, 697270, 697270, 697270 };
+const int DRIVE_DC_PORT[4] = { 5, 2, 4, 2 };
+const int DRIVE_STEPPER_SERIAL_NUMBER[4] = { 697178, 697178, 697270, 697270 };
 const int DRIVE_STEPPER_CHANNEL[4] = { 0, 0, 0, 0 };
-const int DRIVE_STEPPER_PORT[4] = { 1, 4, 2, 5 };
-const int DRIVE_DIGITAL_INPUT_SERIAL_NUMBER = 697270;
-const int DRIVE_DIGITAL_INPUT_CHANNEL[4] = { 0, 1, 2, 3 };
-const int DRIVE_DIGITAL_INPUT_PORT = 3;
+const int DRIVE_STEPPER_PORT[4] = { 4, 1, 5, 1 };
+const int DRIVE_ENCODER_SERIAL_NUMBER[4] = { 697178, 697178, 697270, 697270 };
+const int DRIVE_ENCODER_INPUT_CHANNEL[4] = { 0, 0, 0, 0 };
+const int DRIVE_ENCODER_INPUT_PORT[4] = { 3, 0, 3, 0 };
 
 const int ARM_MOTOR_SERIAL_NUMBER[6] = { 1000, 1000, 1000, 1000, 1000, 1000 };
 const int ARM_MOTOR_CHANNEL[6] = { 0, 0, 0, 0, 0, 0 };

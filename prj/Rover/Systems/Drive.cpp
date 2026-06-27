@@ -32,17 +32,17 @@ Drive::Drive(float width, float length) : m_width(width), m_length(length) {
         PhidgetStepper_setEngaged(m_handlesStepper.at(stepper), 1);
     }
 
-    // initialise digital inputs
-    Logging::logD(file, "Initialising Drive Digital Inputs");
-    for (int digitalInput = 0; digitalInput < DRIVE_INDEX_WHEEL_COUNT;
-         digitalInput++) {
-        m_handlesDigitalInput.push_back(PhidgetDigitalInputHandle());
-        PhidgetDigitalInput_create(&m_handlesDigitalInput.at(digitalInput));
-        setAddressProperties<PhidgetDigitalInputHandle>(
-            &m_handlesDigitalInput.at(digitalInput),
-            DRIVE_DIGITAL_INPUT_SERIAL_NUMBER,
-            DRIVE_DIGITAL_INPUT_CHANNEL[digitalInput],
-            DRIVE_DIGITAL_INPUT_PORT);
+    // initialise encoders for wheel zero tracking
+    Logging::logD(file, "Initialising Drive Encoders");
+    for (int driveEncoder = 0; driveEncoder < DRIVE_INDEX_WHEEL_COUNT;
+         driveEncoder++) {
+        m_handlesDriveEncoder.push_back(PhidgetEncoderHandle());
+        PhidgetEncoder_create(&m_handlesDriveEncoder.at(driveEncoder));
+        setAddressProperties<PhidgetEncoderHandle>(
+            &m_handlesDriveEncoder.at(driveEncoder),
+            DRIVE_ENCODER_SERIAL_NUMBER[driveEncoder],
+            DRIVE_ENCODER_CHANNEL[driveEncoder],
+            DRIVE_ENCODER_PORT[driveEncoder]);
     }
 }
 
@@ -61,12 +61,12 @@ Drive::~Drive() {
         PhidgetStepper_delete(&m_handlesStepper.at(stepper));
     }
 
-    // deinitialise digital inputs
-    Logging::logD(file, "Deinitialising Drive Digital Inputs");
-    for (int digitalInput = 0; digitalInput < DRIVE_INDEX_WHEEL_COUNT;
-         digitalInput++) {
-        Phidget_close((PhidgetHandle)m_handlesDigitalInput.at(digitalInput));
-        PhidgetDigitalInput_delete(&m_handlesDigitalInput.at(digitalInput));
+    // deinitialise drive encoders
+    Logging::logD(file, "Deinitialising Drive Encoders");
+    for (int driveEncoder = 0; driveEncoder < DRIVE_INDEX_WHEEL_COUNT;
+         driveEncoder++) {
+        Phidget_close((PhidgetHandle)m_handlesDriveEncoder.at(driveEncoder));
+        PhidgetEncoder_delete(&m_handlesDriveEncoder.at(driveEncoder));
     }
 }
 
@@ -90,12 +90,10 @@ bool Drive::getDriveStepperHandle(MotorHandlerReturn* retVal, int index) {
     return false;
 }
 
-bool Drive::getDriveDigitalInputHandle(MotorHandlerReturn* retVal, int index) {
+bool Drive::getDriveEncoderHandle(MotorHandlerReturn* retVal, int index) {
     if (index >= 0 && index < DRIVE_INDEX_WHEEL_COUNT) {
-        retVal->type
-            = MOTOR_TYPE_DIGITAL_INPUT; // Assuming digital input is treated as
-                                        // servo for this context
-        retVal->handler.digitalInput = &m_handlesDigitalInput.at(index);
+        retVal->type = MOTOR_TYPE_ENCODER;
+        retVal->handler.encoder = &m_handlesDriveEncoder.at(index);
         return true;
     }
     retVal->type = MOTOR_TYPE_INVALID;
