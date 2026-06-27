@@ -118,6 +118,41 @@ void Base::updateDesiredRoverState(uint64_t elapsed_ms) {
     };
 
     desiredMotorStateManager.updateState(desiredMotorstate);
+
+    static uint64_t accumulated_ms = 0;
+    accumulated_ms += elapsed_ms;
+
+    if (accumulated_ms >= 1000) {
+        accumulated_ms = 0;
+
+        // Log desired Drive state
+        Logging::logI(file, "=== Desired Drive State ===");
+        Logging::logI(file,
+                      "steer[FR=%.2f FL=%.2f BR=%.2f BL=%.2f] drive[FR=%.2f "
+                      "FL=%.2f BR=%.2f BL=%.2f]",
+                      desiredMotorstate.driveMotorState.steer[WHEEL_FR],
+                      desiredMotorstate.driveMotorState.steer[WHEEL_FL],
+                      desiredMotorstate.driveMotorState.steer[WHEEL_BR],
+                      desiredMotorstate.driveMotorState.steer[WHEEL_BL],
+                      desiredMotorstate.driveMotorState.drive[WHEEL_FR],
+                      desiredMotorstate.driveMotorState.drive[WHEEL_FL],
+                      desiredMotorstate.driveMotorState.drive[WHEEL_BR],
+                      desiredMotorstate.driveMotorState.drive[WHEEL_BL]);
+
+        // Log desdired Arm state
+        Logging::logI(file, "=== Desired Arm State ===");
+        Logging::logI(
+            file,
+            "motors[BASE=%d SHOULDER=%d ELBOW=%d WRIST=%d CLAW_ROLL=%d "
+            "CLAW_PITCH=%d CLAW_OPEN=%d]",
+            desiredMotorstate.armMotorState.motorValues[MOTOR_ID_BASE],
+            desiredMotorstate.armMotorState.motorValues[MOTOR_ID_SHOULDER],
+            desiredMotorstate.armMotorState.motorValues[MOTOR_ID_ELBOW],
+            desiredMotorstate.armMotorState.motorValues[MOTOR_ID_WRIST],
+            desiredMotorstate.armMotorState.motorValues[MOTOR_ID_CLAW_ROLL],
+            desiredMotorstate.armMotorState.motorValues[MOTOR_ID_CLAW_PITCH],
+            desiredMotorstate.armMotorState.motorValues[MOTOR_ID_CLAW_OPEN]);
+    }
 }
 
 void Base::receive(UDPHandler& receiver) {
