@@ -60,8 +60,8 @@ const int DRIVE_STEPPER_SERIAL_NUMBER[4] = { 697178, 697178, 697270, 697270 };
 const int DRIVE_STEPPER_CHANNEL[4] = { 0, 0, 0, 0 };
 const int DRIVE_STEPPER_PORT[4] = { 4, 1, 5, 1 };
 const int DRIVE_ENCODER_SERIAL_NUMBER[4] = { 697178, 697178, 697270, 697270 };
-const int DRIVE_ENCODER_INPUT_CHANNEL[4] = { 0, 0, 0, 0 };
-const int DRIVE_ENCODER_INPUT_PORT[4] = { 3, 0, 3, 0 };
+const int DRIVE_ENCODER_CHANNEL[4] = { 0, 0, 0, 0 };
+const int DRIVE_ENCODER_PORT[4] = { 3, 0, 3, 0 };
 
 const int ARM_MOTOR_SERIAL_NUMBER[6] = { 1000, 1000, 1000, 1000, 1000, 1000 };
 const int ARM_MOTOR_CHANNEL[6] = { 0, 0, 0, 0, 0, 0 };
