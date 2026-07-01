@@ -1,6 +1,3 @@
-#ifndef DRIVE_HANDLER_H
-#define DRIVE_HANDLER_H
-
 #pragma once
 
 #include "DriveMotorStateManager.h"
@@ -20,18 +17,6 @@ public:
                  DriveMotorStateManager* desiredDriveMotorStateManager,
                  DriveMotorStateManager* currentDriveMotorStateManager);
     ~DriveHandler() { };
-
-    /**
-     * @brief Turns the stepper motor of a wheel to a specified angle
-     * @param wheel the handler of a particular stepper motor
-     * @param angle the angle to turn the stepper
-     * @return None
-     */
-    void setWheelAngle(DriveIndex wheel, float angle);
-    double getWheelAngle(DriveIndex wheelIndex);
-
-    void setWheelSpeed(DriveIndex wheel, float speed);
-    double getWheelSpeed(DriveIndex wheelIndex);
 
     void updateCurrentState();
 
@@ -67,6 +52,16 @@ private:
     DriveMotorState
         wheelZeroState; // Direct hardware values, not consistent with software DriveModel
     // Variables corresponding to conditions during operation
-};
 
-#endif
+    /**
+     * @brief Turns the stepper motor of a wheel to a specified angle
+     * @param wheel the handler of a particular stepper motor
+     * @param angle the angle to turn the stepper
+     * @return None
+     */
+    void setWheelAngle(DriveIndex wheel, float angle);
+    double getWheelAngle(DriveIndex wheelIndex);
+
+    void setWheelSpeed(DriveIndex wheel, float speed);
+    double getWheelSpeed(DriveIndex wheelIndex);
+};

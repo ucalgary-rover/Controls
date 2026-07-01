@@ -1,154 +1,136 @@
 #include "Rover.h"
-#include "Message.h"
-#include "UDPHandler.h"
-#include "pub_general.h"
 
 #include <chrono>
+#include <thread>
+
+#include "Message.h"
+#include "MessageQueue.h"
+#include "UDPHandler.h"
+#include "pub_rover.h"
+
+#include "Rover/Handlers/DriveHandler.h"
+#include "Rover/Systems/Drive.h"
+
+#if EXTENTION == EXTENTION_TYPE_ARM
+#include "Rover/Handlers/ArmHandler.h"
+#include "Rover/Systems/Arm.h"
+#endif
+
+#define CURRENT_STATE_PUSH_INTERVAL_US 1000 * 1000 // 1s
+#define INACTIVE_SLEEP_US 100 * 1000               // 100ms
 
 static const char* file = "Rover";
 
-using namespace std;
+MotorStateManager Rover::desiredMotorStateManager;
+MotorStateManager Rover::currentMotorStateManager;
 
 //---------------------- Start/Stop Functions ----------------------//
 // Note: Only the start() and stop() functions have their own thread //
+void Rover::initialize() {
+    Logging::logI(file, "Initializing Rover");
+
+    // Initialize Rover State Manager
+    Logging::logI(file, "Initializing State Managers");
+    desiredMotorStateManager = MotorStateManager();
+    currentMotorStateManager = MotorStateManager();
+}
 
 void Rover::start() {
-    char address[16];
-
-    UDPHandler client(ROVER_PORT, BASE_PORT);
-    MessageQueue sendQueue;
-
     // Instantiate the systems for the rover
 #if EXTENTION == EXTENTION_TYPE_ARM
+    Logging::logI(file, "Instantiating Arm System");
     const std::vector<MotorType> motorTypes
         = { MOTOR_TYPE_STEPPER_MOTOR, MOTOR_TYPE_BLDC_MOTOR,
             MOTOR_TYPE_BLDC_MOTOR, MOTOR_TYPE_STEPPER_MOTOR,
             MOTOR_TYPE_STEPPER_MOTOR };
     Arm arm(motorTypes);
-#endif
-
-    Logging::logI(file, "Instantiating Drive system");
-    Drive drive(ROVER_WIDTH, ROVER_LENGTH);
-
-    // Create queue for rover
-    MessageQueue roverQueue;
-
-    // Create desired state manager
-    desiredStateManager = MotorStateManager(defaultState);
-
-    desiredDriveMotorStateManager = desiredStateManager.getDriveStateManager();
-    ArmMotorStateManager* desiredArmMotorStateManager
-        = desiredStateManager.getArmStateManager();
-
-    // Create current state manager
-    currentStateManager = MotorStateManager(defaultState);
-
-    DriveMotorStateManager* currentDriveMotorStateManager
-        = currentStateManager.getDriveStateManager();
-    ArmMotorStateManager* currentArmMotorStateManager
-        = currentStateManager.getArmStateManager(); // TODO: not yet used
-
-    // instantiate handlers
-    DriveHandler driveHandler(&drive, desiredDriveMotorStateManager,
-                              currentDriveMotorStateManager);
-#if EXTENTION == EXTENTION_TYPE_ARM
     ArmHandler armHandler(&arm, &desiredArmMotorStateManager);
+    std::thread armHandlerThread([&]() { armHandler.start(); });
 #endif
-    // Start the client thread
-    thread clientThread([&]() { startClient(&roverQueue, &driveHandler); });
 
-    // start thread for handlers
-    thread driveHandlerThread([&]() { driveHandler.start(); });
-#if EXTENTION == EXTENTION_TYPE_ARM
-    thread armHandlerThread([&]() { armHandler.start(); });
-#endif
-    thread sendingThread([&]() { client.run(sendQueue); });
+    Logging::logI(file, "Instantiating Drive System");
+    Drive drive(ROVER_WIDTH, ROVER_LENGTH);
+    DriveHandler driveHandler(&drive,
+                              desiredMotorStateManager.getDriveStateManager(),
+                              currentMotorStateManager.getDriveStateManager());
+    std::thread driveHandlerThread([&]() { driveHandler.start(); });
 
-    thread currentStateHandlerThread([&]() {
+    Logging::logI(file, "Instantiating Network Systems");
+    UDPHandler client(ROVER_PORT, BASE_PORT);
+    MessageQueue sendQueue;
+    MessageQueue receiveQueue;
+    std::thread sendingThread([&]() { client.run(sendQueue); });
+    std::thread receivingThread([&]() {
         while (true) {
-            driveHandler.updateCurrentState();
-
-            Message message = Message(currentStateManager.getState());
-            sendQueue.push(message);
-
-            usleep(0.1 * 1000000); // Sleep
+            Message received = client.receive().getPayload();
+            receiveQueue.push(received);
         }
     });
 
-    while (true) {
-        Message reply = client.receive();
-        MessagePayload payload = reply.getPayload();
+    std::thread currentStatePublishThread([&]() {
+        while (true) {
+            // Read and send current motor state
+            Message message = Message(currentMotorStateManager.getState());
+            sendQueue.push(message);
 
-        std::visit(
-            [this, &payload](auto&& arg) {
-                using T = std::decay_t<decltype(arg)>;
+            usleep(CURRENT_STATE_PUSH_INTERVAL_US); // Sleep
+        }
+    });
 
-                if constexpr (std::is_same_v<T, MotorState>) {
-                    MotorStateManager newStateManager = MotorStateManager(arg);
-                    desiredDriveMotorStateManager->updateState(
-                        newStateManager.getState().driveMotorState);
-                } else {
-                    // Handles other message payloads
-                    std::cerr << "Non-motor control message received from base!"
-                              << std::endl;
-                }
-            },
-            payload);
-
-        roverQueue.push(reply);
-    }
-
-    driveHandlerThread.join();
-    clientThread.join();
-    sendingThread.join();
-    currentStateHandlerThread.join();
-#if EXTENTION_TYPE_ARM
-    armHandlerThread.join();
-#endif
-}
-
-//---------------------- Instantiation Functions ----------------------//
-
-// Thread instantiation
-void Rover::startClient(MessageQueue* clientQueue, DriveHandler* driveHandler) {
-
+    // Main message processing loop
     Message message;
     auto last_reception = std::chrono::system_clock::now();
+    bool roverHalted = false;
 
     while (true) {
-        // Get message from roverQueue
-
-        if (!clientQueue->empty()) {
+        // Check activity timeout
+        if (!receiveQueue.empty()) {
             last_reception = std::chrono::system_clock::now();
         } else {
             std::chrono::seconds time_since_reception
                 = std::chrono::duration_cast<std::chrono::seconds>(
                     std::chrono::system_clock::now() - last_reception);
 
-            Logging::logE(file,
-                          "Connection to base timed out, halting motors.");
-            //  if (time_since_reception.count() > NO_MESSAGE_RECIEVED_TIMEOUT)
-            //  {
-            //      armQueue->push(Message(0, ArmMessage()));
-            //      driveQueue->push(Message(0, WheelMessage()));
-            //  }
+            if (time_since_reception.count() > NO_MESSAGE_RECIEVED_TIMEOUT) {
+                Logging::logE(file,
+                              "Connection to base timed out, halting motors.");
+
+                desiredMotorStateManager.updateDriveMotorState(
+                    {}); // Zero Motors
+            }
+
+            usleep(INACTIVE_SLEEP_US);
+            continue;
         }
 
-        message = clientQueue->pop();
+        message = receiveQueue.pop();
 
-        if (message.getFormat()
-            == MESSAGE_FORMAT_MOTOR_STATE) { // Discard invalid messages
-            desiredStateManager.updateState(
+        switch (message.getFormat()) {
+        case MESSAGE_FORMAT_MOTOR_STATE:
+            desiredMotorStateManager.updateState(
                 std::get<MotorState>(message.getPayload()));
-        } else if (message.getFormat() == MESSAGE_FORMAT_DRIVE_ZERO) {
+            break;
+        case MESSAGE_FORMAT_DRIVE_ZERO: {
             DriveZeroMessage zeroMessage
                 = std::get<DriveZeroMessage>(message.getPayload());
             if (zeroMessage.set) { // currently setting zero
-                driveHandler->setWheelZeroState();
+                driveHandler.setWheelZeroState();
             } else { // currently getting zero
-                driveHandler->stopWheels();
-                driveHandler->currentlyGettingZeroState = true;
+                driveHandler.stopWheels();
+                driveHandler.currentlyGettingZeroState = true;
             }
+            break;
+        }
+        default:
+            break;
         }
     }
+
+#if EXTENTION_TYPE_ARM
+    armHandlerThread.join();
+#endif
+    driveHandlerThread.join();
+    receivingThread.join();
+    sendingThread.join();
+    currentStatePublishThread.join();
 }

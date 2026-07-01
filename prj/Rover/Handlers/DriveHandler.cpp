@@ -83,6 +83,8 @@ const float PI = 3.14;
 // two decimal places
 #define TO_DEGREES(value) round(value * 180 / PI * 100) / 100
 
+#define DRIVE_UPDATE_INTERVAL_US 50 * 1000 // 50ms
+
 // Constructor
 DriveHandler::DriveHandler(
     Drive* drive, DriveMotorStateManager* desiredDriveMotorStateManager,
@@ -106,11 +108,9 @@ void DriveHandler::setWheelAngle(DriveIndex wheel, float angle) {
     MotorHandlerReturn motorStuct;
     m_drive->getDriveStepperHandle(&motorStuct, wheel);
 
-    void* angleAchieved;
-
     // can make this async with PhidgetStepper_setTargetPosition_async
-    PhidgetStepper_setTargetPosition_async(
-        *motorStuct.handler.stepperMotor, angle, onAngleReached, angleAchieved);
+    PhidgetStepper_setTargetPosition_async(*motorStuct.handler.stepperMotor,
+                                           angle, onAngleReached, nullptr);
 }
 
 double DriveHandler::getWheelAngle(DriveIndex wheelIndex) {
@@ -126,12 +126,9 @@ void DriveHandler::setWheelSpeed(DriveIndex wheel, float speed) {
     MotorHandlerReturn motorStuct;
     m_drive->getDriveDCHandle(&motorStuct, wheel);
 
-    void* speedAchieved;
-
     // can make this async with PhidgetBLDCMotor_setTargetVelocity_async
-    PhidgetBLDCMotor_setTargetVelocity_async(*motorStuct.handler.bldcMotor,
-                                             speed, setTargetVelocityDone,
-                                             speedAchieved);
+    PhidgetBLDCMotor_setTargetVelocity_async(
+        *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone, nullptr);
 }
 
 double DriveHandler::getWheelSpeed(DriveIndex wheelIndex) {
@@ -222,8 +219,6 @@ void DriveHandler::setWheelZeroState() {
 }
 
 void DriveHandler::start() {
-
-    bool stopped = false;
     while (true) {
 
         // Read from desired state
@@ -274,18 +269,21 @@ void DriveHandler::start() {
 
         // Update current state for sending back to base
         updateCurrentState();
+
+        // Sleep to unblock CPU
+        usleep(DRIVE_UPDATE_INTERVAL_US);
     }
 }
 
 static void CCONV onButtonPressedHandler(PhidgetEncoderHandle pdih, void* ctx,
                                          int state) {
-    int* myIntPtr = (int*)ctx;
-    *myIntPtr = 1;
+    // int* myIntPtr = (int*)ctx;
+    // *myIntPtr = 1;
 }
 
 static void CCONV onAngleReached(PhidgetHandle pdih, void* ctx,
                                  PhidgetReturnCode returnCode) {
-    *(bool*)ctx = true;
+    //*(bool*)ctx = true;
 }
 
 static void CCONV setTargetVelocityDone(PhidgetHandle phid, void* ctx,

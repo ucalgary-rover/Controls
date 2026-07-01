@@ -1,14 +1,13 @@
-#ifndef ARMHANDLER_H
-#define ARMHANDLER_H
-
 #pragma once
+
+#include <string>
+#include <thread>
 
 // #include "ArmModel.h"
 #include "ArmMotorStateManager.h"
 #include "HandlerInterface.h"
 #include "Rover/Rover.h"
 #include "Rover/Systems/Arm.h"
-#include <string>
 
 class ArmHandler : public HandlerInterface {
 public:
@@ -42,5 +41,3 @@ private:
 
     void updateMotorAngles(std::array<int, 6> new_angles);
 };
-
-#endif

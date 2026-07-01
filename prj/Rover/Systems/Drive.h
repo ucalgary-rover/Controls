@@ -1,6 +1,3 @@
-#ifndef DRIVE_H
-#define DRIVE_H
-
 #pragma once
 
 #include "Rover/Systems/pub_systems.h"
@@ -90,5 +87,3 @@ private:
     float m_length;
     float m_width;
 };
-
-#endif

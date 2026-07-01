@@ -6,7 +6,7 @@
 #include <iostream>
 #include <string>
 
-static const char* file = "Base";
+static const char* file = "Logging";
 
 namespace Logging {
     static std::ofstream logFile;
@@ -47,12 +47,12 @@ namespace Logging {
 #if SIDE_TO_BUILD == BUILD_SIDE_BASE
         filename = "logs/base_" + timestamp + ".log";
         logFile.open(filename, std::ios::app);
-        logI(file, "Logging initialized for Base side %s", filename);
+        logI(file, "Logging initialized for Base side %s", filename.c_str());
 
 #elif SIDE_TO_BUILD == BUILD_SIDE_ROVER
         filename = "logs/rover_" + timestamp + ".log";
         logFile.open(filename, std::ios::app);
-        logI(file, "Logging initialized for Rover side %s", filename);
+        logI(file, "Logging initialized for Rover side %s", filename.c_str());
 #endif
     }
 

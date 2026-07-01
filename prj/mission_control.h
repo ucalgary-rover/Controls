@@ -41,10 +41,6 @@
 #define MOVING_DEADZONE 3000
 #define STATIC_DEADZONE 5000
 
-// Logging past motor positions
-#define BASE_LAST_KNOWN_POS_FILE "./prj/Rover/Handlers/LastKnowPosBase.json"
-#define ARM_LAST_KNOWN_POS_FILE "./prj/Rover/Handlers/LastKnowPosArm.json"
-
 // Allow inaccuracy in sensor data for drive systems to still be parsed correctly
 #define DRIVE_THRESHOLD 0.1 // TODO: configure
 #define STEER_THRESHOLD 1.0 // TODO: configure
@@ -74,7 +70,7 @@ const int ARM_CLAW_CHANNEL = 0;
 const int ARM_CLAW_PORT = 0;
 
 // UDP Definitions
-const int ROVER_PORT = 8080; // For on the nook: 5995
+const int ROVER_PORT = 8080; // For on the Nuc: 5995
 const int BASE_PORT = 8008;
 
 #endif // MISSION_CONTROL_H
