@@ -23,8 +23,7 @@ public:
     void translateSpeedAndAngle(DriveMotorState desiredState,
                                 DriveIndex wheelIndex);
 
-    /**
-     * @brief Stops all wheel movement
+    /** @brief Stops all wheel movement
      * @return None
      */
     void stopWheels();
@@ -52,16 +51,4 @@ private:
     DriveMotorState
         wheelZeroState; // Direct hardware values, not consistent with software DriveModel
     // Variables corresponding to conditions during operation
-
-    /**
-     * @brief Turns the stepper motor of a wheel to a specified angle
-     * @param wheel the handler of a particular stepper motor
-     * @param angle the angle to turn the stepper
-     * @return None
-     */
-    void setWheelAngle(DriveIndex wheel, float angle);
-    double getWheelAngle(DriveIndex wheelIndex);
-
-    void setWheelSpeed(DriveIndex wheel, float speed);
-    double getWheelSpeed(DriveIndex wheelIndex);
 };

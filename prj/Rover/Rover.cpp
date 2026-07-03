@@ -10,6 +10,7 @@
 
 #include "Rover/Handlers/DriveHandler.h"
 #include "Rover/Systems/Drive.h"
+#include "Rover/Systems/DriveHardware.h"
 
 #if EXTENTION == EXTENTION_TYPE_ARM
 #include "Rover/Handlers/ArmHandler.h"
@@ -49,8 +50,8 @@ void Rover::start() {
 #endif
 
     Logging::logI(file, "Instantiating Drive System");
-    Drive drive(ROVER_WIDTH, ROVER_LENGTH);
-    DriveHandler driveHandler(&drive,
+    DriveHardware physicalDrive(ROVER_WIDTH, ROVER_LENGTH);
+    DriveHandler driveHandler(&physicalDrive,
                               desiredMotorStateManager.getDriveStateManager(),
                               currentMotorStateManager.getDriveStateManager());
     std::thread driveHandlerThread([&]() { driveHandler.start(); });

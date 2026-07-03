@@ -1,11 +1,33 @@
 #pragma once
 
+#include "Rover/Systems/Drive.h"
 #include "Rover/Systems/pub_systems.h"
 #include "Rover/pub_rover.h"
 #include "mission_control.h"
+#include "phidget22.h"
+#include <cmath>
+#include <iostream>
+#include <stdio.h>
+#include <vector>
 
-class Drive { // abstract
+class DriveHardware : public Drive {
 public:
+    /**
+     * @brief Completes the initialisation for all four DC and stepper motors
+     * needed to drive the rover its self.
+     * @param width The distance between the motors on the left side of the
+     * rover to the motors on the right side of the rover.
+     * @param length The distance between the motors on the top side of the
+     * rover to the motors on the bottom side of the rover.
+     */
+    DriveHardware(float width, float length);
+
+    /**
+     * @brief Completes the deinitialisation for all four DC and stepper motors
+     * that were initialised in the constructor.
+     */
+    ~DriveHardware();
+
     /**
      * @brief Edits retVal to contain the motor type (in this case DC) and the
      * phidgets handler for that motor.
@@ -15,7 +37,7 @@ public:
      * want the DC handler for.
      * @return True is successful, false otherwise
      */
-    virtual bool getDriveDCHandle(MotorHandlerReturn* retVal, int index) = 0;
+    bool getDriveDCHandle(MotorHandlerReturn* retVal, int index);
 
     /**
      * @brief Edits retVal to contain the motor type (in this case stepper) and
@@ -26,8 +48,7 @@ public:
      * want the stepper handler for.
      * @return True is successful, false otherwise.
      */
-    virtual bool getDriveStepperHandle(MotorHandlerReturn* retVal, int index)
-        = 0;
+    bool getDriveStepperHandle(MotorHandlerReturn* retVal, int index);
 
     /**
      * @brief Edits retVal to contain the motor type (in this case encoder
@@ -38,8 +59,7 @@ public:
      * want the encoder handler for.
      * @return True is successful, false otherwise.
      */
-    virtual bool getDriveEncoderHandle(MotorHandlerReturn* retVal, int index)
-        = 0;
+    bool getDriveEncoderHandle(MotorHandlerReturn* retVal, int index);
 
     /**
      * @brief Turns the stepper motor of a wheel to a specified angle
@@ -47,23 +67,36 @@ public:
      * @param angle the angle to turn the stepper
      * @return None
      */
-    virtual void setWheelAngle(DriveIndex wheel, float angle) = 0;
-    virtual double getWheelAngle(DriveIndex wheelIndex) = 0;
+    void setWheelAngle(DriveIndex wheel, float angle) override;
+    double getWheelAngle(DriveIndex wheelIndex) override;
 
-    virtual void setWheelSpeed(DriveIndex wheel, float speed) = 0;
-    virtual double getWheelSpeed(DriveIndex wheelIndex) = 0;
+    void setWheelSpeed(DriveIndex wheel, float speed) override;
+    double getWheelSpeed(DriveIndex wheelIndex) override;
 
     /**
      * @brief Gets the width of the rover between motors
      * @return The width of the rover from the motor on the left to the motor on
      * the right.
      */
-    virtual float getWidth() = 0;
+    float getWidth();
 
     /**
      * @brief Gets the length of the rover between motors
      * @return The length of the rover from the motor on the left to the motor
      * on the right.
      */
-    virtual float getLength() = 0;
+    float getLength();
+
+private:
+    std::vector<PhidgetBLDCMotorHandle> m_handlesDC = {};
+    std::vector<PhidgetStepperHandle> m_handlesStepper = {};
+    std::vector<PhidgetEncoderHandle> m_handlesDriveEncoder = {};
+
+    // if true, the wheels are in spot turning configuration
+    bool m_spotTurnFlag = false;
+
+    // Length and width in meters for now, can change once we get dimensions
+    // from Mech Rover
+    float m_length;
+    float m_width;
 };

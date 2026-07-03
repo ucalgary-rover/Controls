@@ -87,11 +87,11 @@ const float PI = 3.14;
 
 // Constructor
 DriveHandler::DriveHandler(
-    Drive* drive, DriveMotorStateManager* desiredDriveMotorStateManager,
+    Drive* m_drive, DriveMotorStateManager* desiredDriveMotorStateManager,
     DriveMotorStateManager* currentDriveMotorStateManager) {
 
-    // Reference to the Arm object in Rover.cpp
-    m_drive = drive;
+    // Reference to the m_drive object
+    m_drive = m_drive;
 
     // Create DriveMotorStateManager objects in this file that reference the
     // DriveMotorStateManager in Rover.cpp (NOT A COPY!!!) This allows us to use
@@ -104,58 +104,6 @@ DriveHandler::DriveHandler(
     }
 }
 
-void DriveHandler::setWheelAngle(DriveIndex wheel, float angle) {
-    MotorHandlerReturn motorStuct;
-    m_drive->getDriveStepperHandle(&motorStuct, wheel);
-
-    // can make this async with PhidgetStepper_setTargetPosition_async
-    PhidgetStepper_setTargetPosition_async(*motorStuct.handler.stepperMotor,
-                                           angle, onAngleReached, nullptr);
-}
-
-double DriveHandler::getWheelAngle(DriveIndex wheelIndex) {
-    double steer;
-    MotorHandlerReturn motorStuctStepper;
-    m_drive->getDriveStepperHandle(&motorStuctStepper, wheelIndex);
-    PhidgetStepper_getPosition(*motorStuctStepper.handler.stepperMotor,
-                               &(steer));
-    return steer;
-}
-
-void DriveHandler::setWheelSpeed(DriveIndex wheel, float speed) {
-    MotorHandlerReturn motorStuct;
-    m_drive->getDriveDCHandle(&motorStuct, wheel);
-
-    // can make this async with PhidgetBLDCMotor_setTargetVelocity_async
-    PhidgetBLDCMotor_setTargetVelocity_async(
-        *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone, nullptr);
-}
-
-double DriveHandler::getWheelSpeed(DriveIndex wheelIndex) {
-    double velocity;
-    MotorHandlerReturn motorStuctDC;
-    m_drive->getDriveDCHandle(&motorStuctDC, wheelIndex);
-    PhidgetBLDCMotor_getTargetVelocity(*motorStuctDC.handler.bldcMotor,
-                                       &(velocity));
-
-    return velocity;
-}
-
-void DriveHandler::stopWheels() {
-    // sets target velocities of all wheels to zero
-    for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
-        // get the handler
-        MotorHandlerReturn motorStuct;
-        m_drive->getDriveDCHandle(&motorStuct, dc);
-
-        PhidgetBLDCMotor_setTargetVelocity_async(
-            *motorStuct.handler.bldcMotor, 0, setTargetVelocityDone, NULL);
-    }
-
-    // wait for an amount of seconds to let the wheels slow down
-    usleep(STOP_WHEEL_WAIT * 1000000);
-}
-
 void DriveHandler::updateCurrentState() {
     DriveMotorState currentState; // Construct the current state struct
 
@@ -163,24 +111,26 @@ void DriveHandler::updateCurrentState() {
     for (int index = 0; index < WHEEL_COUNT; index++) {
         DriveIndex wheelIndex = static_cast<DriveIndex>(wheelIndex);
         // Get the current position of the wheel
-        currentState.steer[wheelIndex]
-            = getWheelAngle(wheelIndex); // Truncate since resolution here is
-                                         // not too bad (degrees)
+        currentState.steer[wheelIndex] = m_drive->getWheelAngle(
+            wheelIndex); // Truncate since resolution here is
+                         // not too bad (degrees)
 
-        currentState.drive[wheelIndex] = getWheelAngle(wheelIndex);
+        currentState.drive[wheelIndex] = m_drive->getWheelAngle(wheelIndex);
     }
 
     m_currentDriveMotorStateManager->updateState(currentState);
 }
 
-void DriveHandler::translateSpeedAndAngle(DriveMotorState desiredState,
-                                          DriveIndex wheelIndex) {
+void DriveHandler::translateSpeedAndAngle(
+    DriveMotorState desiredState,
+    DriveIndex wheelIndex) { // From software -> hardware
     double angle = desiredState.steer[wheelIndex];
     double speed = desiredState.drive[wheelIndex];
 
     if (angle <= 360 && angle >= 0) { // Check valid software range
-        if (wheelIndex % 2 == 0) {  // WHEEL_FL/WHEEL_BL (mounted to drive fwds)
-            if (angle > 90) {       // if angle < 90, do nothing
+        if (wheelIndex % 2
+            == 0) {           // WHEEL_FL/WHEEL_BL (mounted to m_drive fwds)
+            if (angle > 90) { // if angle < 90, do nothing
                 if (angle <= 180) { // Wheel should be backwards
                     desiredState.steer[wheelIndex] = -180 + angle;
                     desiredState.drive[wheelIndex] = -speed;
@@ -192,7 +142,7 @@ void DriveHandler::translateSpeedAndAngle(DriveMotorState desiredState,
                     desiredState.drive[wheelIndex] = speed;
                 }
             }
-        } else {               // WHEEL_FR/WHEEL_BR (mounted to drive bkwds)
+        } else {               // WHEEL_FR/WHEEL_BR (mounted to m_drive bkwds)
             if (angle <= 90) { // Wheel should be backwards
                 desiredState.drive[wheelIndex] = -speed;
             } else if (angle <= 180) { // Wheel should be forwards
@@ -210,10 +160,21 @@ void DriveHandler::translateSpeedAndAngle(DriveMotorState desiredState,
     }
 }
 
+void DriveHandler::stopWheels() {
+    // sets target velocities of all wheels to zero
+    for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
+        DriveIndex wheelIndex = static_cast<DriveIndex>(dc);
+        m_drive->setWheelSpeed(wheelIndex, 0);
+    }
+
+    // wait for an amount of seconds to let the wheels slow down
+    usleep(STOP_WHEEL_WAIT * 1000000);
+}
+
 void DriveHandler::setWheelZeroState() {
     for (int index = 0; index < WHEEL_COUNT; index++) {
         DriveIndex i = static_cast<DriveIndex>(index);
-        wheelZeroState.steer[index] = getWheelAngle(i);
+        wheelZeroState.steer[index] = m_drive->getWheelAngle(i);
     }
     zeroAngleSet = true;
 }
@@ -234,14 +195,14 @@ void DriveHandler::start() {
                     translateSpeedAndAngle(desiredState, i);
 
                     // Update wheel speed and angle
-                    setWheelAngle(i, desiredState.steer[i]);
-                    setWheelSpeed(i, desiredState.drive[i]);
+                    m_drive->setWheelAngle(i, desiredState.steer[i]);
+                    m_drive->setWheelSpeed(i, desiredState.drive[i]);
                 }
             } else {
                 if (zeroAngleSet) {
                     for (int index = 0; index < WHEEL_COUNT; index++) {
                         DriveIndex i = static_cast<DriveIndex>(index);
-                        setWheelAngle(i, wheelZeroState.steer[i]);
+                        m_drive->setWheelAngle(i, wheelZeroState.steer[i]);
                     }
                 }
 
@@ -249,7 +210,8 @@ void DriveHandler::start() {
                 bool doneGettingZeroState = true;
                 for (int index = 0; index < WHEEL_COUNT; index++) {
                     DriveIndex i = static_cast<DriveIndex>(index);
-                    if (abs(getWheelAngle(i) - wheelZeroState.steer[index])
+                    if (abs(m_drive->getWheelAngle(i)
+                            - wheelZeroState.steer[index])
                         > STEER_THRESHOLD) {
                         doneGettingZeroState = false;
                     }
@@ -263,7 +225,7 @@ void DriveHandler::start() {
             // Stop all wheels
             for (int index = 0; index < WHEEL_COUNT; index++) {
                 DriveIndex i = static_cast<DriveIndex>(index);
-                setWheelSpeed(i, 0.0);
+                m_drive->setWheelSpeed(i, 0.0);
             }
         }
 
@@ -273,20 +235,4 @@ void DriveHandler::start() {
         // Sleep to unblock CPU
         usleep(DRIVE_UPDATE_INTERVAL_US);
     }
-}
-
-static void CCONV onButtonPressedHandler(PhidgetEncoderHandle pdih, void* ctx,
-                                         int state) {
-    // int* myIntPtr = (int*)ctx;
-    // *myIntPtr = 1;
-}
-
-static void CCONV onAngleReached(PhidgetHandle pdih, void* ctx,
-                                 PhidgetReturnCode returnCode) {
-    //*(bool*)ctx = true;
-}
-
-static void CCONV setTargetVelocityDone(PhidgetHandle phid, void* ctx,
-                                        PhidgetReturnCode res) {
-    // Async call completed
 }

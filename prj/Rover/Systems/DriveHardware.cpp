@@ -1,15 +1,16 @@
-#include "Drive.h"
+#include "DriveHardware.h"
 #define GEAR_RATIO 77
 
-static const char* file = "Drive";
+static const char* file = "DriveHardware";
 
-Drive::Drive(float width, float length) : m_width(width), m_length(length) {
+DriveHardware::DriveHardware(float width, float length) :
+    m_width(width), m_length(length) {
 
     // Create handles for DC motors
     PhidgetReturnCode res;
 
     // initialise DC motors
-    Logging::logD(file, "Initialising Drive DC Motors");
+    Logging::logD(file, "Initialising DriveHardware DC Motors");
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
         m_handlesDC.push_back(PhidgetBLDCMotorHandle());
         res = PhidgetBLDCMotor_create(&m_handlesDC.at(dc));
@@ -20,7 +21,7 @@ Drive::Drive(float width, float length) : m_width(width), m_length(length) {
     }
 
     // initialise stepper motors
-    Logging::logD(file, "Initialising Drive Stepper Motors");
+    Logging::logD(file, "Initialising DriveHardware Stepper Motors");
     for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
         m_handlesStepper.push_back(PhidgetStepperHandle());
         PhidgetStepper_create(&m_handlesStepper.at(stepper));
@@ -33,7 +34,7 @@ Drive::Drive(float width, float length) : m_width(width), m_length(length) {
     }
 
     // initialise encoders for wheel zero tracking
-    Logging::logD(file, "Initialising Drive Encoders");
+    Logging::logD(file, "Initialising DriveHardware Encoders");
     for (int driveEncoder = 0; driveEncoder < DRIVE_INDEX_WHEEL_COUNT;
          driveEncoder++) {
         m_handlesDriveEncoder.push_back(PhidgetEncoderHandle());
@@ -46,23 +47,23 @@ Drive::Drive(float width, float length) : m_width(width), m_length(length) {
     }
 }
 
-Drive::~Drive() {
+DriveHardware::~DriveHardware() {
     // deinitialise DC motors
-    Logging::logD(file, "Deinitialising Drive Motors");
+    Logging::logD(file, "Deinitialising DriveHardware Motors");
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
         Phidget_close((PhidgetHandle)m_handlesDC.at(dc));
         PhidgetBLDCMotor_delete(&m_handlesDC.at(dc));
     }
 
     // deinitialise stepper motors
-    Logging::logD(file, "Deinitialising Drive Stepper Motors");
+    Logging::logD(file, "Deinitialising DriveHardware Stepper Motors");
     for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
         Phidget_close((PhidgetHandle)m_handlesStepper.at(stepper));
         PhidgetStepper_delete(&m_handlesStepper.at(stepper));
     }
 
     // deinitialise drive encoders
-    Logging::logD(file, "Deinitialising Drive Encoders");
+    Logging::logD(file, "Deinitialising DriveHardware Encoders");
     for (int driveEncoder = 0; driveEncoder < DRIVE_INDEX_WHEEL_COUNT;
          driveEncoder++) {
         Phidget_close((PhidgetHandle)m_handlesDriveEncoder.at(driveEncoder));
@@ -70,7 +71,7 @@ Drive::~Drive() {
     }
 }
 
-bool Drive::getDriveDCHandle(MotorHandlerReturn* retVal, int index) {
+bool DriveHardware::getDriveDCHandle(MotorHandlerReturn* retVal, int index) {
     if (index >= 0 && index < DRIVE_INDEX_WHEEL_COUNT) {
         retVal->type = MOTOR_TYPE_BLDC_MOTOR;
         retVal->handler.bldcMotor = &m_handlesDC.at(index);
@@ -80,7 +81,8 @@ bool Drive::getDriveDCHandle(MotorHandlerReturn* retVal, int index) {
     return false;
 }
 
-bool Drive::getDriveStepperHandle(MotorHandlerReturn* retVal, int index) {
+bool DriveHardware::getDriveStepperHandle(MotorHandlerReturn* retVal,
+                                          int index) {
     if (index >= 0 && index < DRIVE_INDEX_WHEEL_COUNT) {
         retVal->type = MOTOR_TYPE_STEPPER_MOTOR;
         retVal->handler.stepperMotor = &m_handlesStepper.at(index);
@@ -90,7 +92,8 @@ bool Drive::getDriveStepperHandle(MotorHandlerReturn* retVal, int index) {
     return false;
 }
 
-bool Drive::getDriveEncoderHandle(MotorHandlerReturn* retVal, int index) {
+bool DriveHardware::getDriveEncoderHandle(MotorHandlerReturn* retVal,
+                                          int index) {
     if (index >= 0 && index < DRIVE_INDEX_WHEEL_COUNT) {
         retVal->type = MOTOR_TYPE_ENCODER;
         retVal->handler.encoder = &m_handlesDriveEncoder.at(index);
@@ -100,6 +103,59 @@ bool Drive::getDriveEncoderHandle(MotorHandlerReturn* retVal, int index) {
     return false;
 }
 
-float Drive::getLength() { return m_length; }
+static void CCONV onButtonPressedHandler(PhidgetEncoderHandle pdih, void* ctx,
+                                         int state) {
+    // int* myIntPtr = (int*)ctx;
+    // *myIntPtr = 1;
+}
 
-float Drive::getWidth() { return m_width; }
+static void CCONV onAngleReached(PhidgetHandle pdih, void* ctx,
+                                 PhidgetReturnCode returnCode) {
+    //*(bool*)ctx = true;
+}
+
+static void CCONV setTargetVelocityDone(PhidgetHandle phid, void* ctx,
+                                        PhidgetReturnCode res) {
+    // Async call completed
+}
+
+void DriveHardware::setWheelAngle(DriveIndex wheel, float angle) {
+    MotorHandlerReturn motorStuct;
+    getDriveStepperHandle(&motorStuct, wheel);
+
+    // can make this async with PhidgetStepper_setTargetPosition_async
+    PhidgetStepper_setTargetPosition_async(*motorStuct.handler.stepperMotor,
+                                           angle, onAngleReached, nullptr);
+}
+
+double DriveHardware::getWheelAngle(DriveIndex wheelIndex) {
+    double steer;
+    MotorHandlerReturn motorStuctStepper;
+    getDriveStepperHandle(&motorStuctStepper, wheelIndex);
+    PhidgetStepper_getPosition(*motorStuctStepper.handler.stepperMotor,
+                               &(steer));
+    return steer;
+}
+
+void DriveHardware::setWheelSpeed(DriveIndex wheel, float speed) {
+    MotorHandlerReturn motorStuct;
+    getDriveDCHandle(&motorStuct, wheel);
+
+    // can make this async with PhidgetBLDCMotor_setTargetVelocity_async
+    PhidgetBLDCMotor_setTargetVelocity_async(
+        *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone, nullptr);
+}
+
+double DriveHardware::getWheelSpeed(DriveIndex wheelIndex) {
+    double velocity;
+    MotorHandlerReturn motorStuctDC;
+    getDriveDCHandle(&motorStuctDC, wheelIndex);
+    PhidgetBLDCMotor_getTargetVelocity(*motorStuctDC.handler.bldcMotor,
+                                       &(velocity));
+
+    return velocity;
+}
+
+float DriveHardware::getLength() { return m_length; }
+
+float DriveHardware::getWidth() { return m_width; }
