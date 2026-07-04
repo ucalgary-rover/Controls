@@ -49,7 +49,7 @@ void Base::initialize() {
         processDesiredArmState, armForwardsKinematics);
 
     ControllerHandler::initialize({ driveController, armController });
-#elif EXTENSION == EXTENSION_TYPE_SCIENCE_TOOL
+#elif EXTENSION == EXTENSION_TYPE_SCI_TOOL
     sciToolController = std::make_shared<SciToolControllerLayout>();
 
     ControllerHandler::initialize({ driveController, sciToolController });

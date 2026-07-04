@@ -1,7 +1,6 @@
 #include "DriveControllerLayout.h"
 
 static const char* file = "DriveControllerLayout";
-static const char* layoutNames[] = { NAMEOF(DRIVE_AUTO), NAMEOF(DRIVE_MANUAL) };
 
 DriveControlState DriveControllerLayout::getControlState(uint64_t elapsed_ms) {
     DriveControlState control;
@@ -44,5 +43,5 @@ void DriveControllerLayout::rightTriggerResponse(int16_t axisValue) {
 
 void DriveControllerLayout::switchLayout(DriveLayout layout) {
     currentLayout = layout;
-    Logging::logI(file, "Switching to %s", layoutNames[layout]);
+    Logging::logI(file, "Switching to %s", drivelayouts[layout]->getName());
 }

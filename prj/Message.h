@@ -17,10 +17,9 @@
 // Generic message format for default constructor
 
 // Allows for different message formats
-using MessagePayload
-    = std::variant<Generic, MotorState, SciToolDoorMessage,
-                   ScienceToolHeightMessage, SciToolBrushMessage,
-                   HeadlightMessage, DriveZeroMessage>;
+using MessagePayload = std::variant<Generic, MotorState, SciToolDoorMessage,
+                                    SciToolHeightMessage, SciToolBrushMessage,
+                                    HeadlightMessage, DriveZeroMessage>;
 
 class Message {
 public:
