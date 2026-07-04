@@ -16,7 +16,7 @@ enum MotorType {
     MOTOR_TYPE_INVALID = MOTOR_TYPE_COUNT,
 };
 
-enum DriveIndex {
+enum DriveIndex : int {
     DRIVE_INDEX_FRONT_LEFT,
     DRIVE_INDEX_FRONT_RIGHT,
     DRIVE_INDEX_BACK_LEFT,

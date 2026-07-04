@@ -67,13 +67,6 @@ fit within the range
 Stepper motors turn wheels and report when their targets are hit afterwards
 
 */
-static void CCONV onButtonPressedHandler(PhidgetEncoderHandle pdih, void* ctx,
-                                         int state);
-static void CCONV onAngleReached(PhidgetHandle pdih, void* ctx,
-                                 PhidgetReturnCode returnCode);
-
-static void CCONV setTargetVelocityDone(PhidgetHandle phid, void* ctx,
-                                        PhidgetReturnCode res);
 
 const float PI = 3.14;
 
@@ -87,11 +80,11 @@ const float PI = 3.14;
 
 // Constructor
 DriveHandler::DriveHandler(
-    Drive* m_drive, DriveMotorStateManager* desiredDriveMotorStateManager,
+    Drive* drive, DriveMotorStateManager* desiredDriveMotorStateManager,
     DriveMotorStateManager* currentDriveMotorStateManager) {
 
     // Reference to the m_drive object
-    m_drive = m_drive;
+    m_drive = drive;
 
     // Create DriveMotorStateManager objects in this file that reference the
     // DriveMotorStateManager in Rover.cpp (NOT A COPY!!!) This allows us to use
@@ -102,6 +95,10 @@ DriveHandler::DriveHandler(
     for (int i = 0; i < WHEEL_COUNT; i++) {
         wheelZeroState.drive[i] = 0; // stopped
     }
+
+    float val = m_drive->getWheelAngle(DriveIndex::DRIVE_INDEX_BACK_RIGHT);
+
+    Logging::logI(file, "start_val = %.2f", val);
 }
 
 void DriveHandler::updateCurrentState() {
@@ -109,13 +106,13 @@ void DriveHandler::updateCurrentState() {
 
     // Get values for each wheel
     for (int index = 0; index < WHEEL_COUNT; index++) {
-        DriveIndex wheelIndex = static_cast<DriveIndex>(wheelIndex);
+        DriveIndex wheelIndex = static_cast<DriveIndex>(index);
         // Get the current position of the wheel
-        currentState.steer[wheelIndex] = m_drive->getWheelAngle(
-            wheelIndex); // Truncate since resolution here is
-                         // not too bad (degrees)
+        currentState.steer[wheelIndex] = m_drive->getWheelAngle(wheelIndex);
+        // Truncate since resolution here is
+        // not too bad (degrees)
 
-        currentState.drive[wheelIndex] = m_drive->getWheelAngle(wheelIndex);
+        currentState.drive[wheelIndex] = m_drive->getWheelSpeed(wheelIndex);
     }
 
     m_currentDriveMotorStateManager->updateState(currentState);

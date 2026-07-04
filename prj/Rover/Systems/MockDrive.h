@@ -45,14 +45,14 @@ public:
      * @return The width of the rover from the motor on the left to the motor on
      * the right.
      */
-    float getWidth();
+    float getWidth() override;
 
     /**
      * @brief Gets the length of the rover between motors
      * @return The length of the rover from the motor on the left to the motor
      * on the right.
      */
-    float getLength();
+    float getLength() override;
 
 private:
     float steer[WHEEL_COUNT] = {};
