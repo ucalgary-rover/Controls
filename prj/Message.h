@@ -18,7 +18,9 @@
 
 // Allows for different message formats
 using MessagePayload
-    = std::variant<Generic, MotorState, ScienceToolMessage, DriveZeroMessage>;
+    = std::variant<Generic, MotorState, SciToolDoorMessage,
+                   ScienceToolHeightMessage, SciToolBrushMessage,
+                   HeadlightMessage, DriveZeroMessage>;
 
 class Message {
 public:

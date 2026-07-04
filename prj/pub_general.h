@@ -92,13 +92,38 @@ enum MotorID : int {
     MOTOR_ID_END,
 };
 
-// Message format for science tool
-struct ScienceToolMessage {
-    int moveUpDown;
-    int moveLeftRight;
+enum SciToolDoorControl : int {
+    Left,
+    Middle,
+    Right,
+};
 
-    int xPos;
-    int yPos;
+// Message format for science tool
+struct SciToolDoorMessage {
+    SciToolDoorControl door;
+};
+
+enum SciToolHeightControl : int {
+    Raise,
+    Lower,
+    Stop,
+};
+
+struct ScienceToolHeightMessage {
+    SciToolHeightControl control;
+};
+
+enum SciToolBrushControl : int {
+    Start,
+    Stop,
+};
+
+struct SciToolBrushMessage {
+    SciToolBrushControl control;
+};
+
+struct HeadlightMessage {
+    int brightness;
 };
 
 struct DriveZeroMessage {
