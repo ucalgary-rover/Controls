@@ -3,8 +3,7 @@
 
 static const char* file = "DriveHardware";
 
-DriveHardware::DriveHardware(float width, float length) :
-    m_width(width), m_length(length) {
+DriveHardware::DriveHardware() {
 
     // Create handles for DC motors
     PhidgetReturnCode res;

@@ -31,4 +31,10 @@ public:
      * on the right.
      */
     virtual float getLength() = 0;
+
+protected:
+    // Length and width in meters for now, can change once we get dimensions
+    // from Mech Rover
+    float m_length = ROVER_LENGTH;
+    float m_width = ROVER_WIDTH;
 };

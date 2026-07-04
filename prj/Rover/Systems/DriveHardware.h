@@ -15,12 +15,8 @@ public:
     /**
      * @brief Completes the initialisation for all four DC and stepper motors
      * needed to drive the rover its self.
-     * @param width The distance between the motors on the left side of the
-     * rover to the motors on the right side of the rover.
-     * @param length The distance between the motors on the top side of the
-     * rover to the motors on the bottom side of the rover.
      */
-    DriveHardware(float width, float length);
+    DriveHardware();
 
     /**
      * @brief Completes the deinitialisation for all four DC and stepper motors
@@ -91,12 +87,4 @@ private:
      * @return True is successful, false otherwise.
      */
     bool getDriveEncoderHandle(MotorHandlerReturn* retVal, int index);
-
-    // if true, the wheels are in spot turning configuration
-    bool m_spotTurnFlag = false;
-
-    // Length and width in meters for now, can change once we get dimensions
-    // from Mech Rover
-    float m_length;
-    float m_width;
 };
