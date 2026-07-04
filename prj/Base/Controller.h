@@ -104,9 +104,6 @@ private:
     Trigger m_leftTrigger;
     Trigger m_rightTrigger;
 
-    // struct for button functions
-    buttonFunctions m_buttonFuncs;
-
     std::shared_ptr<ControllerLayout> controllerLayout;
 
 public:

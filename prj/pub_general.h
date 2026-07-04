@@ -87,8 +87,8 @@ struct SciToolHeightMessage {
 };
 
 enum SciToolBrushControl : int {
-    START,
-    STOP,
+    START_BRUSH,
+    STOP_BRUSH,
 };
 
 struct SciToolBrushMessage {

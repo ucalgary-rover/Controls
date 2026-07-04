@@ -26,8 +26,8 @@ ArmMessageType Base::armControlType;
 bool Base::exitLoop = false;
 
 std::shared_ptr<DriveControllerLayout> Base::driveController;
-std::shared_ptr<ArmControllerLayout> armController;
-std::shared_ptr<SciToolControllerLayout> sciToolController;
+std::shared_ptr<ArmControllerLayout> Base::armController;
+std::shared_ptr<SciToolControllerLayout> Base::sciToolController;
 
 void Base::initialize() {
     Logging::logI(file, "Initializing Base");
