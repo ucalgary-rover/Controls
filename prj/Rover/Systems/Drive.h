@@ -7,41 +7,6 @@
 class Drive { // abstract
 public:
     /**
-     * @brief Edits retVal to contain the motor type (in this case DC) and the
-     * phidgets handler for that motor.
-     * @param retVal Pointer to a stuct that will get updated with the motor
-     * handler and motor type.
-     * @param index Valid value from DriveMotorIndex to specify what wheel you
-     * want the DC handler for.
-     * @return True is successful, false otherwise
-     */
-    virtual bool getDriveDCHandle(MotorHandlerReturn* retVal, int index) = 0;
-
-    /**
-     * @brief Edits retVal to contain the motor type (in this case stepper) and
-     * the phidgets handler for that motor.
-     * @param retVal Pointer to a stuct that will get updated with the motor
-     * handler and motor type.
-     * @param index Valid value from DriveMotorIndex to specify what wheel you
-     * want the stepper handler for.
-     * @return True is successful, false otherwise.
-     */
-    virtual bool getDriveStepperHandle(MotorHandlerReturn* retVal, int index)
-        = 0;
-
-    /**
-     * @brief Edits retVal to contain the motor type (in this case encoder
-     * and the phidgets handler for that motor.
-     * @param retVal Pointer to a stuct that will get updated with the motor
-     * handler and motor type.
-     * @param index Valid value from DriveMotorIndex to specify what wheel you
-     * want the encoder handler for.
-     * @return True is successful, false otherwise.
-     */
-    virtual bool getDriveEncoderHandle(MotorHandlerReturn* retVal, int index)
-        = 0;
-
-    /**
      * @brief Turns the stepper motor of a wheel to a specified angle
      * @param wheel the handler of a particular stepper motor
      * @param angle the angle to turn the stepper

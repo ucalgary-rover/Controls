@@ -29,6 +29,37 @@ public:
     ~DriveHardware();
 
     /**
+     * @brief Turns the stepper motor of a wheel to a specified angle
+     * @param wheel the handler of a particular stepper motor
+     * @param angle the angle to turn the stepper
+     * @return None
+     */
+    void setWheelAngle(DriveIndex wheel, float angle) override;
+    double getWheelAngle(DriveIndex wheelIndex) override;
+
+    void setWheelSpeed(DriveIndex wheel, float speed) override;
+    double getWheelSpeed(DriveIndex wheelIndex) override;
+
+    /**
+     * @brief Gets the width of the rover between motors
+     * @return The width of the rover from the motor on the left to the motor on
+     * the right.
+     */
+    float getWidth();
+
+    /**
+     * @brief Gets the length of the rover between motors
+     * @return The length of the rover from the motor on the left to the motor
+     * on the right.
+     */
+    float getLength();
+
+private:
+    std::vector<PhidgetBLDCMotorHandle> m_handlesDC = {};
+    std::vector<PhidgetStepperHandle> m_handlesStepper = {};
+    std::vector<PhidgetEncoderHandle> m_handlesDriveEncoder = {};
+
+    /**
      * @brief Edits retVal to contain the motor type (in this case DC) and the
      * phidgets handler for that motor.
      * @param retVal Pointer to a stuct that will get updated with the motor
@@ -60,37 +91,6 @@ public:
      * @return True is successful, false otherwise.
      */
     bool getDriveEncoderHandle(MotorHandlerReturn* retVal, int index);
-
-    /**
-     * @brief Turns the stepper motor of a wheel to a specified angle
-     * @param wheel the handler of a particular stepper motor
-     * @param angle the angle to turn the stepper
-     * @return None
-     */
-    void setWheelAngle(DriveIndex wheel, float angle) override;
-    double getWheelAngle(DriveIndex wheelIndex) override;
-
-    void setWheelSpeed(DriveIndex wheel, float speed) override;
-    double getWheelSpeed(DriveIndex wheelIndex) override;
-
-    /**
-     * @brief Gets the width of the rover between motors
-     * @return The width of the rover from the motor on the left to the motor on
-     * the right.
-     */
-    float getWidth();
-
-    /**
-     * @brief Gets the length of the rover between motors
-     * @return The length of the rover from the motor on the left to the motor
-     * on the right.
-     */
-    float getLength();
-
-private:
-    std::vector<PhidgetBLDCMotorHandle> m_handlesDC = {};
-    std::vector<PhidgetStepperHandle> m_handlesStepper = {};
-    std::vector<PhidgetEncoderHandle> m_handlesDriveEncoder = {};
 
     // if true, the wheels are in spot turning configuration
     bool m_spotTurnFlag = false;
