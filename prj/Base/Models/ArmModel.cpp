@@ -110,14 +110,16 @@ ArmFKOutput ArmModel::forwardsKinematics(std::array<int, 6> motor_angles) {
         return {};
     }
 
-    SSRTArm2025::TargetPose pose
-        = armModel->ForwardsKinematics(int2DoubleArray(motor_angles));
+    // SSRTArm2025::TargetPose pose
+    //     = armModel->ForwardsKinematics(int2DoubleArray(motor_angles));
 
-    ArmFKOutput out = {
-        .wrist_position = vector3d2array(pose.position),
-        .claw_pitch = pose.pitch,
-        .claw_roll = pose.roll,
-    };
+    // ArmFKOutput out = {
+    //     .wrist_position = vector3d2array(pose.position),
+    //     .claw_pitch = pose.pitch,
+    //     .claw_roll = pose.roll,
+    // };
+
+    ArmFKOutput out = ArmFKOutput();
 
     return out;
 }

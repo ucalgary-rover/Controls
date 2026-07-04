@@ -39,19 +39,17 @@ Message UDPHandler::receive() {
 void UDPHandler::handle_session(MessageQueue& queue) {
 
     while (true) {
-        if (!queue.empty()) {
-            // Pop the next message from the queue (blocks if empty)
-            Message msg = queue.pop();
+        // Pop the next message from the queue (blocks if empty)
+        Message msg = queue.pop();
 
-            // Serialize Message object to a byte vector
-            std::vector<std::byte> serializedMsg = msg.serialize();
-            asio::mutable_buffer msgBuffer = asio::buffer(serializedMsg);
+        // Serialize Message object to a byte vector
+        std::vector<std::byte> serializedMsg = msg.serialize();
+        asio::mutable_buffer msgBuffer = asio::buffer(serializedMsg);
 
-            // Send the serialized message to the client
-            size_t returned = mySocket.send_to(msgBuffer, theirEndpoint);
+        // Send the serialized message to the client
+        size_t returned = mySocket.send_to(msgBuffer, theirEndpoint);
 
-            // Print the sent message
-            Message out = Message::deserialize(serializedMsg, returned);
-        }
+        // Print the sent message
+        Message out = Message::deserialize(serializedMsg, returned);
     }
 }

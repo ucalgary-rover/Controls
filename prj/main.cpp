@@ -26,9 +26,8 @@ int main(int argc, char* argv[]) {
 #endif
 #if SIDE_TO_BUILD == BUILD_SIDE_ROVER
     Logging::logI(file, "Running Rover Side: %d", EXTENTION);
-    Rover rover;
-
-    rover.start();
+    Rover::initialize();
+    Rover::start();
 
 #endif
 

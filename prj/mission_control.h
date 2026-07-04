@@ -41,10 +41,6 @@
 #define MOVING_DEADZONE 3000
 #define STATIC_DEADZONE 5000
 
-// Logging past motor positions
-#define BASE_LAST_KNOWN_POS_FILE "./prj/Rover/Handlers/LastKnowPosBase.json"
-#define ARM_LAST_KNOWN_POS_FILE "./prj/Rover/Handlers/LastKnowPosArm.json"
-
 // Allow inaccuracy in sensor data for drive systems to still be parsed correctly
 #define DRIVE_THRESHOLD 0.1 // TODO: configure
 #define STEER_THRESHOLD 1.0 // TODO: configure
@@ -52,16 +48,16 @@
 // Configuration file to set serial numbers and channels for each of the motors
 
 // Following consts should follow the order of
-// DriveMotorIndex in pub_rover.cpp
-const int DRIVE_DC_SERIAL_NUMBER[4] = { 697178, 697178, 697178, 697178 };
+// DriveMotorIndex in pub_rover.cpp -> FL, FR, BL, BR
+const int DRIVE_DC_SERIAL_NUMBER[4] = { 697178, 697178, 697270, 697270 };
 const int DRIVE_DC_CHANNEL[4] = { 0, 0, 0, 0 };
-const int DRIVE_DC_PORT[4] = { 4, 0, 5, 1 };
-const int DRIVE_STEPPER_SERIAL_NUMBER[4] = { 697270, 697270, 697270, 697270 };
+const int DRIVE_DC_PORT[4] = { 5, 2, 4, 2 };
+const int DRIVE_STEPPER_SERIAL_NUMBER[4] = { 697178, 697178, 697270, 697270 };
 const int DRIVE_STEPPER_CHANNEL[4] = { 0, 0, 0, 0 };
-const int DRIVE_STEPPER_PORT[4] = { 1, 4, 2, 5 };
-const int DRIVE_DIGITAL_INPUT_SERIAL_NUMBER = 697270;
-const int DRIVE_DIGITAL_INPUT_CHANNEL[4] = { 0, 1, 2, 3 };
-const int DRIVE_DIGITAL_INPUT_PORT = 3;
+const int DRIVE_STEPPER_PORT[4] = { 4, 1, 5, 1 };
+const int DRIVE_ENCODER_SERIAL_NUMBER[4] = { 697178, 697178, 697270, 697270 };
+const int DRIVE_ENCODER_CHANNEL[4] = { 0, 0, 0, 0 };
+const int DRIVE_ENCODER_PORT[4] = { 3, 0, 3, 0 };
 
 const int ARM_MOTOR_SERIAL_NUMBER[6] = { 1000, 1000, 1000, 1000, 1000, 1000 };
 const int ARM_MOTOR_CHANNEL[6] = { 0, 0, 0, 0, 0, 0 };
@@ -74,7 +70,7 @@ const int ARM_CLAW_CHANNEL = 0;
 const int ARM_CLAW_PORT = 0;
 
 // UDP Definitions
-const int ROVER_PORT = 8080; // For on the nook: 5995
+const int ROVER_PORT = 8080; // For on the Nuc: 5995
 const int BASE_PORT = 8008;
 
 #endif // MISSION_CONTROL_H

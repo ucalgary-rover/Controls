@@ -1,5 +1,4 @@
-#ifndef BASE_H
-#define BASE_H
+#pragma once
 
 #include "ArmControllerLayout.h"
 #include "Base/ControllerHandler.h"
@@ -7,8 +6,6 @@
 #include "DriveControllerLayout.h"
 #include "MotorStateManager.h"
 #include "UDPHandler.h"
-
-#pragma once
 
 class Base {
 public:
@@ -44,4 +41,3 @@ private:
     // UDP receiving
     static void receive(UDPHandler& receiver);
 };
-#endif
