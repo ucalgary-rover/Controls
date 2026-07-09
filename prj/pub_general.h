@@ -11,6 +11,7 @@ enum MessageFormat : int {
     MESSAGE_FORMAT_MOTOR_STATE,
     MESSAGE_FORMAT_SCIENCE_TOOL,
     MESSAGE_FORMAT_DRIVE_ZERO,
+    MESSAGE_FORMAT_HEADLIGHTS,
     MESSAGE_FORMAT_GENERIC
 };
 
@@ -103,6 +104,10 @@ struct ScienceToolMessage {
 
 struct DriveZeroMessage {
     bool set;
+};
+
+struct HeadlightsMessage {
+    int headLightPercentage; // 0% to 100%
 };
 
 #endif

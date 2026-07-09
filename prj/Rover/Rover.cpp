@@ -18,6 +18,8 @@
 #include "Rover/Systems/Arm.h"
 #endif
 
+#include "Rover/Handlers/HeadlightHandler.h"
+
 #define CURRENT_STATE_PUSH_INTERVAL_US 1000 * 1000 // 1s
 #define INACTIVE_SLEEP_US 100 * 1000               // 100ms
 
@@ -57,6 +59,9 @@ void Rover::start() {
                               desiredMotorStateManager.getDriveStateManager(),
                               currentMotorStateManager.getDriveStateManager());
     std::thread driveHandlerThread([&]() { driveHandler.start(); });
+
+    Logging::logI(file, "Instantiating Headlight System");
+    HeadlightHandler headlightHandler(HEADLIGHT_ARDUINO);
 
     Logging::logI(file, "Instantiating Network Systems");
     UDPHandler client(ROVER_PORT, BASE_PORT);
@@ -124,6 +129,18 @@ void Rover::start() {
             }
             break;
         }
+        case MESSAGE_FORMAT_HEADLIGHTS: {
+            HeadlightsMessage headlightsMessage
+                = std::get<HeadlightsMessage>(message.getPayload());
+
+            // Handle out of bounds data values
+            if (headlightsMessage.headLightPercentage > 100) {
+                headlightsMessage.headLightPercentage = 100;
+            }
+            headlightHandler.setHeadlightPercentage(
+                headlightsMessage.headLightPercentage);
+        }
+
         default:
             break;
         }

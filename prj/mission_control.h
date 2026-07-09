@@ -45,6 +45,10 @@
 #define DRIVE_THRESHOLD 0.1 // TODO: configure
 #define STEER_THRESHOLD 1.0 // TODO: configure
 
+// Teporary value, must be swaped to actual ID
+#define HEADLIGHT_ARDUINO                                                      \
+    "usb-Arduino__www.arduino.cc__0042_44231313330351E05291-if00"
+
 // Configuration file to set serial numbers and channels for each of the motors
 
 // Following consts should follow the order of
