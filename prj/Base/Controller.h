@@ -10,9 +10,6 @@
 #include <memory>
 #include <string>
 
-// Used to streamline the struct (Don't keep in final)<<<<<<<<<<<<<<<<<<<<<<<<<
-typedef void (*ControllerFunc)(void* args);
-
 // class for joysticks (generic and can be applied to any controller)
 class Stick {
 private:
@@ -106,9 +103,6 @@ private:
 
     Trigger m_leftTrigger;
     Trigger m_rightTrigger;
-
-    // struct for button functions
-    buttonFunctions m_buttonFuncs;
 
     std::shared_ptr<ControllerLayout> controllerLayout;
 

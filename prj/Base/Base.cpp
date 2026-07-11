@@ -27,6 +27,7 @@ bool Base::exitLoop = false;
 
 std::shared_ptr<DriveControllerLayout> Base::driveController;
 std::shared_ptr<ArmControllerLayout> Base::armController;
+std::shared_ptr<SciToolControllerLayout> Base::sciToolController;
 
 void Base::initialize() {
     Logging::logI(file, "Initializing Base");
@@ -42,15 +43,24 @@ void Base::initialize() {
 
     driveController
         = std::make_shared<DriveControllerLayout>(processDesiredDriveState);
+
+#if EXTENSION == EXTENSION_TYPE_ARM
     armController = std::make_shared<ArmControllerLayout>(
         processDesiredArmState, armForwardsKinematics);
 
     ControllerHandler::initialize({ driveController, armController });
+#elif EXTENSION == EXTENSION_TYPE_SCI_TOOL
+    sciToolController = std::make_shared<SciToolControllerLayout>();
+
+    ControllerHandler::initialize({ driveController, sciToolController });
+#endif
 
     Logging::logI(file, "Initializing Base done");
 }
 
 void Base::quit() { exitLoop = true; }
+
+#if EXTENSION == EXTENSION_TYPE_ARM
 
 ArmMotorState Base::processDesiredArmState(const ArmState& desiredArmState) {
     ArmMotorState armMs = {};
@@ -102,6 +112,7 @@ ArmState Base::armForwardsKinematics(const ArmMotorState& motorState) {
 
     return out;
 }
+#endif
 
 DriveMotorState Base::processDesiredDriveState(const DriveState& state) {
     DriveMotorState currentMotorState
@@ -113,8 +124,11 @@ void Base::updateDesiredRoverState(uint64_t elapsed_ms) {
     MotorState desiredMotorstate = {
         .driveMotorState
         = driveController->getControlState(elapsed_ms).driveMotorState,
+
+#if EXTENSION == EXTENSION_TYPE_ARM
         .armMotorState
         = armController->getControlState(elapsed_ms).armMotorState,
+#endif
     };
 
     desiredMotorStateManager.updateState(desiredMotorstate);

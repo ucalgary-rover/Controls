@@ -9,7 +9,9 @@
 
 enum MessageFormat : int {
     MESSAGE_FORMAT_MOTOR_STATE,
-    MESSAGE_FORMAT_SCIENCE_TOOL,
+    MESSAGE_FORMAT_SCI_TOOL_DOOR,
+    MESSAGE_FORMAT_SCI_TOOL_HEIGHT,
+    MESSAGE_FORMAT_SCI_TOOL_BRUSH,
     MESSAGE_FORMAT_DRIVE_ZERO,
     MESSAGE_FORMAT_GENERIC
 };
@@ -29,35 +31,6 @@ enum GameControllerAxis : int {
     GAME_CONTROLLER_AXIS_TRIGGERLEFT,
     GAME_CONTROLLER_AXIS_TRIGGERRIGHT,
     GAME_CONTROLLER_AXIS_MAX
-};
-
-// Used to streamline the struct (Don't keep in final)<<<<<<<<<<<<<<<<<<<<<<<<<<
-typedef void (*ControllerFunc)(void* args);
-
-// a struct for function pointers used for button mapping
-// fill buttonArray with button functions
-// Can treat the array as a dictionary and these values as keys
-// SDL_CONTROLLER_BUTTON_A
-// SDL_CONTROLLER_BUTTON_B
-// SDL_CONTROLLER_BUTTON_X
-// SDL_CONTROLLER_BUTTON_Y
-// SDL_CONTROLLER_BUTTON_BACK
-// SDL_CONTROLLER_BUTTON_GUIDE
-// SDL_CONTROLLER_BUTTON_START
-// SDL_CONTROLLER_BUTTON_LEFTSTICK
-// SDL_CONTROLLER_BUTTON_RIGHTSTICK
-// SDL_CONTROLLER_BUTTON_LEFTSHOULDER
-// SDL_CONTROLLER_BUTTON_RIGHTSHOULDER
-// SDL_CONTROLLER_BUTTON_DPAD_UP
-// SDL_CONTROLLER_BUTTON_DPAD_DOWN
-// SDL_CONTROLLER_BUTTON_DPAD_LEFT
-// SDL_CONTROLLER_BUTTON_DPAD_RIGHT
-struct buttonFunctions {
-    std::array<std::function<void()>, 15> buttonArray = { nullptr };
-    std::function<void(int, int)> LEFT_JOYSTICK = nullptr;
-    std::function<void(int, int)> RIGHT_JOYSTICK = nullptr;
-    std::function<void(int)> LEFT_TRIGGER = nullptr;
-    std::function<void(int)> RIGHT_TRIGGER = nullptr;
 };
 
 // Generic Message Format
@@ -92,13 +65,38 @@ enum MotorID : int {
     MOTOR_ID_END,
 };
 
-// Message format for science tool
-struct ScienceToolMessage {
-    int moveUpDown;
-    int moveLeftRight;
+enum SciToolDoorControl : int {
+    LEFT,
+    MIDDLE,
+    RIGHT,
+};
 
-    int xPos;
-    int yPos;
+// Message formats for science tool
+struct SciToolDoorMessage {
+    SciToolDoorControl door;
+};
+
+enum SciToolHeightControl : int {
+    RAISE,
+    LOWER,
+    STOP,
+};
+
+struct SciToolHeightMessage {
+    SciToolHeightControl control;
+};
+
+enum SciToolBrushControl : int {
+    START_BRUSH,
+    STOP_BRUSH,
+};
+
+struct SciToolBrushMessage {
+    SciToolBrushControl control;
+};
+
+struct HeadlightMessage {
+    int brightness;
 };
 
 struct DriveZeroMessage {

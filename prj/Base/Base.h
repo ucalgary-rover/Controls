@@ -5,6 +5,7 @@
 #include "Controller/ControllerLayout.h"
 #include "DriveControllerLayout.h"
 #include "MotorStateManager.h"
+#include "SciToolControllerLayout.h"
 #include "UDPHandler.h"
 
 class Base {
@@ -29,6 +30,7 @@ private:
 
     static std::shared_ptr<DriveControllerLayout> driveController;
     static std::shared_ptr<ArmControllerLayout> armController;
+    static std::shared_ptr<SciToolControllerLayout> sciToolController;
 
     // Desired Motor State Update Methods
     static DriveMotorState
