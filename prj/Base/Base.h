@@ -1,9 +1,11 @@
 #pragma once
 
 #include "ArmControllerLayout.h"
+#include "ArmProcessor.h"
 #include "Base/ControllerHandler.h"
 #include "Controller/ControllerLayout.h"
 #include "DriveControllerLayout.h"
+#include "DriveProcessor.h"
 #include "MotorStateManager.h"
 #include "SciToolControllerLayout.h"
 #include "UDPHandler.h"
@@ -20,25 +22,13 @@ public:
 
 private:
     // Chassis state management
-    static MotorStateManager desiredMotorStateManager;
-    static MotorStateManager currentMotorStateManager;
+    static constexpr ArmMotorState defaultArmMotorState = {};
+    static std::shared_ptr<ArmProcessor> armProcessor;
 
-    // Variables for state of rover arm
-    static ArmMessageType armControlType;
+    static constexpr DriveMotorState defaultDriveMotorState = {};
+    static std::shared_ptr<DriveProcessor> driveProcessor;
 
     static bool exitLoop;
-
-    static std::shared_ptr<DriveControllerLayout> driveController;
-    static std::shared_ptr<ArmControllerLayout> armController;
-    static std::shared_ptr<SciToolControllerLayout> sciToolController;
-
-    // Desired Motor State Update Methods
-    static DriveMotorState
-    processDesiredDriveState(const DriveState& desiredDriveState);
-    static ArmMotorState
-    processDesiredArmState(const ArmState& desiredArmState);
-    static ArmState armForwardsKinematics(const ArmMotorState& motorState);
-    static void updateDesiredRoverState(uint64_t elapsed_ms);
 
     // UDP receiving
     static void receive(UDPHandler& receiver);

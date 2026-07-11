@@ -1,53 +1,32 @@
 #pragma once
 
-#include <functional>
 #include <memory>
 #include <string>
 
-#include "ArmFixedIKControllerLayout.h"
+#include "ArmIKControllerLayout.h"
 #include "ArmManualControllerLayout.h"
-#include "ArmVariableIKControllerLayout.h"
+#include "ArmProcessor.h"
 
 enum ArmLayout {
-    ARM_FIXED_IK,
-    ARM_VARIABLE_IK,
+    ARM_IK,
     ARM_MANUAL,
-};
-
-using ArmToMotorStateFunc = std::function<ArmMotorState(const ArmState&)>;
-using MotorToArmStateFunc = std::function<ArmState(const ArmMotorState&)>;
-
-struct ArmControlState {
-    ArmState armState;
-    ArmMotorState armMotorState;
 };
 
 class ArmControllerLayout : public ControllerLayout {
 public:
-    ArmControllerLayout(ArmToMotorStateFunc armToMotorStateFunc,
-                        MotorToArmStateFunc motorToArmStateFunc) :
+    ArmControllerLayout(std::shared_ptr<ArmProcessor> armProcessor) :
         ControllerLayout("ArmController") {
 
-        layouts[ARM_FIXED_IK] = std::make_shared<ArmFixedIKControllerLayout>(
-            armAutomaticStateManager);
-        layouts[ARM_VARIABLE_IK]
-            = std::make_shared<ArmVariableIKControllerLayout>(
-                armAutomaticStateManager);
-        layouts[ARM_MANUAL] = std::make_shared<ArmManualControllerLayout>(
-            armManualStateIncrementManager, armManualStateDeltaManager);
-
-        armToMotorState = armToMotorStateFunc;
-        motorToArmState = motorToArmStateFunc;
+        layouts[ARM_IK] = std::make_shared<ArmIKControllerLayout>(armProcessor);
+        layouts[ARM_MANUAL]
+            = std::make_shared<ArmManualControllerLayout>(armProcessor);
 
         // Initialize button callbacks
         // clang-format off
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_B, switchLayoutVariableIK);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X, switchLayoutFixedIK);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X, switchLayoutIK);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_Y, switchLayoutManual);
         // clang-format on
     }
-
-    ArmControlState getControlState(uint64_t elapsed_ms);
 
     std::string getName() override { return layouts[currentLayout]->getName(); }
 
@@ -62,19 +41,7 @@ public:
     void rightTriggerResponse(int16_t axisValue) override;
 
 private:
-    ArmStateManager armAutomaticStateManager
-        = {}; // Handles arm state passing between base and controller thread
-    ArmMotorStateManager armManualStateIncrementManager
-        = {}; // Handles motor state increment passing between base and controller thread
-    ArmMotorStateManager armManualStateDeltaManager
-        = {}; // Handles motor state delta (time dependent) passing between base and controller thread
-    ArmMotorStateManager desiredMotorStateManager
-        = {}; // Stores desired motor state
-
-    ArmToMotorStateFunc armToMotorState;
-    MotorToArmStateFunc motorToArmState;
-
-    ArmLayout currentLayout = ArmLayout::ARM_FIXED_IK;
+    ArmLayout currentLayout = ArmLayout::ARM_IK;
     std::shared_ptr<ControllerLayout> layouts[3];
 
     // helper function
@@ -82,8 +49,5 @@ private:
 
     // button callbacks
     void switchLayoutManual(uint8_t buttonID) { switchLayout(ARM_MANUAL); }
-    void switchLayoutVariableIK(uint8_t buttonID) {
-        switchLayout(ARM_VARIABLE_IK);
-    }
-    void switchLayoutFixedIK(uint8_t buttonID) { switchLayout(ARM_FIXED_IK); }
+    void switchLayoutIK(uint8_t buttonID) { switchLayout(ARM_IK); }
 };

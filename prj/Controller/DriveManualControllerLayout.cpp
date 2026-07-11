@@ -20,26 +20,22 @@ void DriveManualControllerLayout::buttonResponse(uint8_t buttonID) {
 }
 
 void DriveManualControllerLayout::incrementWheelAngle(float increment) {
-    DriveMotorState driveState = stateManager.getAndLock();
+    float val = 0;
     std::string logMessage = "wheel: " + std::to_string(wheel);
-    incrementVal(&driveState.steer[wheel], increment, (float)0, (float)360,
-                 logMessage.c_str());
-    stateManager.updateAndUnlock(driveState);
+    incrementVal(&val, increment, (float)0, (float)360, logMessage.c_str());
+    driveProcessor->incrementSteerPosition(wheel, val);
 }
 
 void DriveManualControllerLayout::triggerToincrementWheelAngle(
     int triggerVal, float increment, int* lastTriggerValue) {
-    DriveMotorState driveState = stateManager.getAndLock();
+    float val = 0;
     std::string logMessage = "wheel: " + std::to_string(wheel);
-    triggerToIncrement(triggerVal, lastTriggerValue, &driveState.steer[wheel],
-                       increment, (float)0, (float)360, logMessage.c_str());
-    stateManager.updateAndUnlock(driveState);
+    triggerToIncrement(triggerVal, lastTriggerValue, &val, increment, (float)0,
+                       (float)360, logMessage.c_str());
+    driveProcessor->incrementSteerPosition(wheel, val);
 }
 
 void DriveManualControllerLayout::incrementWheel(int change) {
-    DriveMotorState driveState = stateManager.getAndLock();
     wheel = static_cast<WheelID>((wheel + change + WHEEL_COUNT) % WHEEL_COUNT);
     Logging::logI(filename.c_str(), "Changing to joint: %d", wheel);
-    manualAngleChange = 0; // Reset manual angle change when changing joint
-    stateManager.updateAndUnlock(driveState);
 }

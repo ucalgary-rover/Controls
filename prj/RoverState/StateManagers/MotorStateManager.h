@@ -1,16 +1,19 @@
 #pragma once
 
+#include <memory>
+
 #include "ArmMotorStateManager.h"
 #include "DriveMotorStateManager.h"
 #include "MotorState.h"
 
 class MotorStateManager {
 public:
-    MotorStateManager() { }
-
-    MotorStateManager(MotorState initialState) :
-        driveStateManager(initialState.driveMotorState),
-        armStateManager(initialState.armMotorState) { }
+    MotorStateManager(MotorState initialState = {}) {
+        driveStateManager = std::make_shared<DriveMotorStateManager>(
+            initialState.driveMotorState);
+        armStateManager = std::make_shared<ArmMotorStateManager>(
+            initialState.armMotorState);
+    }
 
     MotorStateManager& operator=(const MotorStateManager& other) {
         if (this != &other) {
@@ -29,10 +32,10 @@ public:
 
     MotorState getState();
 
-    DriveMotorStateManager* getDriveStateManager();
-    ArmMotorStateManager* getArmStateManager();
+    std::shared_ptr<DriveMotorStateManager> getDriveStateManager();
+    std::shared_ptr<ArmMotorStateManager> getArmStateManager();
 
 private:
-    DriveMotorStateManager driveStateManager;
-    ArmMotorStateManager armStateManager;
+    std::shared_ptr<DriveMotorStateManager> driveStateManager;
+    std::shared_ptr<ArmMotorStateManager> armStateManager;
 };

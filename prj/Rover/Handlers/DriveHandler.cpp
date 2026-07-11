@@ -1,8 +1,13 @@
 // Schulich Space Program Controls Software Division (2025)
 // Written by Johan Esperida
 
+#include <cmath>
+#include <unistd.h>
+
 #include "DriveHandler.h"
 #include "Message.h"
+#include "Rover/Systems/pub_systems.h"
+#include "phidget22.h"
 #include "pub_general.h"
 #include <unistd.h>
 
@@ -76,12 +81,11 @@ const float PI = 3.14;
 // two decimal places
 #define TO_DEGREES(value) round(value * 180 / PI * 100) / 100
 
-#define DRIVE_UPDATE_INTERVAL_US 50 * 1000 // 50ms
-
 // Constructor
 DriveHandler::DriveHandler(
-    Drive* drive, DriveMotorStateManager* desiredDriveMotorStateManager,
-    DriveMotorStateManager* currentDriveMotorStateManager) {
+    std::shared_ptr<Drive> drive, std::shared_ptr<DriveQueue> driveQueue,
+    std::shared_ptr<DriveMotorStateManager> currentDriveMotorStateManager) :
+    HandlerInterface() {
 
     // Reference to the m_drive object
     m_drive = drive;
@@ -89,7 +93,7 @@ DriveHandler::DriveHandler(
     // Create DriveMotorStateManager objects in this file that reference the
     // DriveMotorStateManager in Rover.cpp (NOT A COPY!!!) This allows us to use
     // the same DriveMotorStateManager in this file without shenanigans
-    m_desiredDriveMotorStateManager = desiredDriveMotorStateManager;
+    m_driveQueue = driveQueue;
     m_currentDriveMotorStateManager = currentDriveMotorStateManager;
 
     for (int i = 0; i < WHEEL_COUNT; i++) {
@@ -180,8 +184,7 @@ void DriveHandler::start() {
     while (true) {
 
         // Read from desired state
-        DriveMotorState desiredState
-            = m_desiredDriveMotorStateManager->getState();
+        DriveMotorState desiredState = m_driveQueue->pop();
 
         try {
             if (!currentlyGettingZeroState) {
@@ -228,8 +231,5 @@ void DriveHandler::start() {
 
         // Update current state for sending back to base
         updateCurrentState();
-
-        // Sleep to unblock CPU
-        usleep(DRIVE_UPDATE_INTERVAL_US);
     }
 }

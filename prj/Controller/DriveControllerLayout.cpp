@@ -2,14 +2,6 @@
 
 static const char* file = "DriveControllerLayout";
 
-DriveControlState DriveControllerLayout::getControlState(uint64_t elapsed_ms) {
-    DriveControlState control;
-    control.driveState = driveStateManager.getState();
-    control.driveMotorState = process(control.driveState);
-
-    return control;
-}
-
 void DriveControllerLayout::buttonResponse(uint8_t buttonID) {
     if (buttonID <= SDL_CONTROLLER_BUTTON_INVALID
         || buttonID >= SDL_CONTROLLER_BUTTON_MAX) {

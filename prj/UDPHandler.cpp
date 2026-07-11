@@ -11,7 +11,7 @@ UDPHandler::UDPHandler(unsigned short myPort, unsigned short theirPort) :
 }
 
 // Prepare the UDP sender
-void UDPHandler::run(MessageQueue& queue) {
+void UDPHandler::run(std::shared_ptr<UDPQueue> queue) {
     std::thread(&UDPHandler::handle_session, this, std::ref(queue)).detach();
 
     // Create some fake asio tasks - prevent the context from finishing
@@ -36,11 +36,11 @@ Message UDPHandler::receive() {
 }
 
 // Continuously send messages from the queue over UDP
-void UDPHandler::handle_session(MessageQueue& queue) {
+void UDPHandler::handle_session(std::shared_ptr<UDPQueue> queue) {
 
     while (true) {
         // Pop the next message from the queue (blocks if empty)
-        Message msg = queue.pop();
+        Message msg = queue->pop();
 
         // Serialize Message object to a byte vector
         std::vector<std::byte> serializedMsg = msg.serialize();

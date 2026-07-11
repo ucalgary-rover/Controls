@@ -150,7 +150,7 @@ bool DriveModel::stateIsSpotTurn(DriveMotorState state) {
         bool allWheelsDrivingInCircle = true;
         if (state.drive[0]
             < 0.0) { // Should be jitter safe due to stateIsStopped check
-            for (int i = 1; i < WHEEL_COUNT; i + 2) {
+            for (int i = 1; i < WHEEL_COUNT; i += 2) {
                 if (i % 2
                     == 1) { // Odd, should be opposite direction to first wheel
                     if (state.drive[i] > 0.0) {
@@ -166,8 +166,8 @@ bool DriveModel::stateIsSpotTurn(DriveMotorState state) {
             }
         } else {
             for (int i = 1; i < WHEEL_COUNT;
-                 i + 2) { // Driving in opposite direction
-                          // state.drive[0] > 0.0
+                 i += 2) { // Driving in opposite direction
+                           // state.drive[0] > 0.0
                 if (i % 2
                     == 1) { // Odd, should be opposite direction to first wheel
                     if (state.drive[i] < 0.0) {

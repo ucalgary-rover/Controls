@@ -1,12 +1,12 @@
-#include "Arm.h"
+#include "ArmHardware.h"
 
-static const char* file = "Arm";
+static const char* file = "ArmHardware";
 
-Arm::Arm(const std::vector<MotorType> motorTypes) :
+ArmHardware::ArmHardware(const std::vector<MotorType> motorTypes) :
     m_degOfFreedom(motorTypes.size()), m_motorTypes(motorTypes) {
 
-    // initialise motors in the arm
-    Logging::logD(file, "Initialising Arm Motors");
+    // initialise motors in the ArmHardware
+    Logging::logD(file, "Initialising ArmHardware Motors");
     for (int motor = 0; motor < m_degOfFreedom; motor++) {
         switch (motorTypes[motor]) {
         case MOTOR_TYPE_DC_MOTOR:
@@ -46,15 +46,15 @@ Arm::Arm(const std::vector<MotorType> motorTypes) :
     }
 
     // initialise claw
-    Logging::logD(file, "Initialising Arm Claw");
+    Logging::logD(file, "Initialising ArmHardware Claw");
     PhidgetRCServo_create(m_handleClaw);
     setAddressProperties<PhidgetRCServoHandle>(
         m_handleClaw, ARM_CLAW_SERIAL_NUMBER, ARM_CLAW_CHANNEL, ARM_CLAW_PORT);
 }
 
-Arm::~Arm() {
-    // deinitialise motors in the arm
-    Logging::logD(file, "Deinitialising Arm Motors");
+ArmHardware::~ArmHardware() {
+    // deinitialise motors in the ArmHardware
+    Logging::logD(file, "Deinitialising ArmHardware Motors");
     for (int motor = 0; motor < m_degOfFreedom; motor++) {
         switch (m_motorTypes[motor]) {
         case MOTOR_TYPE_DC_MOTOR:
@@ -79,19 +79,19 @@ Arm::~Arm() {
     }
 
     // deinitialise encoders
-    Logging::logD(file, "Deinitialising Arm Encoders");
+    Logging::logD(file, "Deinitialising ArmHardware Encoders");
     for (int encoder = 0; encoder < m_degOfFreedom; encoder++) {
         Phidget_close((PhidgetHandle)m_handlesEncoder.at(encoder));
         PhidgetEncoder_delete(&m_handlesEncoder.at(encoder));
     }
 
     // deinitialise claw
-    Logging::logD(file, "Deinitialising Arm Claw");
+    Logging::logD(file, "Deinitialising ArmHardware Claw");
     Phidget_close((PhidgetHandle)*m_handleClaw);
     PhidgetRCServo_delete(m_handleClaw);
 }
 
-bool Arm::getArmMotorHandle(MotorHandlerReturn* retVal, int index) {
+bool ArmHardware::getArmMotorHandle(MotorHandlerReturn* retVal, int index) {
     switch (m_motorTypes[index]) {
     case MOTOR_TYPE_DC_MOTOR:
         retVal->type = MOTOR_TYPE_DC_MOTOR;
@@ -116,7 +116,7 @@ bool Arm::getArmMotorHandle(MotorHandlerReturn* retVal, int index) {
     return true;
 }
 
-bool Arm::getArmEncoderHandle(MotorHandlerReturn* retVal, int index) {
+bool ArmHardware::getArmEncoderHandle(MotorHandlerReturn* retVal, int index) {
     if (index >= 0 && index < m_degOfFreedom) {
         retVal->type = MOTOR_TYPE_ENCODER;
         retVal->handler.encoder = &m_handlesEncoder.at(index);
@@ -126,11 +126,11 @@ bool Arm::getArmEncoderHandle(MotorHandlerReturn* retVal, int index) {
     return false;
 }
 
-bool Arm::getArmClawHandle(MotorHandlerReturn* retVal) {
+bool ArmHardware::getArmClawHandle(MotorHandlerReturn* retVal) {
     retVal->type = MOTOR_TYPE_SERVO_MOTOR;
     retVal->handler.servoMotor = m_handleClaw;
 
     return true;
 }
 
-int Arm::getDOF() { return m_degOfFreedom; }
+int ArmHardware::getDOF() { return m_degOfFreedom; }
