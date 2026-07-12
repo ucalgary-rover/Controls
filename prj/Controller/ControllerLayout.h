@@ -126,9 +126,9 @@ protected:
     void setVal(T* val, T n, T min, T max, const char* name) {
         *val = clampVal(n, min, max);
         if (std::is_same<T, int>::value) {
-            Logging::logI(filename.c_str(), "Setting %s to %d", name, *val);
+            Logging::logV(filename.c_str(), "Setting %s to %d", name, *val);
         } else if (std::is_same<T, float>::value) {
-            Logging::logI(filename.c_str(), "Setting %s to %f", name, *val);
+            Logging::logV(filename.c_str(), "Setting %s to %f", name, *val);
         }
     }
 
@@ -145,9 +145,9 @@ protected:
     void incrementVal(T* val, T n, T min, T max, const char* name) {
         *val = clampVal((T)(*val + n), min, max);
         if (std::is_same<T, int>::value) {
-            Logging::logI(filename.c_str(), "Setting %s to %d", name, *val);
+            Logging::logV(filename.c_str(), "Setting %s to %d", name, *val);
         } else if (std::is_same<T, float>::value) {
-            Logging::logI(filename.c_str(), "Setting %s to %f", name, *val);
+            Logging::logV(filename.c_str(), "Setting %s to %f", name, *val);
         }
     }
 };

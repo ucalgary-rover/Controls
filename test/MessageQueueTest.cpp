@@ -31,6 +31,8 @@ std::mutex coutMutex;
 //    std::lock_guard<std::mutex> lock(coutMutex);
 // lines to get real output (it's unreadable)
 
+// TODO: Fix all the things Oliver destroyed
+
 void producer(MessageQueue& queue, int id, int numMessages) {
     for (int i = 0; i < numMessages; ++i) {
         // Alternate between priority and regular messages
