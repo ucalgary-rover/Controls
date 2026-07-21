@@ -5,11 +5,14 @@
 
 #include <chrono>
 #include <cmath>
+#include <string>
 #include <unistd.h>
 #include <vector>
 
 #include "ArmControllerLayout.h"
+#include "Config/Config.h"
 #include "DriveControllerLayout.h"
+#include "MqttPublisher/MqttPublisher.h"
 #include "UDPHandler.h"
 
 static const char* file = "Base";
@@ -64,6 +67,12 @@ void Base::start() {
     auto sendQueue = std::make_shared<MessageQueue<Message>>();
     UDPHandler server(BASE_PORT, ROVER_PORT);
 
+    // MQTT setup: load config and connect the (singleton) publisher.
+    // Adjust the path to wherever the binary is launched from.
+    Config config("prj/Config/config.json");
+    std::cout << "MQTT serverUrl=[" << config.mqttConfig.serverUrl << "] clientId=[" << config.mqttConfig.clientId << "] topic=[" << config.mqttConfig.topic << "]" << std::endl;
+    MqttPublisher mqttPublisher(config.mqttConfig);
+
     std::thread controllerThread([&]() { ControllerHandler::eventLoop(); });
     std::thread sendingThread([&]() { server.run(sendQueue); });
     std::thread receivingThread([&]() { receive(server); });
@@ -79,8 +88,19 @@ void Base::start() {
         Message message(desiredState);
         sendQueue->push(message);
 
+        // Publish the same desired state to the dashboard over MQTT.
+        // Caught locally so a transient publish failure never kills the loop.
+        try {
+            mqttPublisher.publish(config.mqttConfig.topic, desiredState);
+        } catch (const std::exception& e) {
+            Logging::logE(file, "MQTT publish failed: %s", e.what());
+        }
+
         usleep(0.1 * 1000 * 1000); // Sleep 0.1s
     }
+
+    MqttPublisher::shutdown();
+
     controllerThread.join();
     sendingThread.join();
     receivingThread.join();
