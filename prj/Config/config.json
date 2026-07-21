@@ -1,8 +1,8 @@
 {
     "mqttConfig": {
         "serverUrl": "tcp://127.0.0.1:1883",
-        "clientId": "cpp_publisher",
-        "topic": "test/topic"
+        "clientId": "rover_base_publisher",
+        "topic": "MOTOR_STATE_TOPIC"
     },
     "websocketConfig": {
         "port": "8080",

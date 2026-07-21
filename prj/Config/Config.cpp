@@ -3,6 +3,7 @@
 #include <boost/describe.hpp>
 #include <boost/exception/all.hpp>
 #include <boost/json.hpp>
+#include <boost/json/src.hpp>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
