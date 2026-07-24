@@ -17,7 +17,7 @@ static const char* file = "Base";
 // Chassis state management
 std::shared_ptr<ArmProcessor> Base::armProcessor;
 std::shared_ptr<DriveProcessor> Base::driveProcessor;
-
+std::shared_ptr<MessageQueue<Message>> Base::directMessageQueue;
 bool Base::exitLoop = false;
 
 void Base::initialize() {
@@ -34,7 +34,8 @@ void Base::initialize() {
 
     std::vector<std::shared_ptr<ControllerLayout>> controllers = {};
 
-    controllers.push_back(std::make_shared<DriveControllerLayout>(driveProcessor));
+    controllers.push_back(std::make_shared<DriveControllerLayout>(
+        driveProcessor, sendHeadlightsMessage, sendZeroMessage));
 #if EXTENSION == EXTENSION_TYPE_ARM
     controllers.push_back(std::make_shared<ArmControllerLayout>(armProcessor));
 #elif EXTENSION == EXTENSION_TYPE_SCI_TOOL
@@ -62,6 +63,7 @@ void Base::receive(UDPHandler& receiver) {
 void Base::start() {
     Logging::logI(file, "Starting Base");
     auto sendQueue = std::make_shared<MessageQueue<Message>>();
+    directMessageQueue = std::make_shared<MessageQueue<Message>>();
     UDPHandler server(BASE_PORT, ROVER_PORT);
 
     std::thread controllerThread([&]() { ControllerHandler::eventLoop(); });
@@ -79,9 +81,27 @@ void Base::start() {
         Message message(desiredState);
         sendQueue->push(message);
 
+        while (!directMessageQueue->empty()) {
+            sendQueue->push(directMessageQueue->pop());
+        }
+
         usleep(0.1 * 1000 * 1000); // Sleep 0.1s
     }
     controllerThread.join();
     sendingThread.join();
     receivingThread.join();
+}
+
+void Base::sendZeroMessage(int setVal) {
+    Message message(DriveZeroMessage { .set = setVal });
+    directMessageQueue->push(message);
+
+    Logging::logV(file, "zeroMessage queued. Set = %d", setVal);
+}
+
+void Base::sendHeadlightsMessage(int brightnessVal) {
+    Message message(HeadlightMessage { .brightness = brightnessVal });
+    directMessageQueue->push(message);
+    Logging::logV(file, "headlightsMessage queued. Brightness = %d",
+                  brightnessVal);
 }

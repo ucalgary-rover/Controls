@@ -30,6 +30,12 @@ private:
 
     static bool exitLoop;
 
+    static std::shared_ptr<MessageQueue<Message>> directMessageQueue;
+
+    //direct message functions
+    static void sendZeroMessage(int set);
+    static void sendHeadlightsMessage(int brightnessVal);
+
     // UDP receiving
     static void receive(UDPHandler& receiver);
 };
