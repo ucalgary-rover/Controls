@@ -120,7 +120,7 @@ void Rover::start() {
 
     while (true) {
 
-        std::cout << "\nSelect action: ";
+        std::cout << "\nSelect action: set (a)ngle / set (z)ero ";
         std::cin >> action;
 
         switch (action) {
