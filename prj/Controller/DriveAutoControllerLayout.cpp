@@ -105,12 +105,16 @@ void DriveAutoControllerLayout::rightStickResponse(int xValue, int yValue) {
 }
 
 void DriveAutoControllerLayout::leftTriggerResponse(int16_t axisValue) {
-    if (axisValue >= INT16_MAX)
+    if (axisValue >= INT16_MAX) {
         setVal(&lightLevel, (uint8_t)0, (uint8_t)0, (uint8_t)100, "lightLevel");
+        sendHeadlightsMessage(lightLevel);
+    }
 }
 
 void DriveAutoControllerLayout::rightTriggerResponse(int16_t axisValue) {
-    if (axisValue >= INT16_MAX)
+    if (axisValue >= INT16_MAX) {
         setVal(&lightLevel, (uint8_t)100, (uint8_t)0, (uint8_t)100,
                "lightLevel");
+        sendHeadlightsMessage(lightLevel);
+    }
 }

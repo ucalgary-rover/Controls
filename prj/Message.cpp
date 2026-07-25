@@ -21,6 +21,8 @@ Message::Message(MessagePayload payload) : m_payload(std::move(payload)) {
                 m_format = MESSAGE_FORMAT_SCI_TOOL_BRUSH;
             else if constexpr (std::is_same_v<T, DriveZeroMessage>)
                 m_format = MESSAGE_FORMAT_DRIVE_ZERO;
+            else if constexpr (std::is_same_v<T, HeadlightMessage>)
+                m_format = MESSAGE_FORMAT_HEADLIGHTS;
             else
                 m_format = static_cast<MessageFormat>(
                     MESSAGE_FORMAT_GENERIC); // Or a GENERIC/UNKNOWN value if
@@ -92,6 +94,10 @@ void Message::printMessage() const {
 
             } else if constexpr (std::is_same_v<T, DriveZeroMessage>) {
                 std::cout << "DriveZeroMessage - set: " << payload.set;
+
+            } else if constexpr (std::is_same_v<T, HeadlightMessage>) {
+                std::cout << "HeadlightMessage - brightness: "
+                          << payload.brightness;
             }
         },
         m_payload);
@@ -120,6 +126,10 @@ std::vector<std::byte> Message::serialize() const {
     }
     case MESSAGE_FORMAT_DRIVE_ZERO: {
         payloadLength += sizeof(DriveZeroMessage);
+        break;
+    }
+    case MESSAGE_FORMAT_HEADLIGHTS: {
+        payloadLength += sizeof(HeadlightMessage);
         break;
     }
     default: { // Generic or unknown
@@ -175,6 +185,10 @@ Message Message::deserialize(const std::vector<std::byte> data, size_t size) {
     }
     case MESSAGE_FORMAT_DRIVE_ZERO: {
         payload = parseMessage<DriveZeroMessage>(data, size);
+        break;
+    }
+    case MESSAGE_FORMAT_HEADLIGHTS: {
+        payload = parseMessage<HeadlightMessage>(data, size);
         break;
     }
     case MESSAGE_FORMAT_GENERIC: { // Generic or unknown

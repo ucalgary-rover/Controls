@@ -2,11 +2,20 @@
 #include <string>
 
 void DriveManualControllerLayout::leftTriggerResponse(int16_t axisValue) {
-    triggerTosetWheelAngleVelocity(axisValue, -1.0, &lastleftTriggerValue);
+    if (axisValue <= INT16_MIN) {
+        triggerTosetWheelAngleVelocity(axisValue, 0, &lastleftTriggerValue);
+    } else {
+        triggerTosetWheelAngleVelocity(axisValue, -1.0, &lastleftTriggerValue);
+    }
 }
 
 void DriveManualControllerLayout::rightTriggerResponse(int16_t axisValue) {
-    triggerTosetWheelAngleVelocity(axisValue, 1.0, &lastrightTriggerValue);
+    if (axisValue <= INT16_MIN) {
+        triggerTosetWheelAngleVelocity(axisValue, 0, &lastrightTriggerValue);
+
+    } else {
+        triggerTosetWheelAngleVelocity(axisValue, 1.0, &lastrightTriggerValue);
+    }
 }
 
 void DriveManualControllerLayout::buttonResponse(uint8_t buttonID) {
