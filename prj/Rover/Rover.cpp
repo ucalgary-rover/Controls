@@ -114,8 +114,34 @@ void Rover::start() {
     Message message;
     auto last_reception = std::chrono::system_clock::now();
     bool roverHalted = false;
+    char action;
+    float angle = 0;
+    char zero = 'n';
 
     while (true) {
+
+        std::cout << "\nSelect action: ";
+        std::cin >> action;
+
+        switch (action) {
+        case 'a':
+            std::cout << "\nGive angle: ";
+            std::cin >> angle;
+            driveQueue->push({ .steer = { angle, angle, angle, angle } });
+
+            break;
+
+        case 'z':
+            std::cout << "\nSetting zero: ";
+            driveHandler->setWheelZeroState();
+            break;
+
+        default:
+            std::cout << "Passing ";
+        }
+
+        continue;
+
         // Check activity timeout
         if (!receiveQueue->empty()) {
             last_reception = std::chrono::system_clock::now();
