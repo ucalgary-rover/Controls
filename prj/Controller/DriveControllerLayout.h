@@ -24,7 +24,7 @@ public:
                           messageFunc sendHeadlightMessage,
                           messageFunc sendZeroMessage) {
         drivelayouts[DRIVE_AUTO] = std::make_shared<DriveAutoControllerLayout>(
-            driveProcessor, sendHeadlightMessage, sendZeroMessage);
+            driveProcessor, sendHeadlightMessage);
         drivelayouts[DRIVE_MANUAL]
             = std::make_shared<DriveManualControllerLayout>(driveProcessor,
                                                             sendZeroMessage);

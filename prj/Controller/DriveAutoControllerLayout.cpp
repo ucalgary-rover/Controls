@@ -47,12 +47,6 @@ void DriveAutoControllerLayout::checkState(uint8_t button) {
 }
 
 void DriveAutoControllerLayout::setVelocity(int X, int Y) {
-    // TODO: Confirm if this makes sense
-    if (X == 0 && Y == 0) {
-        sendZeroMessage(ZERO_STATE);
-        return;
-    }
-
     int speed = 0;
     int heading = 0;
     // get the speed

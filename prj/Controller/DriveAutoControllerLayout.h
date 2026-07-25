@@ -8,13 +8,11 @@
 class DriveAutoControllerLayout : public ControllerLayout {
 public:
     DriveAutoControllerLayout(std::shared_ptr<DriveProcessor> driveProcessor,
-                              messageFunc sendHeadlightsMessage,
-                              messageFunc sendZeroMessage) :
+                              messageFunc sendHeadlightsMessage) :
         ControllerLayout("DriveController") {
 
         this->driveProcessor = driveProcessor;
         this->sendHeadlightsMessage = sendHeadlightsMessage;
-        this->sendZeroMessage = sendZeroMessage;
 
         // clang-format off
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSHOULDER, decrementLightLevelOneStep);
@@ -37,7 +35,6 @@ public:
 private:
     std::shared_ptr<DriveProcessor> driveProcessor;
     messageFunc sendHeadlightsMessage;
-    messageFunc sendZeroMessage;
 
     int presentMaxSpeed = 80;  // present maximum speed of chassis
     int absoluteMaxSpeed = 80; // Absolute max speed of the chassis

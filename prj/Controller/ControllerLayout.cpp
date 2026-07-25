@@ -12,10 +12,17 @@ int ControllerLayout::stickMagnitude(int axisX, int axisY) {
 }
 
 int ControllerLayout::stickAngle(int axisX, int axisY) {
-    int angle = (int)radianToDegree(atan2(-(double)axisX, -(double)axisY));
-    if (angle < 0) {
-        angle += 360;
+    int angle;
+    if (!axisX && !axisY) {
+        angle = 0;
+
+    } else {
+        angle = (int)radianToDegree(atan2(-(double)axisX, -(double)axisY));
+        if (angle < 0) {
+            angle += 360;
+        }
     }
+
     return angle;
 }
 

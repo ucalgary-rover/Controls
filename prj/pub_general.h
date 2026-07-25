@@ -110,12 +110,8 @@ struct HeadlightMessage {
     int brightness;
 };
 
-enum DriveZeroControl : int {
-    SET_ZERO,
-    ZERO_STATE,
-};
 struct DriveZeroMessage {
-    int set;
+    bool set;
 };
 
 #endif
