@@ -151,11 +151,7 @@ void Rover::start() {
                 = std::get<DriveZeroMessage>(message.getPayload());
             if (zeroMessage.set) { // currently setting zero
                 driveHandler->setWheelZeroState();
-            } else { // currently getting zero
-                driveHandler->stopWheels();
-                driveHandler->currentlyGettingZeroState = true;
             }
-            break;
         }
         default:
             break;

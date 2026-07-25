@@ -55,5 +55,5 @@ private:
     void incrementWheelAngleOnce(uint8_t buttonID) { incrementWheelAngle(0.1); }
     void decrementWheelOnce(uint8_t buttonID) { incrementWheel(-1); }
     void incrementWheelOnce(uint8_t buttonID) { incrementWheel(1); }
-    void buttonZeroMessage(uint8_t buttonID) { sendZeroMessage(SET_ZERO); }
+    void buttonZeroMessage(uint8_t buttonID) { sendZeroMessage(1); }
 };
