@@ -19,6 +19,8 @@ Message::Message(MessagePayload payload) : m_payload(std::move(payload)) {
                 m_format = MESSAGE_FORMAT_SCI_TOOL_HEIGHT;
             else if constexpr (std::is_same_v<T, SciToolBrushMessage>)
                 m_format = MESSAGE_FORMAT_SCI_TOOL_BRUSH;
+            else if constexpr (std::is_same_v<T, SciToolServoMessage>)
+                m_format = MESSAGE_FORMAT_SCI_TOOL_SERVO;
             else if constexpr (std::is_same_v<T, DriveZeroMessage>)
                 m_format = MESSAGE_FORMAT_DRIVE_ZERO;
             else if constexpr (std::is_same_v<T, HeadlightMessage>)
@@ -92,6 +94,9 @@ void Message::printMessage() const {
                 std::cout << "SciToolBrushMessage - Control: "
                           << payload.control;
 
+            } else if constexpr (std::is_same_v<T, SciToolServoMessage>) {
+                std::cout << "SciToolServoMessage - Angle: " << payload.angle;
+
             } else if constexpr (std::is_same_v<T, DriveZeroMessage>) {
                 std::cout << "DriveZeroMessage - set: " << payload.set;
 
@@ -122,6 +127,10 @@ std::vector<std::byte> Message::serialize() const {
     }
     case MESSAGE_FORMAT_SCI_TOOL_BRUSH: {
         payloadLength += sizeof(SciToolBrushMessage);
+        break;
+    }
+    case MESSAGE_FORMAT_SCI_TOOL_SERVO: {
+        payloadLength += sizeof(SciToolServoMessage);
         break;
     }
     case MESSAGE_FORMAT_DRIVE_ZERO: {
@@ -181,6 +190,10 @@ Message Message::deserialize(const std::vector<std::byte> data, size_t size) {
     }
     case MESSAGE_FORMAT_SCI_TOOL_BRUSH: {
         payload = parseMessage<SciToolBrushMessage>(data, size);
+        break;
+    }
+    case MESSAGE_FORMAT_SCI_TOOL_SERVO: {
+        payload = parseMessage<SciToolServoMessage>(data, size);
         break;
     }
     case MESSAGE_FORMAT_DRIVE_ZERO: {

@@ -5,9 +5,13 @@
 #include "pub_general.h"
 #include <functional>
 
+using sciToolMessageFunc = std::function<void(MessageFormat, int)>;
+
 class SciToolControllerLayout : public ControllerLayout {
 public:
-    SciToolControllerLayout() : ControllerLayout("SciToolController") {
+    SciToolControllerLayout(sciToolMessageFunc sendSciToolMessage) :
+        ControllerLayout("SciToolController") {
+        this->sendSciToolMessage = sendSciToolMessage;
 
         // Initialize Layout API
         // clang-format off
@@ -16,6 +20,8 @@ public:
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_Y, toogleDoor2);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_B, toogleDoor3);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_A, toggleBrush);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, decrementServoAngleOneStep);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, incrementServoAngleOneStep);
 
         // clang-format on
     }
@@ -29,17 +35,34 @@ public:
 private:
     int lastleftTriggerValue = 0;
     int lastrightTriggerValue = 0;
+    int servoAngle = 0;
+    bool brushEnabled = false;
 
-    //helper functions
-    void toggleDoor(int door);
+    //message functions
+    sciToolMessageFunc sendSciToolMessage;
 
-    void lowerSciTool();
-    void raiseSciTool();
-    void stopSciTool();
+    //helper function
+    void incrementServoAngle(int increment);
 
     //button callbacks
-    void toogleDoor1(uint8_t buttonID) { toggleDoor(1); }
-    void toogleDoor2(uint8_t buttonID) { toggleDoor(2); }
-    void toogleDoor3(uint8_t buttonID) { toggleDoor(3); }
-    void toggleBrush(uint8_t buttonID);
+    void toogleDoor1(uint8_t buttonID) {
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_DOOR, LEFT);
+    };
+    void toogleDoor2(uint8_t buttonID) {
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_DOOR, MIDDLE);
+    };
+    void toogleDoor3(uint8_t buttonID) {
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_DOOR, RIGHT);
+    };
+    void toggleBrush(uint8_t buttonID) {
+        brushEnabled = !brushEnabled;
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_BRUSH,
+                           brushEnabled ? START_BRUSH : STOP_BRUSH);
+    };
+    void decrementServoAngleOneStep(uint8_t buttonID) {
+        incrementServoAngle(-5);
+    };
+    void incrementServoAngleOneStep(uint8_t buttonID) {
+        incrementServoAngle(5);
+    };
 };

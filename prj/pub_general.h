@@ -12,7 +12,9 @@ enum MessageFormat : int {
     MESSAGE_FORMAT_SCI_TOOL_DOOR,
     MESSAGE_FORMAT_SCI_TOOL_HEIGHT,
     MESSAGE_FORMAT_SCI_TOOL_BRUSH,
+    MESSAGE_FORMAT_SCI_TOOL_SERVO,
     MESSAGE_FORMAT_DRIVE_ZERO,
+    MESSAGE_FORMAT_HEADLIGHTS,
     MESSAGE_FORMAT_GENERIC
 };
 
@@ -86,6 +88,11 @@ struct SciToolHeightMessage {
     SciToolHeightControl control;
 };
 
+enum DriveZeroControl : int {
+    SET_ZERO,
+    ZERO_STATE,
+};
+
 enum SciToolBrushControl : int {
     START_BRUSH,
     STOP_BRUSH,
@@ -93,6 +100,10 @@ enum SciToolBrushControl : int {
 
 struct SciToolBrushMessage {
     SciToolBrushControl control;
+};
+
+struct SciToolServoMessage {
+    int angle;
 };
 
 struct HeadlightMessage {

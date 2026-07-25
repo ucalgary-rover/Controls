@@ -3,17 +3,17 @@
 
 void SciToolControllerLayout::leftTriggerResponse(int16_t axisValue) {
     if (INT16_MAX == axisValue) {
-        void lowerSciTool();
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_HEIGHT, LOWER);
     } else {
-        void stopSciTool();
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_HEIGHT, STOP);
     }
 }
 
 void SciToolControllerLayout::rightTriggerResponse(int16_t axisValue) {
     if (INT16_MAX == axisValue) {
-        void raiseSciTool();
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_HEIGHT, RAISE);
     } else {
-        void stopSciTool();
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_HEIGHT, STOP);
     }
 }
 
@@ -25,4 +25,9 @@ void SciToolControllerLayout::buttonResponse(uint8_t buttonID) {
     }
 
     buttonCallbacks[buttonID](buttonID);
+}
+
+void SciToolControllerLayout::incrementServoAngle(int increment) {
+    incrementVal(&servoAngle, increment, 0, 180, "servoAngle");
+    sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_SERVO, servoAngle);
 }
