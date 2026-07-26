@@ -16,7 +16,7 @@
 
 #include "Logging.h"
 
-using HeadlightQueue = MessageQueue<HeadlightMessage>; // Change type as needed
+using HeadlightQueue = MessageQueue<HeadlightMessage>;
 
 class HeadlightHandler : public HandlerInterface {
 public:
