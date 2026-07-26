@@ -1,4 +1,5 @@
 #include "ArmManualControllerLayout.h"
+
 #include <string>
 
 void ArmManualControllerLayout::leftTriggerResponse(int16_t axisValue) {
@@ -20,11 +21,11 @@ void ArmManualControllerLayout::buttonResponse(uint8_t buttonID) {
 }
 
 void ArmManualControllerLayout::triggerToDeltaJointValue(int triggerVal) {
-    ArmMotorState armDelta = deltaManager.getAndLock();
+    ArmMotorState armVelocity = {};
     std::string logMessage = "motor: " + std::to_string(joint);
-    setVal(&armDelta.motorValues[joint], triggerVal, -20, 20,
+    setVal(&armVelocity.motorValues[joint], triggerVal, -20, 20,
            logMessage.c_str());
-    deltaManager.updateAndUnlock(armDelta);
+    armProcessor->setJointSpaceVelocity(armVelocity);
 }
 
 void ArmManualControllerLayout::incrementJoint(int change) {
@@ -35,9 +36,9 @@ void ArmManualControllerLayout::incrementJoint(int change) {
 }
 
 void ArmManualControllerLayout::incrementJointValue(int increment) {
-    ArmMotorState armState = incrementManager.getAndLock();
+    ArmMotorState armIncrement = {};
     std::string logMessage = "motor: " + std::to_string(joint);
-    incrementVal(&armState.motorValues[joint], increment, -20, 20,
+    incrementVal(&armIncrement.motorValues[joint], increment, -20, 20,
                  logMessage.c_str());
-    incrementManager.updateAndUnlock(armState);
+    armProcessor->incrementJointSpaceState(armIncrement);
 }

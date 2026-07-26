@@ -13,8 +13,12 @@ Message::Message(MessagePayload payload) : m_payload(std::move(payload)) {
 
             if constexpr (std::is_same_v<T, MotorState>)
                 m_format = MESSAGE_FORMAT_MOTOR_STATE;
-            else if constexpr (std::is_same_v<T, ScienceToolMessage>)
-                m_format = MESSAGE_FORMAT_SCIENCE_TOOL;
+            else if constexpr (std::is_same_v<T, SciToolDoorMessage>)
+                m_format = MESSAGE_FORMAT_SCI_TOOL_DOOR;
+            else if constexpr (std::is_same_v<T, SciToolHeightMessage>)
+                m_format = MESSAGE_FORMAT_SCI_TOOL_HEIGHT;
+            else if constexpr (std::is_same_v<T, SciToolBrushMessage>)
+                m_format = MESSAGE_FORMAT_SCI_TOOL_BRUSH;
             else if constexpr (std::is_same_v<T, DriveZeroMessage>)
                 m_format = MESSAGE_FORMAT_DRIVE_ZERO;
             else
@@ -75,12 +79,17 @@ void Message::printMessage() const {
                 }
                 std::cout << std::endl;
 
-            } else if constexpr (std::is_same_v<T, ScienceToolMessage>) {
-                std::cout << "ScienceToolMessage - Move Up/Down: "
-                          << payload.moveUpDown
-                          << ", Move Left/Right: " << payload.moveLeftRight
-                          << ", X Pos: " << payload.xPos
-                          << ", Y Pos: " << payload.yPos;
+            } else if constexpr (std::is_same_v<T, SciToolDoorMessage>) {
+                std::cout << "SciToolDoorMessage - Door: " << payload.door;
+
+            } else if constexpr (std::is_same_v<T, SciToolHeightMessage>) {
+                std::cout << "SciToolHeightMessage - Control: "
+                          << payload.control;
+
+            } else if constexpr (std::is_same_v<T, SciToolBrushMessage>) {
+                std::cout << "SciToolBrushMessage - Control: "
+                          << payload.control;
+
             } else if constexpr (std::is_same_v<T, DriveZeroMessage>) {
                 std::cout << "DriveZeroMessage - set: " << payload.set;
             }
@@ -97,8 +106,16 @@ std::vector<std::byte> Message::serialize() const {
         payloadLength += sizeof(MotorState);
         break;
     }
-    case MESSAGE_FORMAT_SCIENCE_TOOL: {
-        payloadLength += sizeof(ScienceToolMessage);
+    case MESSAGE_FORMAT_SCI_TOOL_DOOR: {
+        payloadLength += sizeof(SciToolDoorMessage);
+        break;
+    }
+    case MESSAGE_FORMAT_SCI_TOOL_HEIGHT: {
+        payloadLength += sizeof(SciToolHeightMessage);
+        break;
+    }
+    case MESSAGE_FORMAT_SCI_TOOL_BRUSH: {
+        payloadLength += sizeof(SciToolBrushMessage);
         break;
     }
     case MESSAGE_FORMAT_DRIVE_ZERO: {
@@ -144,8 +161,16 @@ Message Message::deserialize(const std::vector<std::byte> data, size_t size) {
         payload = parseMessage<MotorState>(data, size);
         break;
     }
-    case MESSAGE_FORMAT_SCIENCE_TOOL: {
-        payload = parseMessage<ScienceToolMessage>(data, size);
+    case MESSAGE_FORMAT_SCI_TOOL_DOOR: {
+        payload = parseMessage<SciToolDoorMessage>(data, size);
+        break;
+    }
+    case MESSAGE_FORMAT_SCI_TOOL_HEIGHT: {
+        payload = parseMessage<SciToolHeightMessage>(data, size);
+        break;
+    }
+    case MESSAGE_FORMAT_SCI_TOOL_BRUSH: {
+        payload = parseMessage<SciToolBrushMessage>(data, size);
         break;
     }
     case MESSAGE_FORMAT_DRIVE_ZERO: {

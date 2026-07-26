@@ -1,16 +1,18 @@
 #pragma once
 
+#include <memory>
+
 #include "ArmMotorStateManager.h"
+#include "ArmProcessor.h"
 #include "ControllerLayout.h"
 #include "pub_general.h"
-#include <functional>
 
 class ArmManualControllerLayout : public ControllerLayout {
 public:
-    ArmManualControllerLayout(ArmMotorStateManager& armIncrementManager,
-                              ArmMotorStateManager& armDeltaManager) :
-        ControllerLayout("ArmManualController"),
-        incrementManager(armIncrementManager), deltaManager(armDeltaManager) {
+    ArmManualControllerLayout(std::shared_ptr<ArmProcessor> armProcessor) :
+        ControllerLayout("ArmManualController") {
+
+        this->armProcessor = armProcessor;
 
         // Initialize Layout API
         // clang-format off
@@ -28,8 +30,7 @@ public:
     void rightTriggerResponse(int16_t axisValue) override;
 
 private:
-    ArmMotorStateManager& incrementManager;
-    ArmMotorStateManager& deltaManager;
+    std::shared_ptr<ArmProcessor> armProcessor;
 
     int lastleftTriggerValue = 0;
     int lastrightTriggerValue = 0;

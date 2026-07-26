@@ -47,25 +47,25 @@ void DriveAutoControllerLayout::checkState(uint8_t button) {
 }
 
 void DriveAutoControllerLayout::setVelocity(int X, int Y) {
-    DriveState driveState = stateManager.getAndLock();
+    int speed = 0;
+    int heading = 0;
     // get the speed
-    setVal(&driveState.speed, stickMagnitude(X, Y), 0, presentMaxSpeed,
-           NAMEOF(driveState.speed));
+    setVal(&speed, stickMagnitude(X, Y), 0, presentMaxSpeed, NAMEOF(speed));
 
     // get the angle
-    setVal(&driveState.heading, stickAngle(X, Y), 0, 360,
-           NAMEOF(driveState.heading));
+    setVal(&heading, stickAngle(X, Y), 0, 360, NAMEOF(heading));
 
-    stateManager.updateAndUnlock(driveState);
+    driveProcessor->setSpeed(speed);
+    driveProcessor->setHeading(heading);
 }
 
 void DriveAutoControllerLayout::setAngularVelocity(int X, int Y) {
-    DriveState driveState = stateManager.getAndLock();
+    int angularVelocity = 0;
     // get the angular velocity
-    setVal(&driveState.angularVelocity, (X * maxRadialSpeed) / 255,
-           -maxRadialSpeed, maxRadialSpeed, NAMEOF(driveState.angularVelocity));
+    setVal(&angularVelocity, (X * maxRadialSpeed) / 255, -maxRadialSpeed,
+           maxRadialSpeed, NAMEOF(angularVelocity));
 
-    stateManager.updateAndUnlock(driveState);
+    driveProcessor->setAngularVelocity(angularVelocity);
 }
 
 void DriveAutoControllerLayout::incrementMaxSpeed(int val) {

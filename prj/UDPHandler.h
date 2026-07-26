@@ -3,8 +3,11 @@
 #include "MessageQueue.h"
 #include <boost/asio.hpp>
 #include <iostream>
+#include <memory>
 
 #define RECEIVE_BUFFER_SIZE 100
+
+using UDPQueue = MessageQueue<Message>;
 
 class UDPHandler {
 public:
@@ -23,22 +26,22 @@ public:
     /** Prepares the UDP handler
      *
      * @param
-     *  queue: MessageQueue& - The queue of messages to send
+     *  queue: std::shared_ptr<UDPQueue> - The queue of messages to send
      *
      * @return
      *  none
      */
-    void run(MessageQueue& queue);
+    void run(std::shared_ptr<UDPQueue> queue);
 
     /** Continuously sends messages from the queue over UDP
      *
      * @param
-     *  queue: MessageQueue& - The queue of messages to send
+     *  queue: std::shared_ptr<UDPQueue> - The queue of messages to send
      *
      * @return
      *  none
      */
-    void handle_session(MessageQueue& queue);
+    void handle_session(std::shared_ptr<UDPQueue> queue);
 
     /** Receives a message from the server
      *

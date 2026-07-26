@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "ArmStateManager.h"
 #include "DriveStateManager.h"
 #include "RoverState.h"
@@ -8,9 +10,12 @@ class RoverStateManager {
 public:
     RoverStateManager() { }
 
-    RoverStateManager(RoverState initialState) :
-        driveStateManager(initialState.driveState),
-        armStateManager(initialState.armState) { }
+    RoverStateManager(RoverState initialState) {
+        driveStateManager
+            = std::make_shared<DriveStateManager>(initialState.driveState);
+        armStateManager
+            = std::make_shared<ArmStateManager>(initialState.armState);
+    }
 
     RoverStateManager& operator=(const RoverStateManager& other) {
         if (this != &other) {
@@ -29,10 +34,10 @@ public:
 
     RoverState getState();
 
-    DriveStateManager* getDriveStateManager();
-    ArmStateManager* getArmStateManager();
+    std::shared_ptr<DriveStateManager> getDriveStateManager();
+    std::shared_ptr<ArmStateManager> getArmStateManager();
 
 private:
-    DriveStateManager driveStateManager;
-    ArmStateManager armStateManager;
+    std::shared_ptr<DriveStateManager> driveStateManager;
+    std::shared_ptr<ArmStateManager> armStateManager;
 };

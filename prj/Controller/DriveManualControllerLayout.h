@@ -1,19 +1,20 @@
 #pragma once
 
+#include <memory>
+
 #include "ControllerLayout.h"
-#include "DriveMotorStateManager.h"
-#include "DriveStateManager.h"
-#include <functional>
+#include "DriveProcessor.h"
 
 class DriveManualControllerLayout : public ControllerLayout {
 public:
-    DriveManualControllerLayout(DriveMotorStateManager& driveStateManager) :
-        ControllerLayout("DriveManualController"),
-        stateManager(driveStateManager) {
+    DriveManualControllerLayout(
+        std::shared_ptr<DriveProcessor> driveProcessor) :
+        ControllerLayout("DriveManualController") {
+
+        this->driveProcessor = driveProcessor;
 
         // Initialize Layout API
         // clang-format off
-
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSHOULDER, decrementWheelAngleOnce);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, incrementWheelAngleOnce);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, decrementWheelOnce);
@@ -28,12 +29,11 @@ public:
     void rightTriggerResponse(int16_t axisValue) override;
 
 private:
-    DriveMotorStateManager& stateManager;
+    std::shared_ptr<DriveProcessor> driveProcessor;
 
     int lastleftTriggerValue = 0;
     int lastrightTriggerValue = 0;
 
-    int manualAngleChange = 0;
     WheelID wheel = WHEEL_FR;
 
     // helper functions

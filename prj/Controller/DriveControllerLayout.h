@@ -2,8 +2,8 @@
 
 #include "DriveAutoControllerLayout.h"
 #include "DriveManualControllerLayout.h"
+#include "DriveProcessor.h"
 #include <SDL2/SDL.h>
-#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -13,8 +13,6 @@ enum DriveLayout {
     DRIVE_MANUAL
 };
 
-using ProcessDriveStateFunc = std::function<DriveMotorState(const DriveState&)>;
-
 struct DriveControlState {
     DriveState driveState;
     DriveMotorState driveMotorState;
@@ -22,14 +20,11 @@ struct DriveControlState {
 
 class DriveControllerLayout : public ControllerLayout {
 public:
-    DriveControllerLayout(ProcessDriveStateFunc processFunc) {
+    DriveControllerLayout(std::shared_ptr<DriveProcessor> driveProcessor) {
         drivelayouts[DRIVE_AUTO]
-            = std::make_shared<DriveAutoControllerLayout>(driveStateManager);
+            = std::make_shared<DriveAutoControllerLayout>(driveProcessor);
         drivelayouts[DRIVE_MANUAL]
-            = std::make_shared<DriveManualControllerLayout>(
-                driveManualStateManager);
-
-        process = processFunc;
+            = std::make_shared<DriveManualControllerLayout>(driveProcessor);
 
         // Initialize button callbacks
         // clang-format off
@@ -39,8 +34,6 @@ public:
 
         // clang-format on
     }
-
-    DriveControlState getControlState(uint64_t elapsed_ms);
 
     std::string getName() { return drivelayouts[currentLayout]->getName(); }
 
@@ -63,12 +56,6 @@ public:
     void swtichToDefault(uint8_t buttonID) { switchLayout(DRIVE_AUTO); }
 
 private:
-    DriveStateManager driveStateManager = {};
-    DriveMotorStateManager driveManualStateManager = {};
-    DriveMotorState desiredMotorState = {};
-
-    ProcessDriveStateFunc process;
-
     DriveLayout currentLayout = DriveLayout::DRIVE_AUTO;
     std::shared_ptr<ControllerLayout> drivelayouts[3];
 };

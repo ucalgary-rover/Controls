@@ -1,15 +1,17 @@
 #pragma once
 
-#include "ArmStateManager.h"
+#include <memory>
+
+#include "ArmProcessor.h"
 #include "ControllerLayout.h"
 #include "pub_general.h"
-#include <functional>
 
-class ArmVariableIKControllerLayout : public ControllerLayout {
+class ArmIKControllerLayout : public ControllerLayout {
 public:
-    ArmVariableIKControllerLayout(ArmStateManager& armStateManager) :
-        ControllerLayout("ArmVariableIKController"),
-        stateManager(armStateManager) {
+    ArmIKControllerLayout(std::shared_ptr<ArmProcessor> armProcessor) :
+        ControllerLayout("ArmVariableIKController") {
+
+        this->armProcessor = armProcessor;
 
         // Initialize Layout API
         // clang-format off
@@ -31,7 +33,7 @@ public:
     void rightTriggerResponse(int16_t axisValue) override;
 
 private:
-    ArmStateManager& stateManager;
+    std::shared_ptr<ArmProcessor> armProcessor;
 
     int lastleftTriggerValue = 0;
     int lastrightTriggerValue = 0;

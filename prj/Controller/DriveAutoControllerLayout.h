@@ -1,25 +1,22 @@
 #pragma once
 
-#include <SDL2/SDL.h>
-#include <functional>
+#include <memory>
 
 #include "ControllerLayout.h"
-#include "DriveMotorStateManager.h"
-#include "DriveStateManager.h"
-
-using ProcessDriveStateFunc = std::function<DriveMotorState(const DriveState&)>;
+#include "DriveProcessor.h"
 
 class DriveAutoControllerLayout : public ControllerLayout {
 public:
-    DriveAutoControllerLayout(DriveStateManager& driveStateManager) :
-        ControllerLayout("DriveController"), stateManager(driveStateManager) {
-        // clang-format off
+    DriveAutoControllerLayout(std::shared_ptr<DriveProcessor> driveProcessor) :
+        ControllerLayout("DriveController") {
 
+        this->driveProcessor = driveProcessor;
+
+        // clang-format off
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSHOULDER, decrementLightLevelOneStep);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, incrementLightLevelOneStep);       
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, decrementMaxSpeedOneStep);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, incrementMaxSpeedOneStep);
-
         // clang-format on
     }
 
@@ -34,15 +31,12 @@ public:
     void rightTriggerResponse(int16_t axisValue) override;
 
 private:
-    DriveStateManager& stateManager;
-    DriveMotorState desiredMotorState;
-
-    ProcessDriveStateFunc process;
+    std::shared_ptr<DriveProcessor> driveProcessor;
 
     int presentMaxSpeed = 80;  // present maximum speed of chassis
     int absoluteMaxSpeed = 80; // Absolute max speed of the chassis
 
-    int maxRadialSpeed = 45; // degrees per second
+    const int maxRadialSpeed = 45; // degrees per second
 
     uint8_t lightLevel = 0;
 
@@ -66,7 +60,9 @@ private:
     void incrementMaxSpeedOneStep(uint8_t buttonID) { incrementMaxSpeed(2); };
 
     void decrementLightLevelOneStep(uint8_t buttonID) {
-        incrementMaxSpeed(-20);
+        incrementLightLevel(-20);
     }
-    void incrementLightLevelOneStep(uint8_t buttonID) { incrementMaxSpeed(20); }
+    void incrementLightLevelOneStep(uint8_t buttonID) {
+        incrementLightLevel(20);
+    }
 };

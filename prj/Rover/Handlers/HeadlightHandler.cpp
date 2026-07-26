@@ -1,8 +1,12 @@
-#include "Rover/Handlers/HeadlightHandler.h"
+#include "HeadlightHandler.h"
 
 static const char* file = "HeadlightHandler";
 
-HeadlightHandler::HeadlightHandler(const char* arduino_id) {
+HeadlightHandler::HeadlightHandler(
+    std::shared_ptr<HeadlightQueue> headlightQueue, const char* arduino_id) :
+    HandlerInterface() {
+    m_headlightQueue = headlightQueue;
+
     char resolved_path[256] = "/dev/serial/by-id/";
     char buffer[256];
 
@@ -41,14 +45,18 @@ HeadlightHandler::HeadlightHandler(const char* arduino_id) {
     cfsetospeed(&tty, B9600);
 }
 
-HeadlightHandler::~HeadlightHandler() { close(serial_port); }
-
-void HeadlightHandler::setHeadlightPercentage(int percentage) {
-    char msg[256];
-    sprintf(msg, "Light level: %d\n", percentage);
-    write(serial_port, msg, strlen(msg));
-}
-
 void HeadlightHandler::start() {
-    // This function is intentionally left empty as the HeadlightHandler does not require a separate thread for operation.
+    while (true) {
+        HeadlightMessage headlightMessage = m_headlightQueue->pop();
+
+        // Handle out of bounds data values
+        uint brightness = headlightMessage.brightnessPercentage;
+        if (brightness > 100) {
+            brightness = 100;
+        }
+
+        char msg[256];
+        sprintf(msg, "Light level: %d\n", brightness);
+        write(serial_port, msg, strlen(msg));
+    }
 }

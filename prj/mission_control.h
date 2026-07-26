@@ -4,7 +4,7 @@
 #pragma once
 
 #define EXTENTION_TYPE_ARM 0
-#define EXTENTION_TYPE_SCIENCE_TOOL 1
+#define EXTENTION_TYPE_SCI_TOOL 1
 #define EXTENTION_TYPE_NONE 2
 
 #define BUILD_SIDE_BASE 1
@@ -20,8 +20,16 @@
 #ifndef SIDE_TO_BUILD
 #define SIDE_TO_BUILD BUILD_SIDE_BASE
 #endif // SIDE_TO_BUILD
-#define EXTENTION EXTENTION_TYPE_NONE
+#define EXTENTION EXTENTION_TYPE_ARM
 #define LOGGING_LEVEL LOG_LEVEL_DEBUG
+
+// Hardware Enabled
+#define ARM_HARDWARE_TEST true
+#define DRIVE_HARDWARE_TEST true
+
+// System Update Rates
+#define ARM_UPDATE_INTERVAL_US 50 * 1000   // 50ms
+#define DRIVE_UPDATE_INTERVAL_US 50 * 1000 // 50ms
 
 // Rover dimentions
 #define ROVER_LENGTH 1.0 // in meters
