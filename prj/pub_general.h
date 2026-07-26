@@ -97,7 +97,7 @@ struct SciToolBrushMessage {
 };
 
 struct HeadlightMessage {
-    uint brightnessPercentage; // 0% to 100%
+    int brightnessPercentage; // 0% to 100%
 };
 
 struct DriveZeroMessage {

@@ -50,9 +50,11 @@ void HeadlightHandler::start() {
         HeadlightMessage headlightMessage = m_headlightQueue->pop();
 
         // Handle out of bounds data values
-        uint brightness = headlightMessage.brightnessPercentage;
+        int brightness = headlightMessage.brightnessPercentage;
         if (brightness > 100) {
             brightness = 100;
+        } else if (brightness < 0) {
+            brightness = 0;
         }
 
         char msg[256];
