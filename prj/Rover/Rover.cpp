@@ -165,6 +165,7 @@ void Rover::start() {
             HeadlightMessage headlightMessage
                 = std::get<HeadlightMessage>(message.getPayload());
             headlightQueue->push(headlightMessage);
+            break;
         }
 
         default:
