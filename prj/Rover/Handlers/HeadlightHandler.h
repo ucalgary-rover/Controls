@@ -30,4 +30,5 @@ private:
 
     char control_port[32];
     int serial_port;
+    bool is_initialized = false;
 };
