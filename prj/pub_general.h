@@ -109,7 +109,7 @@ struct CameraServoMessage {
 };
 
 struct HeadlightMessage {
-    int brightness;
+    int brightnessPercentage; // 0% to 100%
 };
 
 struct DriveZeroMessage {
