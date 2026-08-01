@@ -35,5 +35,6 @@ void DriveControllerLayout::rightTriggerResponse(int16_t axisValue) {
 
 void DriveControllerLayout::switchLayout(DriveLayout layout) {
     currentLayout = layout;
-    Logging::logI(file, "Switching to %s", drivelayouts[layout]->getName());
+    Logging::logI(file, "Switching to %s",
+                  drivelayouts[layout]->getName().c_str());
 }

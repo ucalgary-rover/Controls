@@ -5,9 +5,13 @@
 #include "pub_general.h"
 #include <functional>
 
+using sciToolMessageFunc = std::function<void(MessageFormat, int)>;
+
 class SciToolControllerLayout : public ControllerLayout {
 public:
-    SciToolControllerLayout() : ControllerLayout("SciToolController") {
+    SciToolControllerLayout(sciToolMessageFunc sendSciToolMessage) :
+        ControllerLayout("SciToolController") {
+        this->sendSciToolMessage = sendSciToolMessage;
 
         // Initialize Layout API
         // clang-format off
@@ -29,17 +33,24 @@ public:
 private:
     int lastleftTriggerValue = 0;
     int lastrightTriggerValue = 0;
+    bool brushEnabled = false;
 
-    //helper functions
-    void toggleDoor(int door);
-
-    void lowerSciTool();
-    void raiseSciTool();
-    void stopSciTool();
+    //message functions
+    sciToolMessageFunc sendSciToolMessage;
 
     //button callbacks
-    void toogleDoor1(uint8_t buttonID) { toggleDoor(1); }
-    void toogleDoor2(uint8_t buttonID) { toggleDoor(2); }
-    void toogleDoor3(uint8_t buttonID) { toggleDoor(3); }
-    void toggleBrush(uint8_t buttonID);
+    void toogleDoor1(uint8_t buttonID) {
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_DOOR, LEFT);
+    };
+    void toogleDoor2(uint8_t buttonID) {
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_DOOR, MIDDLE);
+    };
+    void toogleDoor3(uint8_t buttonID) {
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_DOOR, RIGHT);
+    };
+    void toggleBrush(uint8_t buttonID) {
+        brushEnabled = !brushEnabled;
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_BRUSH,
+                           brushEnabled ? START_BRUSH : STOP_BRUSH);
+    };
 };

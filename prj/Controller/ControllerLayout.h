@@ -8,6 +8,8 @@
 
 #define NAMEOF(var) #var
 
+typedef std::function<void(int)> messageFunc;
+
 typedef std::function<void(uint8_t)> ButtonCallback;
 
 #define REGISTER_BUTTON(callbacks, buttonID, buttonCallback)                   \
