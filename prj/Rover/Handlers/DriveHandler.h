@@ -20,7 +20,7 @@ public:
 
     void updateCurrentState();
 
-    void translateSpeedAndAngle(DriveMotorState desiredState,
+    void translateSpeedAndAngle(DriveMotorState* desiredState,
                                 DriveIndex wheelIndex);
 
     /** @brief Stops all wheel movement
