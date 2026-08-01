@@ -2,11 +2,20 @@
 #include <string>
 
 void DriveManualControllerLayout::leftTriggerResponse(int16_t axisValue) {
-    triggerToincrementWheelAngle(axisValue, -1.0, &lastleftTriggerValue);
+    if (axisValue <= INT16_MIN) {
+        triggerTosetWheelAngleVelocity(axisValue, 0, &lastleftTriggerValue);
+    } else {
+        triggerTosetWheelAngleVelocity(axisValue, -1.0, &lastleftTriggerValue);
+    }
 }
 
 void DriveManualControllerLayout::rightTriggerResponse(int16_t axisValue) {
-    triggerToincrementWheelAngle(axisValue, 1.0, &lastrightTriggerValue);
+    if (axisValue <= INT16_MIN) {
+        triggerTosetWheelAngleVelocity(axisValue, 0, &lastrightTriggerValue);
+
+    } else {
+        triggerTosetWheelAngleVelocity(axisValue, 1.0, &lastrightTriggerValue);
+    }
 }
 
 void DriveManualControllerLayout::buttonResponse(uint8_t buttonID) {
@@ -26,16 +35,16 @@ void DriveManualControllerLayout::incrementWheelAngle(float increment) {
     driveProcessor->incrementSteerPosition(wheel, val);
 }
 
-void DriveManualControllerLayout::triggerToincrementWheelAngle(
-    int triggerVal, float increment, int* lastTriggerValue) {
+void DriveManualControllerLayout::triggerTosetWheelAngleVelocity(
+    int triggerVal, float velocity, int* lastTriggerValue) {
     float val = 0;
     std::string logMessage = "wheel: " + std::to_string(wheel);
-    triggerToIncrement(triggerVal, lastTriggerValue, &val, increment, (float)0,
-                       (float)360, logMessage.c_str());
-    driveProcessor->incrementSteerPosition(wheel, val);
+    triggerToIncrement(triggerVal, lastTriggerValue, &val, velocity, (float)-5,
+                       (float)5, logMessage.c_str());
+    driveProcessor->setSteerVelocity(wheel, val);
 }
 
 void DriveManualControllerLayout::incrementWheel(int change) {
     wheel = static_cast<WheelID>((wheel + change + WHEEL_COUNT) % WHEEL_COUNT);
-    Logging::logI(filename.c_str(), "Changing to joint: %d", wheel);
+    Logging::logI(filename.c_str(), "Changing to wheel: %d", wheel);
 }

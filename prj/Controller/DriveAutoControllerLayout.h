@@ -7,16 +7,23 @@
 
 class DriveAutoControllerLayout : public ControllerLayout {
 public:
-    DriveAutoControllerLayout(std::shared_ptr<DriveProcessor> driveProcessor) :
+    DriveAutoControllerLayout(std::shared_ptr<DriveProcessor> driveProcessor,
+                              messageFunc sendHeadlightsMessage,
+                              messageFunc sendCameraServoMessage) :
         ControllerLayout("DriveController") {
 
         this->driveProcessor = driveProcessor;
+        this->sendHeadlightsMessage = sendHeadlightsMessage;
+        this->sendCameraServoMessage = sendCameraServoMessage;
 
         // clang-format off
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSHOULDER, decrementLightLevelOneStep);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, incrementLightLevelOneStep);       
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, decrementMaxSpeedOneStep);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, incrementMaxSpeedOneStep);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSHOULDER, decrementMaxSpeedOneStep );
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, incrementMaxSpeedOneStep );       
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, decrementLightLevelOneStep);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, incrementLightLevelOneStep);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_UP, setLightLevelMax);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_DOWN, setLightLevelMin);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_A, turnCameraServo180);
         // clang-format on
     }
 
@@ -32,13 +39,15 @@ public:
 
 private:
     std::shared_ptr<DriveProcessor> driveProcessor;
+    messageFunc sendHeadlightsMessage;
+    messageFunc sendCameraServoMessage;
 
     int presentMaxSpeed = 80;  // present maximum speed of chassis
     int absoluteMaxSpeed = 80; // Absolute max speed of the chassis
 
     const int maxRadialSpeed = 45; // degrees per second
 
-    uint8_t lightLevel = 0;
+    int lightLevel = 0;
 
     int lastleftTriggerValue = 0;
     int lastrightTriggerValue = 0;
@@ -53,16 +62,22 @@ private:
 
     void incrementMaxSpeed(int val);
 
-    void incrementLightLevel(uint8_t val);
+    void incrementLightLevel(int val);
 
     //button callbacks
     void decrementMaxSpeedOneStep(uint8_t buttonID) { incrementMaxSpeed(-2); };
     void incrementMaxSpeedOneStep(uint8_t buttonID) { incrementMaxSpeed(2); };
 
     void decrementLightLevelOneStep(uint8_t buttonID) {
-        incrementLightLevel(-20);
+        incrementLightLevel(-10);
     }
     void incrementLightLevelOneStep(uint8_t buttonID) {
-        incrementLightLevel(20);
+        incrementLightLevel(10);
+    }
+
+    void setLightLevelMax(uint8_t buttonID) { incrementLightLevel(75); }
+    void setLightLevelMin(uint8_t buttonID) { incrementLightLevel(-75); }
+    void turnCameraServo180(uint8_t buttonID) {
+        sendCameraServoMessage(TURN_180);
     }
 };

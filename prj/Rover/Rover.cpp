@@ -4,6 +4,7 @@
 #include <memory>
 #include <thread>
 
+#include "mission_control.h"
 #include "pub_rover.h"
 
 #include "Rover/Systems/DriveHardware.h"
@@ -11,6 +12,8 @@
 
 #include "Rover/Systems/ArmHardware.h"
 #include "Rover/Systems/MockArm.h"
+
+#include "Rover/Handlers/HeadlightHandler.h"
 
 #define CURRENT_STATE_PUSH_INTERVAL_US 1000 * 1000 // 1s
 #define INACTIVE_SLEEP_US 100 * 1000               // 100ms
@@ -78,7 +81,8 @@ void Rover::initializeDrive() {
 
 void Rover::initializeHeadlights() {
     Logging::logI(file, "Instantiating Headlight System");
-    headlightHandler = std::make_shared<HeadlightHandler>(headlightQueue);
+    headlightHandler
+        = std::make_shared<HeadlightHandler>(headlightQueue, HEADLIGHT_ARDUINO);
     processes.push_back(std::thread([&]() { headlightHandler->start(); }));
 }
 
@@ -116,6 +120,7 @@ void Rover::start() {
     bool roverHalted = false;
 
     while (true) {
+
         // Check activity timeout
         if (!receiveQueue->empty()) {
             last_reception = std::chrono::system_clock::now();
@@ -147,16 +152,16 @@ void Rover::start() {
         }
 
         case MESSAGE_FORMAT_DRIVE_ZERO: {
-            DriveZeroMessage zeroMessage
-                = std::get<DriveZeroMessage>(message.getPayload());
-            if (zeroMessage.set) { // currently setting zero
-                driveHandler->setWheelZeroState();
-            } else { // currently getting zero
-                driveHandler->stopWheels();
-                driveHandler->currentlyGettingZeroState = true;
-            }
+            // currently setting zero
+            driveHandler->setWheelZeroState();
+        }
+        case MESSAGE_FORMAT_HEADLIGHTS: {
+            HeadlightMessage headlightMessage
+                = std::get<HeadlightMessage>(message.getPayload());
+            headlightQueue->push(headlightMessage);
             break;
         }
+
         default:
             break;
         }
