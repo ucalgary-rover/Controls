@@ -116,6 +116,7 @@ void Rover::start() {
     bool roverHalted = false;
 
     while (true) {
+
         // Check activity timeout
         if (!receiveQueue->empty()) {
             last_reception = std::chrono::system_clock::now();
@@ -147,15 +148,8 @@ void Rover::start() {
         }
 
         case MESSAGE_FORMAT_DRIVE_ZERO: {
-            DriveZeroMessage zeroMessage
-                = std::get<DriveZeroMessage>(message.getPayload());
-            if (zeroMessage.set) { // currently setting zero
-                driveHandler->setWheelZeroState();
-            } else { // currently getting zero
-                driveHandler->stopWheels();
-                driveHandler->currentlyGettingZeroState = true;
-            }
-            break;
+            // currently setting zero
+            driveHandler->setWheelZeroState();
         }
         default:
             break;

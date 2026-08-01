@@ -123,38 +123,42 @@ void DriveHandler::updateCurrentState() {
 }
 
 void DriveHandler::translateSpeedAndAngle(
-    DriveMotorState desiredState,
+    DriveMotorState* desiredState,
     DriveIndex wheelIndex) { // From software -> hardware
-    double angle = desiredState.steer[wheelIndex];
-    double speed = desiredState.drive[wheelIndex];
+    double angle = desiredState->steer[wheelIndex];
+    double speed = desiredState->drive[wheelIndex];
 
     if (angle <= 360 && angle >= 0) { // Check valid software range
         if (wheelIndex % 2
             == 0) {           // WHEEL_FL/WHEEL_BL (mounted to m_drive fwds)
             if (angle > 90) { // if angle < 90, do nothing
                 if (angle <= 180) { // Wheel should be backwards
-                    desiredState.steer[wheelIndex] = -180 + angle;
-                    desiredState.drive[wheelIndex] = -speed;
+                    desiredState->steer[wheelIndex] = -180 + angle;
+                    desiredState->drive[wheelIndex] = -speed;
                 } else if (angle <= 270) { // Wheel should be backwards
-                    desiredState.steer[wheelIndex] = -180 + angle;
-                    desiredState.drive[wheelIndex] = -speed;
+                    desiredState->steer[wheelIndex] = -180 + angle;
+                    desiredState->drive[wheelIndex] = -speed;
                 } else { // Wheel should be forwards
-                    desiredState.steer[wheelIndex] = -360 + angle;
-                    desiredState.drive[wheelIndex] = speed;
+                    desiredState->steer[wheelIndex] = -360 + angle;
+                    desiredState->drive[wheelIndex] = speed;
                 }
             }
         } else {               // WHEEL_FR/WHEEL_BR (mounted to m_drive bkwds)
             if (angle <= 90) { // Wheel should be backwards
-                desiredState.drive[wheelIndex] = -speed;
+                desiredState->drive[wheelIndex] = -speed;
             } else if (angle <= 180) { // Wheel should be forwards
-                desiredState.steer[wheelIndex] = -angle;
+                desiredState->steer[wheelIndex] = -180 + angle;
             } else if (angle <= 270) { // Wheel should be forwards
-                desiredState.steer[wheelIndex] = -180 + angle;
+                desiredState->steer[wheelIndex] = -180 + angle;
             } else { // Wheel should be backwards
-                desiredState.steer[wheelIndex] = -360 + angle;
-                desiredState.drive[wheelIndex] = -speed;
+                desiredState->steer[wheelIndex] = -360 + angle;
+                desiredState->drive[wheelIndex] = -speed;
             }
         }
+
+        //apply offset from the zeroState
+        desiredState->steer[wheelIndex]
+            += (float)wheelZeroState.steer[wheelIndex];
     } else {
         throw std::runtime_error(
             "Invalid angle detected: outside of 0-360 degree range.");
@@ -175,7 +179,7 @@ void DriveHandler::stopWheels() {
 void DriveHandler::setWheelZeroState() {
     for (int index = 0; index < WHEEL_COUNT; index++) {
         DriveIndex i = static_cast<DriveIndex>(index);
-        wheelZeroState.steer[index] = m_drive->getWheelAngle(i);
+        wheelZeroState.steer[index] = (float)m_drive->getWheelAngle(i);
     }
     zeroAngleSet = true;
 }
@@ -192,8 +196,7 @@ void DriveHandler::start() {
                     DriveIndex i = static_cast<DriveIndex>(index);
 
                     // Translate into hardware specific angles and speed
-                    translateSpeedAndAngle(desiredState, i);
-
+                    translateSpeedAndAngle(&desiredState, i);
                     // Update wheel speed and angle
                     m_drive->setWheelAngle(i, desiredState.steer[i]);
                     m_drive->setWheelSpeed(i, desiredState.drive[i]);
@@ -218,6 +221,10 @@ void DriveHandler::start() {
                 }
                 currentlyGettingZeroState = !doneGettingZeroState;
             }
+
+            for (int index = 0; index < WHEEL_COUNT; index++)
+                printf("\n%f\n", desiredState.steer[index]);
+
         } catch (const std::runtime_error& e) {
             // Erroneous angle detected
             std::cerr << e.what() << std::endl;
