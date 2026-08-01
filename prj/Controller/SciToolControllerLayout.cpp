@@ -3,17 +3,17 @@
 
 void SciToolControllerLayout::leftTriggerResponse(int16_t axisValue) {
     if (INT16_MAX == axisValue) {
-        void lowerSciTool();
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_HEIGHT, LOWER);
     } else {
-        void stopSciTool();
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_HEIGHT, STOP);
     }
 }
 
 void SciToolControllerLayout::rightTriggerResponse(int16_t axisValue) {
     if (INT16_MAX == axisValue) {
-        void raiseSciTool();
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_HEIGHT, RAISE);
     } else {
-        void stopSciTool();
+        sendSciToolMessage(MESSAGE_FORMAT_SCI_TOOL_HEIGHT, STOP);
     }
 }
 

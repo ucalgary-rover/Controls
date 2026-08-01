@@ -17,7 +17,7 @@ static const char* file = "Base";
 // Chassis state management
 std::shared_ptr<ArmProcessor> Base::armProcessor;
 std::shared_ptr<DriveProcessor> Base::driveProcessor;
-
+std::shared_ptr<MessageQueue<Message>> Base::sendQueue;
 bool Base::exitLoop = false;
 
 void Base::initialize() {
@@ -34,13 +34,19 @@ void Base::initialize() {
 
     std::vector<std::shared_ptr<ControllerLayout>> controllers = {};
 
-    controllers.push_back(std::make_shared<DriveControllerLayout>(driveProcessor));
+    controllers.push_back(std::make_shared<DriveControllerLayout>(
+        driveProcessor, sendHeadlightsMessage, sendZeroMessage,
+        sendCameraServoMessage));
 #if EXTENSION == EXTENSION_TYPE_ARM
     controllers.push_back(std::make_shared<ArmControllerLayout>(armProcessor));
 #elif EXTENSION == EXTENSION_TYPE_SCI_TOOL
-    controllers.push_back(std::make_shared<SciToolControllerLayout>());
+    controllers.push_back(
+        std::make_shared<SciToolControllerLayout>(sendSciToolMessage));
 #endif
     ControllerHandler::initialize(controllers);
+
+    //initialize sendQueue
+    sendQueue = std::make_shared<MessageQueue<Message>>();
 
     Logging::logI(file, "Initializing Base done");
 }
@@ -61,7 +67,6 @@ void Base::receive(UDPHandler& receiver) {
 
 void Base::start() {
     Logging::logI(file, "Starting Base");
-    auto sendQueue = std::make_shared<MessageQueue<Message>>();
     UDPHandler server(BASE_PORT, ROVER_PORT);
 
     std::thread controllerThread([&]() { ControllerHandler::eventLoop(); });
@@ -84,4 +89,56 @@ void Base::start() {
     controllerThread.join();
     sendingThread.join();
     receivingThread.join();
+}
+
+//
+void Base::sendZeroMessage(int setVal) {
+    Message message(DriveZeroMessage {});
+    sendQueue->push(message);
+
+    Logging::logV(file, "zeroMessage queued. Set");
+}
+
+void Base::sendHeadlightsMessage(int brightnessVal) {
+    Message message(HeadlightMessage { .brightness = brightnessVal });
+    sendQueue->push(message);
+    Logging::logV(file, "headlightsMessage queued. Brightness = %d",
+                  brightnessVal);
+}
+
+void Base::sendCameraServoMessage(int control) {
+    Message message(CameraServoMessage {
+        .control = static_cast<CameraServoMessageControl>(control) });
+    sendQueue->push(message);
+    Logging::logV(file, "cameraServoMessage queued. Control = %d", control);
+}
+
+void Base::sendSciToolMessage(MessageFormat format, int value) {
+    switch (format) {
+    case MESSAGE_FORMAT_SCI_TOOL_DOOR: {
+        Message message(SciToolDoorMessage {
+            .door = static_cast<SciToolDoorControl>(value) });
+        sendQueue->push(message);
+        Logging::logV(file, "sciToolDoorMessage queued. Door = %d", value);
+        break;
+    }
+    case MESSAGE_FORMAT_SCI_TOOL_BRUSH: {
+        Message message(SciToolBrushMessage {
+            .control = static_cast<SciToolBrushControl>(value) });
+        sendQueue->push(message);
+        Logging::logV(file, "sciToolBrushMessage queued. Control = %d", value);
+        break;
+    }
+    case MESSAGE_FORMAT_SCI_TOOL_HEIGHT: {
+        Message message(SciToolHeightMessage {
+            .control = static_cast<SciToolHeightControl>(value) });
+        sendQueue->push(message);
+        Logging::logV(file, "sciToolHeightMessage queued. Control = %d", value);
+        break;
+    }
+    default:
+        Logging::logW(file, "Ignoring unsupported SciTool message format: %d",
+                      static_cast<int>(format));
+        break;
+    }
 }

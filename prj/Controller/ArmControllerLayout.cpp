@@ -38,7 +38,7 @@ void ArmControllerLayout::switchLayout(ArmLayout layout) {
         return;
     }
 
-    Logging::logI(file, "Switching to %s", layouts[layout]->getName());
+    Logging::logI(file, "Switching to %s", layouts[layout]->getName().c_str());
 
     currentLayout = layout;
 }

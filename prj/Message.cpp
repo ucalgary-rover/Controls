@@ -19,8 +19,12 @@ Message::Message(MessagePayload payload) : m_payload(std::move(payload)) {
                 m_format = MESSAGE_FORMAT_SCI_TOOL_HEIGHT;
             else if constexpr (std::is_same_v<T, SciToolBrushMessage>)
                 m_format = MESSAGE_FORMAT_SCI_TOOL_BRUSH;
+            else if constexpr (std::is_same_v<T, CameraServoMessage>)
+                m_format = MESSAGE_FORMAT_CAMERA_SERVO;
             else if constexpr (std::is_same_v<T, DriveZeroMessage>)
                 m_format = MESSAGE_FORMAT_DRIVE_ZERO;
+            else if constexpr (std::is_same_v<T, HeadlightMessage>)
+                m_format = MESSAGE_FORMAT_HEADLIGHTS;
             else
                 m_format = static_cast<MessageFormat>(
                     MESSAGE_FORMAT_GENERIC); // Or a GENERIC/UNKNOWN value if
@@ -90,8 +94,16 @@ void Message::printMessage() const {
                 std::cout << "SciToolBrushMessage - Control: "
                           << payload.control;
 
+            } else if constexpr (std::is_same_v<T, CameraServoMessage>) {
+                std::cout << "CameraServoMessage - Control: "
+                          << payload.control;
+
             } else if constexpr (std::is_same_v<T, DriveZeroMessage>) {
-                std::cout << "DriveZeroMessage - set: " << payload.set;
+                std::cout << "DriveZeroMessage - set";
+
+            } else if constexpr (std::is_same_v<T, HeadlightMessage>) {
+                std::cout << "HeadlightMessage - brightness: "
+                          << payload.brightness;
             }
         },
         m_payload);
@@ -118,8 +130,16 @@ std::vector<std::byte> Message::serialize() const {
         payloadLength += sizeof(SciToolBrushMessage);
         break;
     }
+    case MESSAGE_FORMAT_CAMERA_SERVO: {
+        payloadLength += sizeof(CameraServoMessage);
+        break;
+    }
     case MESSAGE_FORMAT_DRIVE_ZERO: {
         payloadLength += sizeof(DriveZeroMessage);
+        break;
+    }
+    case MESSAGE_FORMAT_HEADLIGHTS: {
+        payloadLength += sizeof(HeadlightMessage);
         break;
     }
     default: { // Generic or unknown
@@ -173,8 +193,16 @@ Message Message::deserialize(const std::vector<std::byte> data, size_t size) {
         payload = parseMessage<SciToolBrushMessage>(data, size);
         break;
     }
+    case MESSAGE_FORMAT_CAMERA_SERVO: {
+        payload = parseMessage<CameraServoMessage>(data, size);
+        break;
+    }
     case MESSAGE_FORMAT_DRIVE_ZERO: {
         payload = parseMessage<DriveZeroMessage>(data, size);
+        break;
+    }
+    case MESSAGE_FORMAT_HEADLIGHTS: {
+        payload = parseMessage<HeadlightMessage>(data, size);
         break;
     }
     case MESSAGE_FORMAT_GENERIC: { // Generic or unknown

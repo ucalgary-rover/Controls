@@ -7,11 +7,12 @@
 
 class DriveManualControllerLayout : public ControllerLayout {
 public:
-    DriveManualControllerLayout(
-        std::shared_ptr<DriveProcessor> driveProcessor) :
+    DriveManualControllerLayout(std::shared_ptr<DriveProcessor> driveProcessor,
+                                messageFunc sendZeroMessage) :
         ControllerLayout("DriveManualController") {
 
         this->driveProcessor = driveProcessor;
+        this->sendZeroMessage = sendZeroMessage;
 
         // Initialize Layout API
         // clang-format off
@@ -19,6 +20,8 @@ public:
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, incrementWheelAngleOnce);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, decrementWheelOnce);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, incrementWheelOnce);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_DOWN, buttonZeroMessage);
+
         // clang-format on
     }
 
@@ -30,6 +33,7 @@ public:
 
 private:
     std::shared_ptr<DriveProcessor> driveProcessor;
+    messageFunc sendZeroMessage;
 
     int lastleftTriggerValue = 0;
     int lastrightTriggerValue = 0;
@@ -37,8 +41,8 @@ private:
     WheelID wheel = WHEEL_FR;
 
     // helper functions
-    void triggerToincrementWheelAngle(int triggerVal, float increment,
-                                      int* lastTriggerValue);
+    void triggerTosetWheelAngleVelocity(int triggerVal, float velocity,
+                                        int* lastTriggerValue);
 
     void incrementWheel(int change);
 
@@ -51,4 +55,5 @@ private:
     void incrementWheelAngleOnce(uint8_t buttonID) { incrementWheelAngle(0.1); }
     void decrementWheelOnce(uint8_t buttonID) { incrementWheel(-1); }
     void incrementWheelOnce(uint8_t buttonID) { incrementWheel(1); }
+    void buttonZeroMessage(uint8_t buttonID) { sendZeroMessage(1); }
 };
