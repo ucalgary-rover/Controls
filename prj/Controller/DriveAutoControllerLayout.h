@@ -23,6 +23,7 @@ public:
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, incrementLightLevelOneStep);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_UP, setLightLevelMax);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_DOWN, setLightLevelMin);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_A, turnCameraServo180);
         // clang-format on
     }
 
@@ -75,6 +76,8 @@ private:
     }
 
     void setLightLevelMax(uint8_t buttonID) { incrementLightLevel(100); }
-
     void setLightLevelMin(uint8_t buttonID) { incrementLightLevel(-100); }
+    void turnCameraServo180(uint8_t buttonID) {
+        sendCameraServoMessage(TURN_180);
+    }
 };

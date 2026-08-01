@@ -100,6 +100,7 @@ struct SciToolBrushMessage {
 enum CameraServoMessageControl : int {
     TURN_CLOCKWISE,
     TURN_COUNTER_CLOCKWISE,
+    TURN_180,
     STOP_TURN,
 };
 

@@ -45,6 +45,9 @@ void Base::initialize() {
 #endif
     ControllerHandler::initialize(controllers);
 
+    //initialize sendQueue
+    sendQueue = std::make_shared<MessageQueue<Message>>();
+
     Logging::logI(file, "Initializing Base done");
 }
 
@@ -64,7 +67,6 @@ void Base::receive(UDPHandler& receiver) {
 
 void Base::start() {
     Logging::logI(file, "Starting Base");
-    auto sendQueue = std::make_shared<MessageQueue<Message>>();
     UDPHandler server(BASE_PORT, ROVER_PORT);
 
     std::thread controllerThread([&]() { ControllerHandler::eventLoop(); });
