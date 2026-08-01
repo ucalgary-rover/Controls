@@ -72,8 +72,8 @@ void DriveAutoControllerLayout::incrementMaxSpeed(int val) {
     incrementVal(&presentMaxSpeed, val, 0, absoluteMaxSpeed, "chassisMaxSpeed");
 }
 
-void DriveAutoControllerLayout::incrementLightLevel(uint8_t val) {
-    incrementVal(&lightLevel, val, (uint8_t)0, (uint8_t)100, "chassisMaxSpeed");
+void DriveAutoControllerLayout::incrementLightLevel(int val) {
+    incrementVal(&lightLevel, val, 0, 75, "chassisMaxSpeed");
     sendHeadlightsMessage(lightLevel);
 }
 

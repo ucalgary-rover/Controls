@@ -47,7 +47,7 @@ private:
 
     const int maxRadialSpeed = 45; // degrees per second
 
-    uint8_t lightLevel = 0;
+    int lightLevel = 0;
 
     int lastleftTriggerValue = 0;
     int lastrightTriggerValue = 0;
@@ -62,7 +62,7 @@ private:
 
     void incrementMaxSpeed(int val);
 
-    void incrementLightLevel(uint8_t val);
+    void incrementLightLevel(int val);
 
     //button callbacks
     void decrementMaxSpeedOneStep(uint8_t buttonID) { incrementMaxSpeed(-2); };
@@ -75,8 +75,8 @@ private:
         incrementLightLevel(10);
     }
 
-    void setLightLevelMax(uint8_t buttonID) { incrementLightLevel(100); }
-    void setLightLevelMin(uint8_t buttonID) { incrementLightLevel(-100); }
+    void setLightLevelMax(uint8_t buttonID) { incrementLightLevel(75); }
+    void setLightLevelMin(uint8_t buttonID) { incrementLightLevel(-75); }
     void turnCameraServo180(uint8_t buttonID) {
         sendCameraServoMessage(TURN_180);
     }
