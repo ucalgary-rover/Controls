@@ -21,6 +21,8 @@ Message::Message(MessagePayload payload) : m_payload(std::move(payload)) {
                 m_format = MESSAGE_FORMAT_SCI_TOOL_BRUSH;
             else if constexpr (std::is_same_v<T, DriveZeroMessage>)
                 m_format = MESSAGE_FORMAT_DRIVE_ZERO;
+            else if constexpr (std::is_same_v<T, HeadlightMessage>)
+                m_format = MESSAGE_FORMAT_HEADLIGHTS;
             else
                 m_format = static_cast<MessageFormat>(
                     MESSAGE_FORMAT_GENERIC); // Or a GENERIC/UNKNOWN value if

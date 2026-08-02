@@ -75,10 +75,6 @@ void HeadlightHandler::start() {
             char msg[256];
             sprintf(msg, "Light level: %d\n", brightness);
             write(serial_port, msg, strlen(msg));
-        } else {
-            Logging::logW(
-                file,
-                "HeadlightHandler is not initialized. Cannot send message.");
         }
     }
 }

@@ -26,6 +26,13 @@ enum DriveIndex : int {
     DRIVE_INDEX_WHEEL_COUNT,
 };
 
+enum ScienceToolIndex : int {
+    SCI_TOOL_INDEX_SERVO_LEFT,
+    SCI_TOOL_INDEX_SERVO_RIGHT,
+
+    SCI_TOOL_INDEX_GATE_COUNT,
+};
+
 inline const char* driveIndexToString(DriveIndex index) {
     switch (index) {
     case DRIVE_INDEX_FRONT_LEFT:
