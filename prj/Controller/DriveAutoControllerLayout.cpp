@@ -72,8 +72,9 @@ void DriveAutoControllerLayout::incrementMaxSpeed(int val) {
     incrementVal(&presentMaxSpeed, val, 0, absoluteMaxSpeed, "chassisMaxSpeed");
 }
 
-void DriveAutoControllerLayout::incrementLightLevel(uint8_t val) {
-    incrementVal(&lightLevel, val, (uint8_t)0, (uint8_t)100, "chassisMaxSpeed");
+void DriveAutoControllerLayout::incrementLightLevel(int val) {
+    incrementVal(&lightLevel, val, 0, 75, "lightLevel");
+    sendHeadlightsMessage(lightLevel);
 }
 
 void DriveAutoControllerLayout::buttonResponse(uint8_t buttonID) {
@@ -98,12 +99,17 @@ void DriveAutoControllerLayout::rightStickResponse(int xValue, int yValue) {
 }
 
 void DriveAutoControllerLayout::leftTriggerResponse(int16_t axisValue) {
-    if (axisValue >= INT16_MAX)
-        setVal(&lightLevel, (uint8_t)0, (uint8_t)0, (uint8_t)100, "lightLevel");
+    if (axisValue >= INT16_MAX) {
+        sendCameraServoMessage(TURN_COUNTER_CLOCKWISE);
+    } else {
+        sendCameraServoMessage(STOP_TURN);
+    }
 }
 
 void DriveAutoControllerLayout::rightTriggerResponse(int16_t axisValue) {
-    if (axisValue >= INT16_MAX)
-        setVal(&lightLevel, (uint8_t)100, (uint8_t)0, (uint8_t)100,
-               "lightLevel");
+    if (axisValue >= INT16_MAX) {
+        sendCameraServoMessage(TURN_CLOCKWISE);
+    } else {
+        sendCameraServoMessage(STOP_TURN);
+    }
 }

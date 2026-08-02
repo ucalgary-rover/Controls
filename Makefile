@@ -2,6 +2,8 @@
 BASE_SRC_FILES := $(wildcard prj/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/Base/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/Base/Models/*.cpp)
+BASE_SRC_FILES += $(wildcard prj/Base/MqttPublisher/*.cpp)
+BASE_SRC_FILES += $(wildcard prj/Config/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/RoverState/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/RoverState/StateManagers/*.cpp)
 BASE_SRC_FILES += $(wildcard prj/Controller/*.cpp)
@@ -32,8 +34,10 @@ CMPL_BOOST = -I $(BOOST_ROOT)
 CMPL_SDL = -I$(SDL_ROOT)/include -L$(SDL_ROOT)/lib -lSDL2
 CMPL_PHIDETS = -lphidget22
 CMPL_JSON = -ljsoncpp
+CMPL_MQTT = -L/usr/local/lib -lpaho-mqttpp3 -lpaho-mqtt3a
 CMPL_PTHREAD = -lpthread
 CMPL_IK = -I$(IK_root)/include
+CMPL_MQTT = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lpaho-mqttpp3 -lpaho-mqtt3a
 
 NULL_DEVICE := $(if $(filter Windows_NT,$(OS)),NUL,/dev/null)
 
@@ -51,7 +55,7 @@ build_dir:
 > mkdir -p logs
 
 base: build_dir
-> g++ $(CPP_STD) -DSIDE_TO_BUILD=1 $(BASE_INC_FILES) $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_IK) $(CMPL_PHIDETS) $(CMPL_PTHREAD) -o out/base
+> g++ $(CPP_STD) -DSIDE_TO_BUILD=1 $(BASE_INC_FILES) $(BASE_SRC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_IK) $(CMPL_PHIDETS) $(CMPL_MQTT) $(CMPL_PTHREAD) -o out/base
 
 rover: build_dir
 > g++ $(CPP_STD) -DSIDE_TO_BUILD=2 -I"prj" $(CMPL_IK) $(ROVER_SRC_FILES) $(ROVER_INC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_JSON) $(CMPL_PTHREAD) -o out/rover

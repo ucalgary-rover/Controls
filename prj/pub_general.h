@@ -12,6 +12,7 @@ enum MessageFormat : int {
     MESSAGE_FORMAT_SCI_TOOL_DOOR,
     MESSAGE_FORMAT_SCI_TOOL_HEIGHT,
     MESSAGE_FORMAT_SCI_TOOL_BRUSH,
+    MESSAGE_FORMAT_CAMERA_SERVO,
     MESSAGE_FORMAT_DRIVE_ZERO,
     MESSAGE_FORMAT_HEADLIGHTS,
     MESSAGE_FORMAT_GENERIC
@@ -96,12 +97,23 @@ struct SciToolBrushMessage {
     SciToolBrushControl control;
 };
 
+enum CameraServoMessageControl : int {
+    TURN_CLOCKWISE,
+    TURN_COUNTER_CLOCKWISE,
+    TURN_180,
+    STOP_TURN,
+};
+
+struct CameraServoMessage {
+    CameraServoMessageControl control;
+};
+
 struct HeadlightMessage {
     int brightnessPercentage; // 0% to 100%
 };
 
 struct DriveZeroMessage {
-    bool set;
+    int set;
 };
 
 #endif

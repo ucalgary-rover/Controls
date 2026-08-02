@@ -20,11 +20,15 @@ struct DriveControlState {
 
 class DriveControllerLayout : public ControllerLayout {
 public:
-    DriveControllerLayout(std::shared_ptr<DriveProcessor> driveProcessor) {
-        drivelayouts[DRIVE_AUTO]
-            = std::make_shared<DriveAutoControllerLayout>(driveProcessor);
+    DriveControllerLayout(std::shared_ptr<DriveProcessor> driveProcessor,
+                          messageFunc sendHeadlightMessage,
+                          messageFunc sendZeroMessage,
+                          messageFunc sendCameraServoMessage) {
+        drivelayouts[DRIVE_AUTO] = std::make_shared<DriveAutoControllerLayout>(
+            driveProcessor, sendHeadlightMessage, sendCameraServoMessage);
         drivelayouts[DRIVE_MANUAL]
-            = std::make_shared<DriveManualControllerLayout>(driveProcessor);
+            = std::make_shared<DriveManualControllerLayout>(driveProcessor,
+                                                            sendZeroMessage);
 
         // Initialize button callbacks
         // clang-format off
