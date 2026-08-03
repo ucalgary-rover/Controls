@@ -306,8 +306,7 @@ DriveModel::calculateMotorState(const DriveState& state,
         }
 
         currentHeading = currentHeading / WHEEL_COUNT;
-        float wheelAngle
-            = strafeAngleAdjust(state.angularVelocity, currentHeading);
+        float wheelAngle = strafeAngleAdjust(state.heading, currentHeading);
 
         int direction;
         if (wheelAngle == 0) {
@@ -324,6 +323,7 @@ DriveModel::calculateMotorState(const DriveState& state,
             ms.drive[i] = speed;
         }
 
+        Logging::logV(file, "WheelAngle %f", wheelAngle);
         return ms;
     }
 

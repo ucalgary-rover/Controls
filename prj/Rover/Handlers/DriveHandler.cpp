@@ -222,8 +222,11 @@ void DriveHandler::start() {
                 currentlyGettingZeroState = !doneGettingZeroState;
             }
 
-            for (int index = 0; index < WHEEL_COUNT; index++)
-                printf("\n%f\n", desiredState.steer[index]);
+            for (int index = 0; index < WHEEL_COUNT; index++) {
+                Logging::logV(file, "Wheel %d Heading: %f - Speed %f", index,
+                              desiredState.steer[index],
+                              desiredState.drive[index]);
+            }
 
         } catch (const std::runtime_error& e) {
             // Erroneous angle detected
