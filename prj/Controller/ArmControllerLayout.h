@@ -8,8 +8,8 @@
 #include "ArmProcessor.h"
 
 enum ArmLayout {
-    ARM_IK,
     ARM_MANUAL,
+    ARM_IK,
 };
 
 class ArmControllerLayout : public ControllerLayout {

@@ -10,12 +10,14 @@
 
 #include "ArmProcessor.h"
 
-#include "Models/ArmModel.h"
+#include "Models/ArmModelCylindrical.h"
 
 #define MS_PER_SEC 1000.0
 
-ArmProcessor::ArmProcessor(const ArmState& defaultArmState) {
-    ArmModel::initialize();
+static const char* file = "ArmProcessor";
+
+ArmProcessor::ArmProcessor(const ArmStateCylindrical& defaultArmState) {
+    ArmModelCylindrical::initialize();
 
     mode = ArmProcessorMode::TaskSpace;
     state.taskSpaceState = defaultArmState;
@@ -24,7 +26,7 @@ ArmProcessor::ArmProcessor(const ArmState& defaultArmState) {
 }
 
 ArmProcessor::ArmProcessor(const ArmMotorState& defaultArmMotorState) {
-    ArmModel::initialize();
+    ArmModelCylindrical::initialize();
 
     mode = ArmProcessorMode::JointSpace;
     state.taskSpaceState = armForwardsKinematics(defaultArmMotorState);
@@ -32,7 +34,7 @@ ArmProcessor::ArmProcessor(const ArmMotorState& defaultArmMotorState) {
     update_timestamp = std::chrono::steady_clock::now();
 }
 
-void ArmProcessor::setTaskSpaceState(const ArmState& armState) {
+void ArmProcessor::setTaskSpaceState(const ArmStateCylindrical& armState) {
     std::lock_guard<std::mutex> lock(mtx);
 
     setMode(ArmProcessorMode::TaskSpace);
@@ -42,7 +44,7 @@ void ArmProcessor::setTaskSpaceState(const ArmState& armState) {
     changesMade = true;
 }
 
-void ArmProcessor::incrementTaskSpaceState(const ArmState& delta) {
+void ArmProcessor::incrementTaskSpaceState(const ArmStateCylindrical& delta) {
     std::lock_guard<std::mutex> lock(mtx);
 
     if (mode != ArmProcessorMode::TaskSpace) {
@@ -55,7 +57,8 @@ void ArmProcessor::incrementTaskSpaceState(const ArmState& delta) {
     changesMade = true;
 }
 
-void ArmProcessor::setTaskSpaceVelocity(const ArmState& taskSpaceVelocity) {
+void ArmProcessor::setTaskSpaceVelocity(
+    const ArmStateCylindrical& taskSpaceVelocity) {
     std::lock_guard<std::mutex> lock(mtx);
 
     if (mode != ArmProcessorMode::TaskSpace) {
@@ -103,7 +106,7 @@ void ArmProcessor::setJointSpaceVelocity(
     changesMade = true;
 }
 
-ArmState ArmProcessor::getTaskSpaceState() {
+ArmStateCylindrical ArmProcessor::getTaskSpaceState() {
     std::lock_guard<std::mutex> lock(mtx);
 
     handleChanges();
@@ -115,6 +118,16 @@ ArmMotorState ArmProcessor::getJointSpaceState() {
     std::lock_guard<std::mutex> lock(mtx);
 
     handleChanges();
+
+    Logging::logI(file,
+                  "theta: %.2f r: %.2f z: %.2f pitch: %d roll: %d clawOpen: %d",
+                  state.taskSpaceState.theta, state.taskSpaceState.r,
+                  state.taskSpaceState.z, state.taskSpaceState.pitch,
+                  state.taskSpaceState.roll, state.taskSpaceState.clawOpen);
+
+    auto& vals = state.jointSpaceState.motorValues;
+    Logging::logI(file, "%d %d %d %d %d %d", vals[0], vals[1], vals[2], vals[3],
+                  vals[4], vals[5]);
 
     return state.jointSpaceState;
 }
@@ -139,56 +152,41 @@ ArmMotorState ArmProcessor::getRoverState() {
     return roverMotorState;
 }
 
-ArmMotorState ArmProcessor::armInverseKinematics(const ArmState& armState) {
-    ArmMotorState armMs = {};
-
-    // Wrist position IK
-    std::array<double, 3> desiredPos
-        = { (double)armState.x, (double)armState.y, (double)armState.z };
-    std::array<int, 6> angles = ArmModel::generateWristPosition(desiredPos);
-
-    // Apply claw orientation
-    double pitch = (double)armState.pitch;
-    double roll = (double)armState.roll;
-
-    angles = ArmModel::generateClawOrientation(angles, pitch, roll);
-
-    // Map angles to motor IDs
-    armMs.motorValues[MOTOR_ID_BASE] = angles[0];
-    armMs.motorValues[MOTOR_ID_SHOULDER] = angles[1];
-    armMs.motorValues[MOTOR_ID_ELBOW] = angles[2];
-    armMs.motorValues[MOTOR_ID_WRIST] = angles[3];
-
-    // ArmState desired orientation
-    armMs.motorValues[MOTOR_ID_CLAW_ROLL] = angles[4];
-    armMs.motorValues[MOTOR_ID_CLAW_PITCH] = angles[5];
-
-    // Open/close value
-    armMs.motorValues[MOTOR_ID_CLAW_OPEN] = armState.clawOpen;
-
-    return armMs;
-}
-
-ArmState
-ArmProcessor::armForwardsKinematics(const ArmMotorState& armMotorState) {
-    std::array<int, 6> motorValues = {};
-    for (int i = 0; i <= MOTOR_ID_CLAW_PITCH; i++) {
-        motorValues[i] = armMotorState.motorValues[i];
+ArmMotorState
+ArmProcessor::armInverseKinematics(const ArmStateCylindrical& armState) const {
+    ArmMotorState armMotorState;
+    if (!ArmModelCylindrical::inverseKinematics(armState, armMotorState)) {
+        Logging::logI(file, "Inverse Kinematics Failed");
+        armMotorState = state.jointSpaceState;
     }
 
-    ArmFKOutput fkOut = ArmModel::forwardsKinematics(motorValues);
-
-    ArmState out = {
-        .x = (float)fkOut.wrist_position[0],
-        .y = (float)fkOut.wrist_position[1],
-        .z = (float)fkOut.wrist_position[2],
-        .pitch = (int)fkOut.claw_pitch,
-        .roll = (int)fkOut.claw_roll,
-        .clawOpen = armMotorState.motorValues[MOTOR_ID_CLAW_OPEN],
-    };
-
-    return out;
+    return armMotorState;
 }
+
+ArmStateCylindrical
+ArmProcessor::armForwardsKinematics(const ArmMotorState& armMotorState) const {
+    ArmStateCylindrical armState;
+    if (!ArmModelCylindrical::forwardsKinematics(armMotorState, armState)) {
+        Logging::logI(file, "Forwards Kinematics Failed");
+        armState = state.taskSpaceState;
+    }
+
+    return armState;
+}
+
+void ArmProcessor::saveCurrentAsMin(MotorID joint) {
+    ArmModelCylindrical::setMin(joint,
+                                state.jointSpaceState.motorValues[joint]);
+}
+
+void ArmProcessor::saveCurrentAsMax(MotorID joint) {
+    ArmModelCylindrical::setMax(joint,
+                                state.jointSpaceState.motorValues[joint]);
+}
+
+void ArmProcessor::printLimits() { ArmModelCylindrical::printLimits(); }
+
+void ArmProcessor::resetLimits() { ArmModelCylindrical::initialize(); }
 
 void ArmProcessor::setMode(ArmProcessorMode newMode) {
     switch (newMode) {
@@ -217,9 +215,11 @@ void ArmProcessor::handleChanges() {
                               .count();
     update_timestamp = current_timestamp;
 
+    Logging::logI(file, "Handling Changes");
+
     switch (mode) {
     case ArmProcessorMode::TaskSpace:
-        if (!changesMade && velocity.taskSpaceState == ArmState()) {
+        if (!changesMade && velocity.taskSpaceState == ArmStateCylindrical()) {
             return;
         }
 

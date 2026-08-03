@@ -15,10 +15,10 @@
 #include <mutex>
 
 #include "ArmMotorState.h"
-#include "ArmState.h"
+#include "ArmStateCylindrical.h"
 
 struct ArmProcessorState {
-    ArmState taskSpaceState;
+    ArmStateCylindrical taskSpaceState;
     ArmMotorState jointSpaceState;
 };
 
@@ -29,24 +29,24 @@ enum class ArmProcessorMode {
 
 class ArmProcessor {
 public:
-    ArmProcessor(const ArmState& defaultArmState);
+    ArmProcessor(const ArmStateCylindrical& defaultArmState);
 
     ArmProcessor(const ArmMotorState& defaultArmMotorState);
 
     /**
      * @brief Sets the Task space state computing joint space via Inverse Kinematics.
      */
-    void setTaskSpaceState(const ArmState& armState);
+    void setTaskSpaceState(const ArmStateCylindrical& armState);
 
     /**
      * @brief Increments the Task space state computing joint space via Inverse Kinematics.
      */
-    void incrementTaskSpaceState(const ArmState& delta);
+    void incrementTaskSpaceState(const ArmStateCylindrical& delta);
 
     /**
      * @brief Sets the Task space velocity used for calculating accumulated changes upon getting state.
      */
-    void setTaskSpaceVelocity(const ArmState& taskSpaceVelocity);
+    void setTaskSpaceVelocity(const ArmStateCylindrical& taskSpaceVelocity);
 
     /**
      * @brief Sets the Joint space state computing joint space via Inverse Kinematics.
@@ -66,7 +66,7 @@ public:
     /**
      * @brief Gets task space state synchronzing changes with joint space state.
      */
-    ArmState getTaskSpaceState();
+    ArmStateCylindrical getTaskSpaceState();
 
     /**
      * @brief Gets joint space state synchronzing changes with task space state.
@@ -81,9 +81,17 @@ public:
     void setRoverState(const ArmMotorState& armMotorState);
     ArmMotorState getRoverState();
 
-    static ArmMotorState armInverseKinematics(const ArmState& armState);
+    ArmMotorState
+    armInverseKinematics(const ArmStateCylindrical& armState) const;
 
-    static ArmState armForwardsKinematics(const ArmMotorState& armMotorState);
+    ArmStateCylindrical
+    armForwardsKinematics(const ArmMotorState& armMotorState) const;
+
+    // Calibration Methods
+    void saveCurrentAsMin(MotorID joint);
+    void saveCurrentAsMax(MotorID joint);
+    void printLimits();
+    void resetLimits();
 
 private:
     std::mutex mtx;

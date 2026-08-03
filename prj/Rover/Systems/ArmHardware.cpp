@@ -4,6 +4,10 @@ static const char* file = "ArmHardware";
 
 ArmHardware::ArmHardware(const std::vector<MotorType> motorTypes) :
     m_degOfFreedom(motorTypes.size()), m_motorTypes(motorTypes) {
+    const std::vector<MotorType> motorTypes
+        = { MOTOR_TYPE_STEPPER_MOTOR, MOTOR_TYPE_BLDC_MOTOR,
+            MOTOR_TYPE_BLDC_MOTOR, MOTOR_TYPE_STEPPER_MOTOR,
+            MOTOR_TYPE_STEPPER_MOTOR };
 
     // initialise motors in the ArmHardware
     Logging::logD(file, "Initialising ArmHardware Motors");
@@ -133,4 +137,44 @@ bool ArmHardware::getArmClawHandle(MotorHandlerReturn* retVal) {
     return true;
 }
 
-int ArmHardware::getDOF() { return m_degOfFreedom; }
+void ArmHardware::setJointAngle(MotorID joint, float angle) {
+    switch (joint) {
+    case MotorID::MOTOR_ID_BASE:
+        break;
+    case MotorID::MOTOR_ID_SHOULDER:
+        break;
+    case MotorID::MOTOR_ID_ELBOW:
+        break;
+    case MotorID::MOTOR_ID_WRIST:
+        break;
+    case MotorID::MOTOR_ID_CLAW_ROLL:
+        break;
+    case MotorID::MOTOR_ID_CLAW_PITCH:
+        break;
+    case MotorID::MOTOR_ID_CLAW_OPEN:
+        break;
+    default:
+        break;
+    }
+}
+
+float ArmHardware::getJointAngle(MotorID joint) {
+    switch (joint) {
+    case MotorID::MOTOR_ID_BASE:
+        break;
+    case MotorID::MOTOR_ID_SHOULDER:
+        break;
+    case MotorID::MOTOR_ID_ELBOW:
+        break;
+    case MotorID::MOTOR_ID_WRIST:
+        break;
+    case MotorID::MOTOR_ID_CLAW_ROLL:
+        break;
+    case MotorID::MOTOR_ID_CLAW_PITCH:
+        break;
+    case MotorID::MOTOR_ID_CLAW_OPEN:
+        break;
+    default:
+        break;
+    }
+}
