@@ -263,6 +263,9 @@ DriveModel::calculateMotorState(const DriveState& state,
         ms.steer[WHEEL_BL] = 0;
         ms.steer[WHEEL_BR] = 0;
 
+        Logging::logV(file, "FL: %f FR: %f", ms.steer[WHEEL_FL],
+                      ms.steer[WHEEL_FR]);
+
         int direction = (state.heading <= 90 || state.heading >= 270) ? 1 : -1;
         float speed
             = (float)state.speed * direction * RADIAL_SPEED_MAX / 100.0f;
@@ -306,14 +309,13 @@ DriveModel::calculateMotorState(const DriveState& state,
         }
 
         currentHeading = currentHeading / WHEEL_COUNT;
-        float wheelAngle
-            = strafeAngleAdjust(state.angularVelocity, currentHeading);
+        float wheelAngle = strafeAngleAdjust(state.heading, currentHeading);
 
         int direction;
         if (wheelAngle == 0) {
-            direction = currentHeading == 180 ? -1 : 1;
+            direction = state.heading == 180 ? -1 : 1;
         } else {
-            direction = currentHeading == wheelAngle ? 1 : -1;
+            direction = state.heading == wheelAngle ? 1 : -1;
         }
 
         float speed
@@ -324,6 +326,7 @@ DriveModel::calculateMotorState(const DriveState& state,
             ms.drive[i] = speed;
         }
 
+        Logging::logV(file, "WheelAngle %f", wheelAngle);
         return ms;
     }
 
@@ -401,5 +404,8 @@ float DriveModel::radialTurnWheelAngle(float headingAngle, bool isInnerWheel) {
                        / (2 * roverLength * cos(headingAngle)
                           - wheelInt * roverWidth * sin(headingAngle)));
 
+    if (angle < 0) {
+        angle += 2 * PI;
+    }
     return TO_DEGREES(angle);
 }
