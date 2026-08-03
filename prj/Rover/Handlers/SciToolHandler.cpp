@@ -15,7 +15,10 @@ void SciToolHandler::start() {
         switch (ScienceToolMessage.getFormat()) {
         MESSAGE_FORMAT_SCI_TOOL_DOOR:
             // Handle door message
-            switch (MESSAGE_FORMAT_SCI_TOOL_DOOR) {
+
+            switch (
+                std::get<SciToolDoorMessage>(ScienceToolMessage.getPayload())
+                    .door) {
             case LEFT:
                 m_sciTool->setGateServoAngle(SCI_TOOL_INDEX_SERVO_LEFT,
                                              0); // Example angle for LEFT door
@@ -43,7 +46,9 @@ void SciToolHandler::start() {
             break;
         MESSAGE_FORMAT_SCI_TOOL_HEIGHT:
             // Handle height message
-            switch (MESSAGE_FORMAT_SCI_TOOL_HEIGHT) {
+            switch (
+                std::get<SciToolHeightMessage>(ScienceToolMessage.getPayload())
+                    .control) {
             case RAISE:
                 m_sciTool->setLiftSpeed(-SCIENCE_LIFT_SPEED);
                 break;
@@ -59,7 +64,9 @@ void SciToolHandler::start() {
             break;
         MESSAGE_FORMAT_SCI_TOOL_BRUSH:
             // Handle brush message
-            switch (MESSAGE_FORMAT_SCI_TOOL_BRUSH) {
+            switch (
+                std::get<SciToolBrushMessage>(ScienceToolMessage.getPayload())
+                    .control) {
             case START_BRUSH:
                 m_sciTool->setBrushSpeed(SCIENCE_BRUSH_SPEED);
                 break;
