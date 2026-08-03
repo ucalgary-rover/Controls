@@ -27,6 +27,9 @@
 #define ARM_HARDWARE_TEST true
 #define DRIVE_HARDWARE_TEST true
 
+// MQTT
+#define MQTT_ENABLED false
+
 // System Update Rates
 #define ARM_UPDATE_INTERVAL_US 50 * 1000   // 50ms
 #define DRIVE_UPDATE_INTERVAL_US 50 * 1000 // 50ms

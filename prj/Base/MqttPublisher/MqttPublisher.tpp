@@ -1,6 +1,9 @@
 #pragma once
 #include "MqttPublisher.h"
 
+
+#if MQTT_ENABLED
+
 #include <iostream>
 #include <stdexcept>
 #include <type_traits>
@@ -29,3 +32,5 @@ void MqttPublisher::publish(const std::string& topic, const U& data) {
         throw;
     }
 }
+
+#endif

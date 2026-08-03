@@ -1,5 +1,10 @@
 
 #pragma once
+
+#include "mission_control.h"
+
+#if MQTT_ENABLED
+
 #include <string>
 
 struct MqttConfig {
@@ -22,3 +27,5 @@ public:
     MqttConfig mqttConfig;
     WebsocketConfig websocketConfig;
 };
+
+#endif

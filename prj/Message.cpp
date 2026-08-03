@@ -103,7 +103,7 @@ void Message::printMessage() const {
 
             } else if constexpr (std::is_same_v<T, HeadlightMessage>) {
                 std::cout << "HeadlightMessage - brightness: "
-                          << payload.brightness;
+                          << payload.brightnessPercentage;
             }
         },
         m_payload);
