@@ -38,7 +38,7 @@ private:
     int lastleftTriggerValue = 0;
     int lastrightTriggerValue = 0;
 
-    WheelID wheel = WHEEL_FR;
+    WheelID wheel = DRIVE_INDEX_FRONT_RIGHT;
 
     // helper functions
     void triggerTosetWheelAngleVelocity(int triggerVal, float velocity,

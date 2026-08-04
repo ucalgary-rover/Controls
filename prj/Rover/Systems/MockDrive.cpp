@@ -6,19 +6,19 @@ MockDrive::MockDrive() { }
 
 MockDrive::~MockDrive() { }
 
-void MockDrive::setWheelAngle(DriveIndex wheel, float angle) {
+void MockDrive::setWheelAngle(WheelID wheel, float angle) {
     steer[wheel] = angle;
 }
 
-double MockDrive::getWheelAngle(DriveIndex wheelIndex) {
+double MockDrive::getWheelAngle(WheelID wheelIndex) {
     return steer[wheelIndex];
 }
 
-void MockDrive::setWheelSpeed(DriveIndex wheel, float speed) {
+void MockDrive::setWheelSpeed(WheelID wheel, float speed) {
     drive[wheel] = speed;
 }
 
-double MockDrive::getWheelSpeed(DriveIndex wheelIndex) {
+double MockDrive::getWheelSpeed(WheelID wheelIndex) {
     return drive[wheelIndex];
 }
 

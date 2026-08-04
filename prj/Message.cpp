@@ -66,13 +66,13 @@ void Message::printMessage() const {
                 std::cout << "Generic - Value: " << payload.value;
             } else if constexpr (std::is_same_v<T, MotorState>) {
                 std::cout << "MotorState: Drive - steer: ";
-                for (int i = 0; i < WHEEL_COUNT; i++) {
+                for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
                     std::cout << payload.driveMotorState.steer[i] << " ";
                 }
                 std::cout << std::endl;
 
                 std::cout << "Drive - drive: ";
-                for (int i = 0; i < WHEEL_COUNT; i++) {
+                for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
                     std::cout << payload.driveMotorState.drive[i] << " ";
                 }
                 std::cout << std::endl;

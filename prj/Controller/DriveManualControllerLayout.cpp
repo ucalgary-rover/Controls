@@ -45,6 +45,7 @@ void DriveManualControllerLayout::triggerTosetWheelAngleVelocity(
 }
 
 void DriveManualControllerLayout::incrementWheel(int change) {
-    wheel = static_cast<WheelID>((wheel + change + WHEEL_COUNT) % WHEEL_COUNT);
+    wheel = static_cast<WheelID>((wheel + change + DRIVE_INDEX_WHEEL_COUNT)
+                                 % DRIVE_INDEX_WHEEL_COUNT);
     Logging::logI(filename.c_str(), "Changing to wheel: %d", wheel);
 }

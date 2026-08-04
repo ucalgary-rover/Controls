@@ -32,14 +32,14 @@ bool DriveModel::allWheelsDrivingInSameDirection(DriveMotorState state) {
     if (!stateIsStopped(state)) {
         if (state.drive[0]
             < 0.0) { // Should be jitter safe due to stateIsStopped check
-            for (int i = 1; i < WHEEL_COUNT; i++) {
+            for (int i = 1; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
                 if (state.drive[i] < 0.0) {
                     allWheelsDrivingInSameDirection = false;
                     break;
                 }
             }
         } else if (state.drive[0] > 0.0) {
-            for (int i = 1; i < WHEEL_COUNT; i++) {
+            for (int i = 1; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
                 if (state.drive[i] > 0.0) {
                     allWheelsDrivingInSameDirection = false;
                     break;
@@ -55,7 +55,7 @@ bool DriveModel::allWheelsDrivingInSameDirection(DriveMotorState state) {
 
 bool DriveModel::stateIsStopped(DriveMotorState state) {
     bool stopped = true;
-    for (int i = 0; i < WHEEL_COUNT; i++) {
+    for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
         if (abs(state.drive[i]) > DRIVE_THRESHOLD) {
             stopped = false;
             break;
@@ -67,17 +67,18 @@ bool DriveModel::stateIsStopped(DriveMotorState state) {
 bool DriveModel::stateIsRadialTurn(DriveMotorState state) {
     // Flags for readability
     bool backLeftWheelStraight
-        = abs(state.steer[WHEEL_BL]) < STEER_THRESHOLD
-          || abs(state.steer[WHEEL_BL] - 360.0) < STEER_THRESHOLD;
+        = abs(state.steer[DRIVE_INDEX_BACK_LEFT]) < STEER_THRESHOLD
+          || abs(state.steer[DRIVE_INDEX_BACK_LEFT] - 360.0) < STEER_THRESHOLD;
     bool backRightWheelStraight
-        = abs(state.steer[WHEEL_BR]) < STEER_THRESHOLD
-          || abs(state.steer[WHEEL_BR] - 360.0) < STEER_THRESHOLD;
+        = abs(state.steer[DRIVE_INDEX_BACK_RIGHT]) < STEER_THRESHOLD
+          || abs(state.steer[DRIVE_INDEX_BACK_RIGHT] - 360.0) < STEER_THRESHOLD;
     bool frontLeftWheelStraight
-        = abs(state.steer[WHEEL_FL]) < STEER_THRESHOLD
-          || abs(state.steer[WHEEL_FL] - 360.0) < STEER_THRESHOLD;
+        = abs(state.steer[DRIVE_INDEX_FRONT_LEFT]) < STEER_THRESHOLD
+          || abs(state.steer[DRIVE_INDEX_FRONT_LEFT] - 360.0) < STEER_THRESHOLD;
     bool frontRightWheelStraight
-        = abs(state.steer[WHEEL_FR]) < STEER_THRESHOLD
-          || abs(state.steer[WHEEL_FR] - 360.0) < STEER_THRESHOLD;
+        = abs(state.steer[DRIVE_INDEX_FRONT_RIGHT]) < STEER_THRESHOLD
+          || abs(state.steer[DRIVE_INDEX_FRONT_RIGHT] - 360.0)
+                 < STEER_THRESHOLD;
 
     bool backWheelsStraight = backLeftWheelStraight && backRightWheelStraight;
     bool frontWheelsStraight
@@ -87,22 +88,30 @@ bool DriveModel::stateIsRadialTurn(DriveMotorState state) {
     if (!stateIsStopped(state)) {
         if (frontWheelsStraight && !backWheelsStraight) {
             bool backLeftWheelAngleAcceptable
-                = (abs(state.steer[WHEEL_BL]) < (45.0 + STEER_THRESHOLD)
-                   || abs(state.steer[WHEEL_BL]) > (315.0 - STEER_THRESHOLD));
+                = (abs(state.steer[DRIVE_INDEX_BACK_LEFT])
+                       < (45.0 + STEER_THRESHOLD)
+                   || abs(state.steer[DRIVE_INDEX_BACK_LEFT])
+                          > (315.0 - STEER_THRESHOLD));
             bool backRightWheelAngleAcceptable
-                = (abs(state.steer[WHEEL_BR]) < (45.0 + STEER_THRESHOLD)
-                   || abs(state.steer[WHEEL_BR]) > (315.0 - STEER_THRESHOLD));
+                = (abs(state.steer[DRIVE_INDEX_BACK_RIGHT])
+                       < (45.0 + STEER_THRESHOLD)
+                   || abs(state.steer[DRIVE_INDEX_BACK_RIGHT])
+                          > (315.0 - STEER_THRESHOLD));
             if (!backLeftWheelAngleAcceptable
                 || !backRightWheelAngleAcceptable) {
                 return false;
             }
         } else if (backWheelsStraight && !frontWheelsStraight) {
             bool frontLeftWheelAngleAcceptable
-                = (abs(state.steer[WHEEL_FL]) < (45.0 + STEER_THRESHOLD)
-                   || abs(state.steer[WHEEL_FL]) > (315.0 - STEER_THRESHOLD));
+                = (abs(state.steer[DRIVE_INDEX_FRONT_LEFT])
+                       < (45.0 + STEER_THRESHOLD)
+                   || abs(state.steer[DRIVE_INDEX_FRONT_LEFT])
+                          > (315.0 - STEER_THRESHOLD));
             bool frontRightWheelAngleAcceptable
-                = (abs(state.steer[WHEEL_FR]) < (45.0 + STEER_THRESHOLD)
-                   || abs(state.steer[WHEEL_FR]) > (315.0 - STEER_THRESHOLD));
+                = (abs(state.steer[DRIVE_INDEX_FRONT_RIGHT])
+                       < (45.0 + STEER_THRESHOLD)
+                   || abs(state.steer[DRIVE_INDEX_FRONT_RIGHT])
+                          > (315.0 - STEER_THRESHOLD));
             if (!frontLeftWheelAngleAcceptable
                 || !frontRightWheelAngleAcceptable) {
                 return false;
@@ -124,7 +133,7 @@ bool DriveModel::stateIsStrafe(DriveMotorState state) {
         }
 
         bool allSameAngle = true;
-        for (int i = 1; i < WHEEL_COUNT; i++) {
+        for (int i = 1; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
             if (abs(state.steer[i] - state.steer[0]) > STEER_THRESHOLD) {
                 allSameAngle = false;
                 break;
@@ -141,7 +150,7 @@ bool DriveModel::stateIsSpotTurn(DriveMotorState state) {
     if (!stateIsStopped(state)) {
         float spotTurnAngle = TO_DEGREES(atan(roverLength / roverWidth));
         bool allAnglesCorrect = true; // i.e., all angles at 45 degrees
-        for (int i = 0; i < WHEEL_COUNT; i++) {
+        for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
             if (abs(abs(state.steer[i]) - spotTurnAngle) > STEER_THRESHOLD) {
                 allAnglesCorrect = false;
             }
@@ -150,7 +159,7 @@ bool DriveModel::stateIsSpotTurn(DriveMotorState state) {
         bool allWheelsDrivingInCircle = true;
         if (state.drive[0]
             < 0.0) { // Should be jitter safe due to stateIsStopped check
-            for (int i = 1; i < WHEEL_COUNT; i += 2) {
+            for (int i = 1; i < DRIVE_INDEX_WHEEL_COUNT; i += 2) {
                 if (i % 2
                     == 1) { // Odd, should be opposite direction to first wheel
                     if (state.drive[i] > 0.0) {
@@ -165,7 +174,7 @@ bool DriveModel::stateIsSpotTurn(DriveMotorState state) {
                 }
             }
         } else {
-            for (int i = 1; i < WHEEL_COUNT;
+            for (int i = 1; i < DRIVE_INDEX_WHEEL_COUNT;
                  i += 2) { // Driving in opposite direction
                            // state.drive[0] > 0.0
                 if (i % 2
@@ -194,7 +203,7 @@ DriveMotorState DriveModel::process(const DriveState& state,
         = calculateMotorState(state, currentMotorState);
 
     DriveMotorState stoppedMotorState;
-    for (int i = 0; i < WHEEL_COUNT; i++) {
+    for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
         stoppedMotorState.steer[i]
             = desiredDriveMotorState.steer[i]; // Allow angle change
         stoppedMotorState.drive[i] = 0;        // Stop drive
@@ -215,7 +224,7 @@ DriveMotorState DriveModel::process(const DriveState& state,
         }
     } else {
         // Inter-state halting conditions
-        for (int i = 0; i < WHEEL_COUNT; i++) {
+        for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
             // Check for drive direction reversal
             if (desiredDriveMotorState.drive[i] * currentMotorState.drive[i]
                 < 0.0) { // Opposite signs and therefore negative
@@ -258,19 +267,21 @@ DriveModel::calculateMotorState(const DriveState& state,
 
         bool leftInner = state.angularVelocity >= 0;
 
-        ms.steer[WHEEL_FL] = radialTurnWheelAngle(headingAngle, leftInner);
-        ms.steer[WHEEL_FR] = radialTurnWheelAngle(headingAngle, !leftInner);
-        ms.steer[WHEEL_BL] = 0;
-        ms.steer[WHEEL_BR] = 0;
+        ms.steer[DRIVE_INDEX_FRONT_LEFT]
+            = radialTurnWheelAngle(headingAngle, leftInner);
+        ms.steer[DRIVE_INDEX_FRONT_RIGHT]
+            = radialTurnWheelAngle(headingAngle, !leftInner);
+        ms.steer[DRIVE_INDEX_BACK_LEFT] = 0;
+        ms.steer[DRIVE_INDEX_BACK_RIGHT] = 0;
 
-        Logging::logV(file, "FL: %f FR: %f", ms.steer[WHEEL_FL],
-                      ms.steer[WHEEL_FR]);
+        Logging::logV(file, "FL: %f FR: %f", ms.steer[DRIVE_INDEX_FRONT_LEFT],
+                      ms.steer[DRIVE_INDEX_FRONT_RIGHT]);
 
         int direction = (state.heading <= 90 || state.heading >= 270) ? 1 : -1;
         float speed
             = (float)state.speed * direction * RADIAL_SPEED_MAX / 100.0f;
 
-        for (int i = 0; i < WHEEL_COUNT; i++) {
+        for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
             ms.drive[i] = speed;
         }
 
@@ -286,12 +297,12 @@ DriveModel::calculateMotorState(const DriveState& state,
 
         float wheelAngle = TO_DEGREES(atan(roverLength / roverWidth));
 
-        ms.steer[WHEEL_FL] = 360 - wheelAngle;
-        ms.steer[WHEEL_FR] = wheelAngle;
-        ms.steer[WHEEL_BL] = wheelAngle;
-        ms.steer[WHEEL_BR] = 360 - wheelAngle;
+        ms.steer[DRIVE_INDEX_FRONT_LEFT] = 360 - wheelAngle;
+        ms.steer[DRIVE_INDEX_FRONT_RIGHT] = wheelAngle;
+        ms.steer[DRIVE_INDEX_BACK_LEFT] = wheelAngle;
+        ms.steer[DRIVE_INDEX_BACK_RIGHT] = 360 - wheelAngle;
 
-        for (int i = 0; i < WHEEL_COUNT; i++) {
+        for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
             ms.drive[i] = (i % 2 == 0) ? speed : -speed;
         }
 
@@ -304,11 +315,11 @@ DriveModel::calculateMotorState(const DriveState& state,
     if (hasLinearVelocity && lateralOnly && !hasAngularVelocity) {
         float currentHeading = 0;
 
-        for (int i = 0; i < WHEEL_COUNT; i++) {
+        for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
             currentHeading += currentMotorState.steer[i];
         }
 
-        currentHeading = currentHeading / WHEEL_COUNT;
+        currentHeading = currentHeading / DRIVE_INDEX_WHEEL_COUNT;
         float wheelAngle = strafeAngleAdjust(state.heading, currentHeading);
 
         int direction;
@@ -321,7 +332,7 @@ DriveModel::calculateMotorState(const DriveState& state,
         float speed
             = (float)state.speed / 100.0f * direction * STRAFE_SPEED_MAX;
 
-        for (int i = 0; i < WHEEL_COUNT; i++) {
+        for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
             ms.steer[i] = wheelAngle;
             ms.drive[i] = speed;
         }
@@ -335,7 +346,7 @@ DriveModel::calculateMotorState(const DriveState& state,
 
 DriveStateType DriveModel::getDriveStateType(DriveMotorState state) {
     bool cumulativeAngleError = false;
-    for (int i = 0; i < WHEEL_COUNT; i++) {
+    for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
         if (state.steer[i] > 360.0 || state.steer[i] < 0.0) {
             cumulativeAngleError = true;
         }
