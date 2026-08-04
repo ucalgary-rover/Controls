@@ -9,16 +9,20 @@ SciToolHandler::SciToolHandler(std::shared_ptr<SciTool> sciTool,
 
 void SciToolHandler::start() {
     // TODO: Start SciToolHandling
+    Message ScienceToolMessage;
+    SciToolDoorMessage DoorMessage;
+    SciToolHeightMessage HeightMessage;
+    SciToolBrushMessage BrushMessage;
+
     while (true) {
-        Message ScienceToolMessage = m_sciToolQueue->pop();
+        ScienceToolMessage = m_sciToolQueue->pop();
 
         switch (ScienceToolMessage.getFormat()) {
         MESSAGE_FORMAT_SCI_TOOL_DOOR:
             // Handle door message
-
-            switch (
-                std::get<SciToolDoorMessage>(ScienceToolMessage.getPayload())
-                    .door) {
+            DoorMessage
+                = std::get<SciToolDoorMessage>(ScienceToolMessage.getPayload());
+            switch (DoorMessage.door) {
             case LEFT:
                 m_sciTool->setGateServoAngle(SCI_TOOL_INDEX_SERVO_LEFT,
                                              0); // Example angle for LEFT door
@@ -46,9 +50,9 @@ void SciToolHandler::start() {
             break;
         MESSAGE_FORMAT_SCI_TOOL_HEIGHT:
             // Handle height message
-            switch (
-                std::get<SciToolHeightMessage>(ScienceToolMessage.getPayload())
-                    .control) {
+            HeightMessage = std::get<SciToolHeightMessage>(
+                ScienceToolMessage.getPayload());
+            switch (HeightMessage.control) {
             case RAISE:
                 m_sciTool->setLiftSpeed(-SCIENCE_LIFT_SPEED);
                 break;
@@ -64,9 +68,9 @@ void SciToolHandler::start() {
             break;
         MESSAGE_FORMAT_SCI_TOOL_BRUSH:
             // Handle brush message
-            switch (
-                std::get<SciToolBrushMessage>(ScienceToolMessage.getPayload())
-                    .control) {
+            BrushMessage = std::get<SciToolBrushMessage>(
+                ScienceToolMessage.getPayload());
+            switch (BrushMessage.control) {
             case START_BRUSH:
                 m_sciTool->setBrushSpeed(SCIENCE_BRUSH_SPEED);
                 break;
