@@ -4,14 +4,15 @@
 #pragma once
 
 #include "Arm.h"
+#include "Motors/Motor.h"
 #include "Rover/Systems/pub_systems.h"
 #include "Rover/pub_rover.h"
 #include "mission_control.h"
 #include "phidget22.h"
 #include <iostream>
-#include <vector>
-
-class ArmHardware : Arm {
+#include <memory>
+#include <unordered_map>
+class ArmHardware : public Arm {
 public:
     /**
      * @brief Completes the initialisation for all motors That make up the arm
@@ -25,45 +26,15 @@ public:
      */
     ~ArmHardware();
 
-    /**
-     * @brief Function to get the motor handler and motor type for a motor on
-     * the arm at a scpecific index, reguardless of motor type.
-     * @param retVal Pointer to a stuct that will get updated with the motor
-     * handler and motor type.
-     * @param index The index starting from the base motor on the arm to get the
-     * handler for.
-     * @return True is successful, false otherwise
-     */
-    bool getArmMotorHandle(MotorHandlerReturn* retVal, int index);
-
-    /**
-     * @brief Function to get the motor handler and motor type for the claw
-     * servo.
-     * @param retVal Pointer to a stuct that will get updated with the motor
-     * handler and motor type.
-     * @param index The index starting from the base motor on the arm to get the
-     * handler for.
-     * @return True is successful, false otherwise
-     */
-    bool getArmEncoderHandle(MotorHandlerReturn* retVal, int index);
-
-    /**
-     * @brief Gets the servo handler for the servo initialised as the claw.
-     * @param retVal Pointer to a stuct that will get updated with the motor
-     * handler and motor type.
-     * @return True is successful, false otherwise
-     */
-    bool getArmClawHandle(MotorHandlerReturn* retVal);
-
-    void setJointAngle(MotorID joint, float angle);
-    float getJointAngle(MotorID joint);
+    void setJointAngle(MotorID joint, float angle) override;
+    float getJointAngle(MotorID joint) override;
 
 private:
-    const std::vector<MotorType> m_motorTypes;
-    std::vector<PhidgetDCMotorHandle> m_handlesDC = {};
-    std::vector<PhidgetStepperHandle> m_handlesStepper = {};
-    std::vector<PhidgetEncoderHandle> m_handlesEncoder = {};
-    PhidgetRCServoHandle* m_handleClaw;
+    std::unordered_map<MotorID, std::shared_ptr<Motor>> motors = {};
+
+    bool clawInUse = false;
+
+    void setClawFree() { clawInUse = false; }
 };
 
 #endif
