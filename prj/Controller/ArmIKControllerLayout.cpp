@@ -2,42 +2,57 @@
 
 static const char* file = "ArmIKControllerLayout";
 
+static ArmStateCylindrical velocity = {};
+
+static float mapStickX2theta(int xValue) {
+    return (((float)xValue) / -255.0) * 5;
+}
+
+static float mapStickY2r(int yValue) {
+    return (((float)yValue) / -255.0) * 0.05;
+}
+
+static float mapStickX2z(int xValue) {
+    return (((float)xValue) / -255.0) * 0.05;
+}
+
 void ArmIKControllerLayout::leftStickResponse(int xValue, int yValue) {
-    ArmState armState = {};
-    stickChangeAxis(xValue, yValue, &armState.x, &armState.y, 0.0001, 0.0001, 1,
-                    1, "wristX", "wristY");
-    armProcessor->incrementTaskSpaceState(armState);
+    velocity.theta = mapStickX2theta(xValue);
+    velocity.r = mapStickY2r(yValue);
+    armProcessor->setTaskSpaceVelocity(velocity);
+
+    Logging::logI(file, "%d %d", xValue, yValue);
 }
 
 void ArmIKControllerLayout::rightStickResponse(int xValue, int yValue) {
-    ArmState armState = {};
-    stickChangeAxis(xValue, yValue, &armState.z, nullptr, 0.0001, 0, 1, 0,
-                    "wristZ", "");
-    armProcessor->incrementTaskSpaceState(armState);
+    velocity.z = mapStickX2z(xValue);
+    armProcessor->setTaskSpaceVelocity(velocity);
+
+    Logging::logI(file, "%d %d", xValue, yValue);
 }
 
 void ArmIKControllerLayout::leftTriggerResponse(int16_t axisValue) {
-    ArmState armState = {};
+    ArmStateCylindrical armState = {};
     triggerToIncrement(axisValue, &lastleftTriggerValue, &armState.clawOpen, -5,
                        0, 100, "clawOpen");
     armProcessor->incrementTaskSpaceState(armState);
 }
 
 void ArmIKControllerLayout::rightTriggerResponse(int16_t axisValue) {
-    ArmState armState = {};
+    ArmStateCylindrical armState = {};
     triggerToIncrement(axisValue, &lastrightTriggerValue, &armState.clawOpen, 5,
                        0, 100, "clawOpen");
     armProcessor->incrementTaskSpaceState(armState);
 }
 
 void ArmIKControllerLayout::incrementPitch(int value) {
-    ArmState armState = {};
+    ArmStateCylindrical armState = {};
     incrementVal(&armState.pitch, value, -maxPitch, maxPitch, "clawPitch");
     armProcessor->incrementTaskSpaceState(armState);
 }
 
 void ArmIKControllerLayout::incrementRoll(int value) {
-    ArmState armState = {};
+    ArmStateCylindrical armState = {};
     incrementVal(&armState.roll, value, -maxRoll, maxRoll, "clawPitch");
     armProcessor->incrementTaskSpaceState(armState);
 }

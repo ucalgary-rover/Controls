@@ -42,3 +42,19 @@ void ArmManualControllerLayout::incrementJointValue(int increment) {
                  logMessage.c_str());
     armProcessor->incrementJointSpaceState(armIncrement);
 }
+
+void ArmManualControllerLayout::setMin(uint8_t buttonID) {
+    armProcessor->saveCurrentAsMin(joint);
+}
+
+void ArmManualControllerLayout::setMax(uint8_t buttonID) {
+    armProcessor->saveCurrentAsMax(joint);
+}
+
+void ArmManualControllerLayout::printLimits(uint8_t buttonID) {
+    armProcessor->printLimits();
+}
+
+void ArmManualControllerLayout::resetLimits(uint8_t buttonID) {
+    armProcessor->resetLimits();
+}

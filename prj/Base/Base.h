@@ -22,7 +22,8 @@ public:
 
 private:
     // Chassis state management
-    static constexpr ArmMotorState defaultArmMotorState = {};
+    static constexpr ArmMotorState defaultArmMotorState
+        = { .motorValues = { 0, 0, 0, 0, 0, 0 } };
     static std::shared_ptr<ArmProcessor> armProcessor;
 
     static constexpr DriveMotorState defaultDriveMotorState = {};

@@ -46,15 +46,11 @@ void Rover::initialize() {
 void Rover::initializeArm() {
     // Instantiate the systems for the rover
     Logging::logI(file, "Instantiating Arm System");
-    const std::vector<MotorType> motorTypes
-        = { MOTOR_TYPE_STEPPER_MOTOR, MOTOR_TYPE_BLDC_MOTOR,
-            MOTOR_TYPE_BLDC_MOTOR, MOTOR_TYPE_STEPPER_MOTOR,
-            MOTOR_TYPE_STEPPER_MOTOR };
 
 #if ARM_HARDWARE_TEST
     auto arm = std::make_shared<MockArm>();
 #else
-    auto arm = std::make_shared<ArmHardware>(motorTypes);
+    auto arm = std::make_shared<ArmHardware>();
 #endif
     armHandler = std::make_shared<ArmHandler>(arm, armQueue);
     processes.push_back(std::thread([&]() { armHandler->start(); }));
