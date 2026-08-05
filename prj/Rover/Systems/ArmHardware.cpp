@@ -8,14 +8,23 @@
 
 static const char* file = "ArmHardware";
 
+#define SHOULDER_KP 0
+#define SHOULDER_KI 0
+#define SHOULDER_KD 0
+
+#define ELBOW_KP 0
+#define ELBOW_KI 0
+#define ELBOW_KD 0
+
 ArmHardware::ArmHardware() {
     // initialise motors in the ArmHardware
     Logging::logD(file, "Initialising ArmHardware Motors");
 
     motors[MOTOR_ID_BASE] = std::make_shared<Stepper>(0, 0, 0);
-    motors[MOTOR_ID_SHOULDER]
-        = std::make_shared<LinearActuator>(0, 0, 0, 0, 0, 0);
-    motors[MOTOR_ID_ELBOW] = std::make_shared<LinearActuator>(0, 0, 0, 0, 0, 0);
+    motors[MOTOR_ID_SHOULDER] = std::make_shared<LinearActuator>(
+        0, 0, 0, 0, 0, 0, SHOULDER_KP, SHOULDER_KI, SHOULDER_KD);
+    motors[MOTOR_ID_ELBOW] = std::make_shared<LinearActuator>(
+        0, 0, 0, 0, 0, 0, ELBOW_KP, ELBOW_KI, ELBOW_KD);
     motors[MOTOR_ID_CLAW_ROLL] = std::make_shared<Stepper>(0, 0, 0);
     motors[MOTOR_ID_CLAW_PITCH] = std::make_shared<Stepper>(0, 0, 0);
     motors[MOTOR_ID_CLAW_OPEN] = std::make_shared<RCServo>(0, 0, 0);
