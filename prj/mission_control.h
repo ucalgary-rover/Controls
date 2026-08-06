@@ -96,6 +96,8 @@ const int SCI_TOOL_DC_LIFT_CHANNEL = 0;
 const int SCI_TOOL_DC_LIFT_PORT = 0;
 
 // UDP Definitions
+#define BASE_IP "192.168.1.100"
+#define ROVER_IP "192.168.1.50"
 const int ROVER_PORT = 8080; // For on the Nuc: 5995
 const int BASE_PORT = 8008;
 

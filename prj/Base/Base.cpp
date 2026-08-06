@@ -73,7 +73,7 @@ void Base::receive(UDPHandler& receiver) {
 
 void Base::start() {
     Logging::logI(file, "Starting Base");
-    UDPHandler server(BASE_PORT, ROVER_PORT);
+    UDPHandler server(BASE_PORT, ROVER_PORT, ROVER_IP);
 
 #if MQTT_ENABLED
     // MQTT setup: load config and connect the (singleton) publisher.

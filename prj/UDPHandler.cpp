@@ -4,9 +4,10 @@ using namespace boost;
 using udp = asio::ip::udp;
 
 // Constructor
-UDPHandler::UDPHandler(unsigned short myPort, unsigned short theirPort) :
+UDPHandler::UDPHandler(unsigned short myPort, unsigned short theirPort,
+                       std::string theirIP) :
     mySocket(ioc, udp::endpoint(udp::v4(), myPort)),
-    theirEndpoint(udp::v4(), theirPort) {
+    theirEndpoint(boost::asio::ip::make_address(theirIP), theirPort) {
     received.resize(RECEIVE_BUFFER_SIZE);
 }
 

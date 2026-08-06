@@ -93,7 +93,7 @@ void Rover::initializeHeadlights() {
 // Note: Only the start() and stop() functions have their own thread //
 void Rover::start() {
     Logging::logI(file, "Starting Network Systems");
-    UDPHandler client(ROVER_PORT, BASE_PORT);
+    UDPHandler client(ROVER_PORT, BASE_PORT, BASE_IP);
 
     // Sending Thread
     processes.push_back(std::thread([&]() { client.run(sendQueue); }));
