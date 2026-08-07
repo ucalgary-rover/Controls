@@ -259,6 +259,16 @@ void ControllerHandler::controllerRemovedResponse(int controllerID) {
                 stickResponse(0, j, controllerID);
             };
 
+            //releases triggers
+            GameControllerAxis leftTrigger = covert_stl_axis_to_game_controller(
+                SDL_CONTROLLER_AXIS_TRIGGERLEFT);
+            GameControllerAxis rightTrigger
+                = covert_stl_axis_to_game_controller(
+                    SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+
+            triggerResponse(INT16_MIN, leftTrigger, controllerID);
+            triggerResponse(INT16_MIN, rightTrigger, controllerID);
+
             controllerAssignment[i] = -1;
 
             // closes the controller in question

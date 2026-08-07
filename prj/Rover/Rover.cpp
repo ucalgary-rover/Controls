@@ -150,6 +150,7 @@ void Rover::start() {
         case MESSAGE_FORMAT_DRIVE_ZERO: {
             // currently setting zero
             driveHandler->setWheelZeroState();
+            break;
         }
         case MESSAGE_FORMAT_HEADLIGHTS: {
             HeadlightMessage headlightMessage

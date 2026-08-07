@@ -20,7 +20,7 @@ public:
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, incrementWheelAngleOnce);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, decrementWheelOnce);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, incrementWheelOnce);
-        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_DOWN, buttonZeroMessage);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_DOWN, setZero);
 
         // clang-format on
     }
@@ -49,11 +49,14 @@ private:
     void incrementWheelAngle(float increment);
 
     // Button Callbacks
-    void decrementWheelAngleOnce(uint8_t buttonID) {
-        incrementWheelAngle(-0.1);
+    void setZero(uint8_t buttonID) {
+        for (int wheel = 0; wheel < DRIVE_INDEX_WHEEL_COUNT; wheel++) {
+            driveProcessor->setSteerPosition(static_cast<WheelID>(wheel), 0.0);
+        }
+        sendZeroMessage(1);
     }
-    void incrementWheelAngleOnce(uint8_t buttonID) { incrementWheelAngle(0.1); }
+    void decrementWheelAngleOnce(uint8_t buttonID) { incrementWheelAngle(-1); }
+    void incrementWheelAngleOnce(uint8_t buttonID) { incrementWheelAngle(1); }
     void decrementWheelOnce(uint8_t buttonID) { incrementWheel(-1); }
     void incrementWheelOnce(uint8_t buttonID) { incrementWheel(1); }
-    void buttonZeroMessage(uint8_t buttonID) { sendZeroMessage(1); }
 };
