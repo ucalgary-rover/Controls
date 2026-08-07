@@ -186,8 +186,8 @@ void ControllerHandler::buttonResponse(uint8_t buttonID, int controllerID) {
         return;
     }
 
-    Logging::logI(file, "ControllerID: %d", controllerID);
-    Logging::logI(file, "VectorIndex: %d", index);
+    Logging::logV(file, "ControllerID: %d", controllerID);
+    Logging::logV(file, "VectorIndex: %d", index);
 
     controllers[index].buttonUpdate(buttonID);
 }
@@ -402,8 +402,12 @@ void ControllerHandler::eventLoop() {
                 switch (button) {
 
                 case SDL_CONTROLLER_BUTTON_START:
-                    Logging::logI(file, "Switch from controllerID %d",
-                                  event.cdevice.which);
+                    int activeControllerIndex
+                        = vectorIndexFromID(event.cdevice.which);
+                    Logging::logI(file, "Switch from %s",
+                                  controllers[activeControllerIndex]
+                                      .getLayoutName()
+                                      .c_str());
 
                     // switching logic here
                     vectorIndexHolder = controllerAssignment[0];

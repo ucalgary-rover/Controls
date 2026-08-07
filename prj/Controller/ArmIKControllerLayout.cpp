@@ -20,15 +20,11 @@ void ArmIKControllerLayout::leftStickResponse(int xValue, int yValue) {
     velocity.theta = mapStickX2theta(xValue);
     velocity.r = mapStickY2r(yValue);
     armProcessor->setTaskSpaceVelocity(velocity);
-
-    Logging::logI(file, "%d %d", xValue, yValue);
 }
 
 void ArmIKControllerLayout::rightStickResponse(int xValue, int yValue) {
-    velocity.z = mapStickX2z(xValue);
+    velocity.z = mapStickX2z(yValue);
     armProcessor->setTaskSpaceVelocity(velocity);
-
-    Logging::logI(file, "%d %d", xValue, yValue);
 }
 
 void ArmIKControllerLayout::leftTriggerResponse(int16_t axisValue) {

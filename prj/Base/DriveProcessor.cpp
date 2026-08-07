@@ -12,6 +12,8 @@
 
 #define MS_PER_SEC 1000.0
 
+static const char* file = "DriveProcessor";
+
 DriveProcessor::DriveProcessor(const DriveState& defaultDriveState) {
     DriveModel::initialize();
 
@@ -150,6 +152,8 @@ void DriveProcessor::handleChanges() {
                               .count();
     update_timestamp = current_timestamp;
 
+    bool stateChanged = false;
+
     switch (mode) {
     case DriveProcessorMode::DriverSpace:
         if (!changesMade) {
@@ -159,6 +163,14 @@ void DriveProcessor::handleChanges() {
         // Compute Motor State
         state.motorState
             = processDriveState(state.driverState, roverMotorState);
+
+        // Log Drive State
+        Logging::logI(file, "speed: %d heading: %d angularVelocity: %d",
+                      state.driverState.speed, state.driverState.heading,
+                      state.driverState.angularVelocity);
+
+        stateChanged = true;
+
         break;
     case DriveProcessorMode::MotorSpace:
         if (!changesMade && motorVelocity == DriveMotorState()) {
@@ -182,9 +194,20 @@ void DriveProcessor::handleChanges() {
 
         // Clear Drive Space State
         mode = DriveProcessorMode::MotorSpace;
+
+        stateChanged = true;
         break;
     default:
         break;
+    }
+
+    if (stateChanged) {
+        auto& drive = state.motorState.drive;
+        Logging::logI(file, "drive: %.3f %.3f %.3f %.3f", drive[0], drive[1],
+                      drive[2], drive[3]);
+        auto& steer = state.motorState.drive;
+        Logging::logI(file, "steer: %.3f %.3f %.3f %.3f", steer[0], steer[1],
+                      steer[2], steer[3]);
     }
 
     changesMade = false;

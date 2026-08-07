@@ -119,16 +119,6 @@ ArmMotorState ArmProcessor::getJointSpaceState() {
 
     handleChanges();
 
-    Logging::logI(file,
-                  "theta: %.2f r: %.2f z: %.2f pitch: %d roll: %d clawOpen: %d",
-                  state.taskSpaceState.theta, state.taskSpaceState.r,
-                  state.taskSpaceState.z, state.taskSpaceState.pitch,
-                  state.taskSpaceState.roll, state.taskSpaceState.clawOpen);
-
-    auto& vals = state.jointSpaceState.motorValues;
-    Logging::logI(file, "%d %d %d %d %d %d", vals[0], vals[1], vals[2], vals[3],
-                  vals[4], vals[5]);
-
     return state.jointSpaceState;
 }
 
@@ -215,7 +205,7 @@ void ArmProcessor::handleChanges() {
                               .count();
     update_timestamp = current_timestamp;
 
-    Logging::logI(file, "Handling Changes");
+    bool stateChanged = false;
 
     switch (mode) {
     case ArmProcessorMode::TaskSpace:
@@ -229,6 +219,8 @@ void ArmProcessor::handleChanges() {
 
         // Compute inverse kinematics
         state.jointSpaceState = armInverseKinematics(state.taskSpaceState);
+
+        stateChanged = true;
         break;
     case ArmProcessorMode::JointSpace:
         if (!changesMade && velocity.jointSpaceState == ArmMotorState()) {
@@ -241,9 +233,23 @@ void ArmProcessor::handleChanges() {
 
         // Compute forwards kinematics
         state.taskSpaceState = armForwardsKinematics(state.jointSpaceState);
+
+        stateChanged = true;
         break;
     default:
         break;
+    }
+
+    if (stateChanged) {
+        Logging::logI(
+            file, "theta: %.2f r: %.2f z: %.2f pitch: %d roll: %d clawOpen: %d",
+            state.taskSpaceState.theta, state.taskSpaceState.r,
+            state.taskSpaceState.z, state.taskSpaceState.pitch,
+            state.taskSpaceState.roll, state.taskSpaceState.clawOpen);
+
+        auto& vals = state.jointSpaceState.motorValues;
+        Logging::logI(file, "motors: %d %d %d %d %d %d", vals[0], vals[1],
+                      vals[2], vals[3], vals[4], vals[5]);
     }
 
     changesMade = false;

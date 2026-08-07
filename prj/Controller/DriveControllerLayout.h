@@ -32,14 +32,15 @@ public:
 
         // Initialize button callbacks
         // clang-format off
-
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X, swtichToDefault);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_Y, swtichToManual);
-
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_START, logActive);
         // clang-format on
     }
 
-    std::string getName() { return drivelayouts[currentLayout]->getName(); }
+    std::string getName() override {
+        return drivelayouts[currentLayout]->getName();
+    }
 
     // button layout here (do the drivelayout switching)
     void buttonResponse(uint8_t buttonID) override;
@@ -61,5 +62,9 @@ public:
 
 private:
     DriveLayout currentLayout = DriveLayout::DRIVE_AUTO;
-    std::shared_ptr<ControllerLayout> drivelayouts[3];
+    std::shared_ptr<ControllerLayout> drivelayouts[2];
+
+    void logActive(uint8_t buttonID) {
+        Logging::logI(getName().c_str(), "Active");
+    }
 };
