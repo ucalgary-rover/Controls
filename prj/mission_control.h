@@ -21,11 +21,11 @@
 #define SIDE_TO_BUILD BUILD_SIDE_BASE
 #endif // SIDE_TO_BUILD
 #define EXTENTION EXTENTION_TYPE_ARM
-#define LOGGING_LEVEL LOG_LEVEL_VERBOSE
+#define LOGGING_LEVEL LOG_LEVEL_INFO
 
 // Hardware Enabled
 #define ARM_HARDWARE_TEST true
-#define DRIVE_HARDWARE_TEST false
+#define DRIVE_HARDWARE_TEST true
 
 // MQTT
 #define MQTT_ENABLED false
@@ -85,9 +85,18 @@ const int ARM_CLAW_CHANNEL = 0;
 const int ARM_CLAW_PORT = 0;
 
 // UDP Definitions
-#define BASE_IP "192.168.1.100"
-#define ROVER_IP "192.168.1.50"
+#define REMOTE_CONNECTION false
+
+#if REMOTE_CONNECTION == true
+#define BASE_IP "192.168.1.50"
+#define ROVER_IP "192.168.1.100"
+const int ROVER_PORT = 5995; // For on the Nuc: 5995
+const int BASE_PORT = 8008;
+#else
+#define BASE_IP "127.0.0.1"
+#define ROVER_IP "127.0.0.1"
 const int ROVER_PORT = 8080; // For on the Nuc: 5995
 const int BASE_PORT = 8008;
+#endif
 
 #endif // MISSION_CONTROL_H

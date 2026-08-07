@@ -141,8 +141,8 @@ void DriveHardware::setWheelSpeed(WheelID wheel, float speed) {
     getDriveDCHandle(&motorStuct, wheel);
 
     // can make this async with PhidgetBLDCMotor_setTargetVelocity_async
-    PhidgetBLDCMotor_setTargetVelocity_async(*motorStuct.handler.bldcMotor, 0,
-                                             setTargetVelocityDone, nullptr);
+    PhidgetBLDCMotor_setTargetVelocity_async(
+        *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone, nullptr);
 }
 
 double DriveHardware::getWheelSpeed(WheelID wheelIndex) {
