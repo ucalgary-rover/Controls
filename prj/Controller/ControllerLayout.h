@@ -17,10 +17,9 @@ typedef std::function<void(uint8_t)> ButtonCallback;
 
 class ControllerLayout {
 public:
-    ControllerLayout() { }
+    ControllerLayout() : filename("DefaultController") { }
 
-    ControllerLayout(const std::string& file) {
-        this->filename = file;
+    ControllerLayout(const std::string& file) : filename(file) {
 
         //Reference for button callback
         // REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_A, unusedButton);
@@ -60,7 +59,7 @@ public:
     }
 
 protected:
-    std::string filename = "DefaultController";
+    std::string filename;
     ButtonCallback buttonCallbacks[SDL_CONTROLLER_BUTTON_MAX];
 
     /**

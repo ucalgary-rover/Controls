@@ -118,7 +118,7 @@ static void CCONV setTargetVelocityDone(PhidgetHandle phid, void* ctx,
     // Async call completed
 }
 
-void DriveHardware::setWheelAngle(DriveIndex wheel, float angle) {
+void DriveHardware::setWheelAngle(WheelID wheel, float angle) {
     MotorHandlerReturn motorStuct;
     getDriveStepperHandle(&motorStuct, wheel);
 
@@ -127,7 +127,7 @@ void DriveHardware::setWheelAngle(DriveIndex wheel, float angle) {
                                            angle, onAngleReached, nullptr);
 }
 
-double DriveHardware::getWheelAngle(DriveIndex wheelIndex) {
+double DriveHardware::getWheelAngle(WheelID wheelIndex) {
     double steer;
     MotorHandlerReturn motorStuctStepper;
     getDriveStepperHandle(&motorStuctStepper, wheelIndex);
@@ -136,16 +136,16 @@ double DriveHardware::getWheelAngle(DriveIndex wheelIndex) {
     return steer;
 }
 
-void DriveHardware::setWheelSpeed(DriveIndex wheel, float speed) {
+void DriveHardware::setWheelSpeed(WheelID wheel, float speed) {
     MotorHandlerReturn motorStuct;
     getDriveDCHandle(&motorStuct, wheel);
 
     // can make this async with PhidgetBLDCMotor_setTargetVelocity_async
-    PhidgetBLDCMotor_setTargetVelocity_async(
-        *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone, nullptr);
+    PhidgetBLDCMotor_setTargetVelocity_async(*motorStuct.handler.bldcMotor, 0,
+                                             setTargetVelocityDone, nullptr);
 }
 
-double DriveHardware::getWheelSpeed(DriveIndex wheelIndex) {
+double DriveHardware::getWheelSpeed(WheelID wheelIndex) {
     double velocity;
     MotorHandlerReturn motorStuctDC;
     getDriveDCHandle(&motorStuctDC, wheelIndex);

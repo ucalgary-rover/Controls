@@ -312,9 +312,9 @@ void ControllerHandler::eventLoop() {
         // has to look like this
         while (SDL_PollEvent(&event)) {
 
-            Logging::logI(file, "SDL Event type: %s (%d), From controllerID %d",
-                          eventTypeToString(event.type), event.type,
-                          event.cdevice.which);
+            // Logging::logD(file, "SDL Event type: %s (%d), From controllerID %d",
+            //               eventTypeToString(event.type), event.type,
+            //               event.cdevice.which);
 
             // checks what kind of event
             switch (event.type) {
@@ -340,8 +340,8 @@ void ControllerHandler::eventLoop() {
 
                 axis = covert_stl_axis_to_game_controller(
                     (SDL_GameControllerAxis)event.jaxis.axis);
-                Logging::logV(file, "Axis motion. Axis was: %d Axis is now: %d",
-                              (int)event.jaxis.axis, axis);
+                // Logging::logV(file, "Axis motion. Axis was: %d Axis is now: %d",
+                //               (int)event.jaxis.axis, axis);
 
                 if (axis <= GAME_CONTROLLER_AXIS_LAST_JOYSTICK) {
                     stickResponse(event.jaxis.value, axis, event.cdevice.which);
@@ -353,9 +353,9 @@ void ControllerHandler::eventLoop() {
                 break;
 
             case SDL_CONTROLLERBUTTONDOWN:
-                Logging::logI(file, "BUTTON: %s (%d)",
-                              getButtonName(event.cbutton.button),
-                              event.cbutton.button);
+                // Logging::logI(file, "BUTTON: %s (%d)",
+                //               getButtonName(event.cbutton.button),
+                //               event.cbutton.button);
 
                 // time the duration SDL_CONTROLLER_BUTTON_START is held
                 switch (event.cbutton.button) {

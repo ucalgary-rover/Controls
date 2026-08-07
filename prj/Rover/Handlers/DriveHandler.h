@@ -21,7 +21,7 @@ public:
     void updateCurrentState();
 
     void translateSpeedAndAngle(DriveMotorState* desiredState,
-                                DriveIndex wheelIndex);
+                                WheelID wheelIndex);
 
     /** @brief Stops all wheel movement
      * @return None

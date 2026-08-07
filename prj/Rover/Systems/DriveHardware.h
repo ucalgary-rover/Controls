@@ -30,11 +30,11 @@ public:
      * @param angle the angle to turn the stepper
      * @return None
      */
-    void setWheelAngle(DriveIndex wheel, float angle) override;
-    double getWheelAngle(DriveIndex wheelIndex) override;
+    void setWheelAngle(WheelID wheel, float angle) override;
+    double getWheelAngle(WheelID wheelIndex) override;
 
-    void setWheelSpeed(DriveIndex wheel, float speed) override;
-    double getWheelSpeed(DriveIndex wheelIndex) override;
+    void setWheelSpeed(WheelID wheel, float speed) override;
+    double getWheelSpeed(WheelID wheelIndex) override;
 
     /**
      * @brief Gets the width of the rover between motors

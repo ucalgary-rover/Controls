@@ -1,5 +1,8 @@
 
 #include "Config.h"
+
+#if MQTT_ENABLED
+
 #include <boost/describe.hpp>
 #include <boost/exception/all.hpp>
 #include <boost/json.hpp>
@@ -49,3 +52,5 @@ Config::Config(const std::string& configFile) {
 }
 
 // int main() { Config cfg = Config("prj/Config/config.json"); }
+
+#endif

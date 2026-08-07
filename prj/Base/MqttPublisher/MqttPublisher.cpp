@@ -1,7 +1,10 @@
 #include "MqttPublisher.h"
-#include <mqtt/async_client.h>
-#include <memory>
+
+#if MQTT_ENABLED
+
 #include <iostream>
+#include <memory>
+#include <mqtt/async_client.h>
 
 std::unique_ptr<mqtt::async_client> MqttPublisher::client_ = nullptr;
 std::mutex MqttPublisher::mutex_;
@@ -49,3 +52,5 @@ void MqttPublisher::shutdown() {
     client_.reset();
     initialized_ = false;
 }
+
+#endif

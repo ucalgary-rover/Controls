@@ -96,11 +96,11 @@ DriveHandler::DriveHandler(
     m_driveQueue = driveQueue;
     m_currentDriveMotorStateManager = currentDriveMotorStateManager;
 
-    for (int i = 0; i < WHEEL_COUNT; i++) {
+    for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
         wheelZeroState.drive[i] = 0; // stopped
     }
 
-    float val = m_drive->getWheelAngle(DriveIndex::DRIVE_INDEX_BACK_RIGHT);
+    float val = m_drive->getWheelAngle(WheelID::DRIVE_INDEX_BACK_RIGHT);
 
     Logging::logI(file, "start_val = %.2f", val);
 }
@@ -109,8 +109,8 @@ void DriveHandler::updateCurrentState() {
     DriveMotorState currentState; // Construct the current state struct
 
     // Get values for each wheel
-    for (int index = 0; index < WHEEL_COUNT; index++) {
-        DriveIndex wheelIndex = static_cast<DriveIndex>(index);
+    for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT; index++) {
+        WheelID wheelIndex = static_cast<WheelID>(index);
         // Get the current position of the wheel
         currentState.steer[wheelIndex] = m_drive->getWheelAngle(wheelIndex);
         // Truncate since resolution here is
@@ -124,14 +124,14 @@ void DriveHandler::updateCurrentState() {
 
 void DriveHandler::translateSpeedAndAngle(
     DriveMotorState* desiredState,
-    DriveIndex wheelIndex) { // From software -> hardware
+    WheelID wheelIndex) { // From software -> hardware
     double angle = desiredState->steer[wheelIndex];
     double speed = desiredState->drive[wheelIndex];
 
     if (angle <= 360 && angle >= 0) { // Check valid software range
         if (wheelIndex % 2
-            == 0) {           // WHEEL_FL/WHEEL_BL (mounted to m_drive fwds)
-            if (angle > 90) { // if angle < 90, do nothing
+            == 0) { // DRIVE_INDEX_FRONT_LEFT/DRIVE_INDEX_BACK_LEFT (mounted to m_drive fwds)
+            if (angle > 90) {       // if angle < 90, do nothing
                 if (angle <= 180) { // Wheel should be backwards
                     desiredState->steer[wheelIndex] = -180 + angle;
                     desiredState->drive[wheelIndex] = -speed;
@@ -143,7 +143,7 @@ void DriveHandler::translateSpeedAndAngle(
                     desiredState->drive[wheelIndex] = speed;
                 }
             }
-        } else {               // WHEEL_FR/WHEEL_BR (mounted to m_drive bkwds)
+        } else { // DRIVE_INDEX_FRONT_RIGHT/DRIVE_INDEX_BACK_RIGHT (mounted to m_drive bkwds)
             if (angle <= 90) { // Wheel should be backwards
                 desiredState->drive[wheelIndex] = -speed;
             } else if (angle <= 180) { // Wheel should be forwards
@@ -168,7 +168,7 @@ void DriveHandler::translateSpeedAndAngle(
 void DriveHandler::stopWheels() {
     // sets target velocities of all wheels to zero
     for (int dc = 0; dc < DRIVE_INDEX_WHEEL_COUNT; dc++) {
-        DriveIndex wheelIndex = static_cast<DriveIndex>(dc);
+        WheelID wheelIndex = static_cast<WheelID>(dc);
         m_drive->setWheelSpeed(wheelIndex, 0);
     }
 
@@ -177,8 +177,8 @@ void DriveHandler::stopWheels() {
 }
 
 void DriveHandler::setWheelZeroState() {
-    for (int index = 0; index < WHEEL_COUNT; index++) {
-        DriveIndex i = static_cast<DriveIndex>(index);
+    for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT; index++) {
+        WheelID i = static_cast<WheelID>(index);
         wheelZeroState.steer[index] = (float)m_drive->getWheelAngle(i);
     }
     zeroAngleSet = true;
@@ -192,8 +192,8 @@ void DriveHandler::start() {
 
         try {
             if (!currentlyGettingZeroState) {
-                for (int index = 0; index < WHEEL_COUNT; index++) {
-                    DriveIndex i = static_cast<DriveIndex>(index);
+                for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT; index++) {
+                    WheelID i = static_cast<WheelID>(index);
 
                     // Translate into hardware specific angles and speed
                     translateSpeedAndAngle(&desiredState, i);
@@ -203,16 +203,17 @@ void DriveHandler::start() {
                 }
             } else {
                 if (zeroAngleSet) {
-                    for (int index = 0; index < WHEEL_COUNT; index++) {
-                        DriveIndex i = static_cast<DriveIndex>(index);
+                    for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT;
+                         index++) {
+                        WheelID i = static_cast<WheelID>(index);
                         m_drive->setWheelAngle(i, wheelZeroState.steer[i]);
                     }
                 }
 
                 // Check if we are done getting the zero state
                 bool doneGettingZeroState = true;
-                for (int index = 0; index < WHEEL_COUNT; index++) {
-                    DriveIndex i = static_cast<DriveIndex>(index);
+                for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT; index++) {
+                    WheelID i = static_cast<WheelID>(index);
                     if (abs(m_drive->getWheelAngle(i)
                             - wheelZeroState.steer[index])
                         > STEER_THRESHOLD) {
@@ -222,16 +223,19 @@ void DriveHandler::start() {
                 currentlyGettingZeroState = !doneGettingZeroState;
             }
 
-            for (int index = 0; index < WHEEL_COUNT; index++)
-                printf("\n%f\n", desiredState.steer[index]);
+            for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT; index++) {
+                Logging::logV(file, "Wheel %d Heading: %f - Speed %f", index,
+                              desiredState.steer[index],
+                              desiredState.drive[index]);
+            }
 
         } catch (const std::runtime_error& e) {
             // Erroneous angle detected
             std::cerr << e.what() << std::endl;
 
             // Stop all wheels
-            for (int index = 0; index < WHEEL_COUNT; index++) {
-                DriveIndex i = static_cast<DriveIndex>(index);
+            for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT; index++) {
+                WheelID i = static_cast<WheelID>(index);
                 m_drive->setWheelSpeed(i, 0.0);
             }
         }

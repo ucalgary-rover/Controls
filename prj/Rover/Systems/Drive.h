@@ -12,11 +12,11 @@ public:
      * @param angle the angle to turn the stepper
      * @return None
      */
-    virtual void setWheelAngle(DriveIndex wheel, float angle) = 0;
-    virtual double getWheelAngle(DriveIndex wheelIndex) = 0;
+    virtual void setWheelAngle(WheelID wheel, float angle) = 0;
+    virtual double getWheelAngle(WheelID wheelIndex) = 0;
 
-    virtual void setWheelSpeed(DriveIndex wheel, float speed) = 0;
-    virtual double getWheelSpeed(DriveIndex wheelIndex) = 0;
+    virtual void setWheelSpeed(WheelID wheel, float speed) = 0;
+    virtual double getWheelSpeed(WheelID wheelIndex) = 0;
 
     /**
      * @brief Gets the width of the rover between motors

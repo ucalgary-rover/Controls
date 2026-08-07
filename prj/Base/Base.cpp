@@ -10,10 +10,13 @@
 #include <vector>
 
 #include "ArmControllerLayout.h"
-#include "Config/Config.h"
 #include "DriveControllerLayout.h"
-#include "MqttPublisher/MqttPublisher.h"
 #include "UDPHandler.h"
+
+#if MQTT_ENABLED
+#include "Config/Config.h"
+#include "MqttPublisher/MqttPublisher.h"
+#endif
 
 static const char* file = "Base";
 
@@ -72,11 +75,15 @@ void Base::start() {
     Logging::logI(file, "Starting Base");
     UDPHandler server(BASE_PORT, ROVER_PORT);
 
+#if MQTT_ENABLED
     // MQTT setup: load config and connect the (singleton) publisher.
     // Adjust the path to wherever the binary is launched from.
     Config config("prj/Config/config.json");
-    std::cout << "MQTT serverUrl=[" << config.mqttConfig.serverUrl << "] clientId=[" << config.mqttConfig.clientId << "] topic=[" << config.mqttConfig.topic << "]" << std::endl;
+    std::cout << "MQTT serverUrl=[" << config.mqttConfig.serverUrl
+              << "] clientId=[" << config.mqttConfig.clientId << "] topic=["
+              << config.mqttConfig.topic << "]" << std::endl;
     MqttPublisher mqttPublisher(config.mqttConfig);
+#endif
 
     std::thread controllerThread([&]() { ControllerHandler::eventLoop(); });
     std::thread sendingThread([&]() { server.run(sendQueue); });
@@ -93,6 +100,7 @@ void Base::start() {
         Message message(desiredState);
         sendQueue->push(message);
 
+#if MQTT_ENABLED
         // Publish the same desired state to the dashboard over MQTT.
         // Caught locally so a transient publish failure never kills the loop.
         try {
@@ -100,18 +108,20 @@ void Base::start() {
         } catch (const std::exception& e) {
             Logging::logE(file, "MQTT publish failed: %s", e.what());
         }
+#endif
 
         usleep(0.1 * 1000 * 1000); // Sleep 0.1s
     }
 
+#if MQTT_ENABLED
     MqttPublisher::shutdown();
+#endif
 
     controllerThread.join();
     sendingThread.join();
     receivingThread.join();
 }
 
-//
 void Base::sendZeroMessage(int setVal) {
     Message message(DriveZeroMessage {});
     sendQueue->push(message);
@@ -120,7 +130,7 @@ void Base::sendZeroMessage(int setVal) {
 }
 
 void Base::sendHeadlightsMessage(int brightnessVal) {
-    Message message(HeadlightMessage { .brightness = brightnessVal });
+    Message message(HeadlightMessage { .brightnessPercentage = brightnessVal });
     sendQueue->push(message);
     Logging::logV(file, "headlightsMessage queued. Brightness = %d",
                   brightnessVal);

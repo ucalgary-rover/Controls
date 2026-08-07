@@ -41,11 +41,13 @@ struct Generic {
 };
 
 enum WheelID : int {
-    WHEEL_FR,
-    WHEEL_FL,
-    WHEEL_BR,
-    WHEEL_BL,
-    WHEEL_COUNT,
+    DRIVE_INDEX_FRONT_LEFT,
+    DRIVE_INDEX_FRONT_RIGHT,
+    DRIVE_INDEX_BACK_LEFT,
+    DRIVE_INDEX_BACK_RIGHT,
+
+    // Additional drive motors should be added above this comment
+    DRIVE_INDEX_WHEEL_COUNT,
 };
 
 // Message format for arm

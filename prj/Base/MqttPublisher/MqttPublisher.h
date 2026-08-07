@@ -1,4 +1,9 @@
 #pragma once
+
+#include "mission_control.h"
+
+#if MQTT_ENABLED
+
 #include "Config/Config.h"
 #include <memory>
 #include <mqtt/async_client.h>
@@ -27,3 +32,5 @@ public:
 };
 
 #include "MqttPublisher.tpp"
+
+#endif

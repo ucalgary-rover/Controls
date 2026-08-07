@@ -20,13 +20,16 @@
 #ifndef SIDE_TO_BUILD
 #define SIDE_TO_BUILD BUILD_SIDE_BASE
 #endif // SIDE_TO_BUILD
-#define EXTENTION EXTENTION_TYPE_SCI_TOOL
-#define LOGGING_LEVEL LOG_LEVEL_DEBUG
+#define EXTENTION EXTENTION_TYPE_ARM
+#define LOGGING_LEVEL LOG_LEVEL_VERBOSE
 
 // Hardware Enabled
 #define ARM_HARDWARE_TEST true
 #define SCI_TOOL_HARDWARE_TEST true
-#define DRIVE_HARDWARE_TEST true
+#define DRIVE_HARDWARE_TEST false
+
+// MQTT
+#define MQTT_ENABLED false
 
 // System Update Rates
 #define ARM_UPDATE_INTERVAL_US 50 * 1000   // 50ms
@@ -62,12 +65,12 @@
 
 // Following consts should follow the order of
 // DriveMotorIndex in pub_rover.cpp -> FL, FR, BL, BR
-const int DRIVE_DC_SERIAL_NUMBER[4] = { 697178, 697178, 697270, 697270 };
+const int DRIVE_DC_SERIAL_NUMBER[4] = { 697178, 620000, 697178, 620000 };
 const int DRIVE_DC_CHANNEL[4] = { 0, 0, 0, 0 };
-const int DRIVE_DC_PORT[4] = { 5, 2, 4, 2 };
-const int DRIVE_STEPPER_SERIAL_NUMBER[4] = { 697178, 697178, 697270, 697270 };
+const int DRIVE_DC_PORT[4] = { 3, 3, 1, 0 };
+const int DRIVE_STEPPER_SERIAL_NUMBER[4] = { 697178, 620000, 697178, 620000 };
 const int DRIVE_STEPPER_CHANNEL[4] = { 0, 0, 0, 0 };
-const int DRIVE_STEPPER_PORT[4] = { 4, 1, 5, 1 };
+const int DRIVE_STEPPER_PORT[4] = { 4, 5, 0, 2 };
 const int DRIVE_ENCODER_SERIAL_NUMBER[4] = { 697178, 697178, 697270, 697270 };
 const int DRIVE_ENCODER_CHANNEL[4] = { 0, 0, 0, 0 };
 const int DRIVE_ENCODER_PORT[4] = { 3, 0, 3, 0 };
