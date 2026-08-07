@@ -28,7 +28,9 @@ std::shared_ptr<ArmHandler> Rover::armHandler;
 std::shared_ptr<SciToolHandler> Rover::sciToolHandler;
 #endif
 std::shared_ptr<DriveHandler> Rover::driveHandler;
+#if HEADLIGHTS_ENABLED
 std::shared_ptr<HeadlightHandler> Rover::headlightHandler;
+#endif
 
 //---------------------- Rover Initialization ----------------------//
 void Rover::initialize() {
@@ -41,7 +43,9 @@ void Rover::initialize() {
 #endif
     initializeDrive();
 
+#if HEADLIGHTS_ENABLED
     initializeHeadlights();
+#endif
 }
 
 #if EXTENTION == EXTENTION_TYPE_ARM
@@ -82,12 +86,14 @@ void Rover::initializeDrive() {
     processes.push_back(std::thread([&]() { driveHandler->start(); }));
 }
 
+#if HEADLIGHTS_ENABLED
 void Rover::initializeHeadlights() {
     Logging::logI(file, "Instantiating Headlight System");
     headlightHandler
         = std::make_shared<HeadlightHandler>(headlightQueue, HEADLIGHT_ARDUINO);
     processes.push_back(std::thread([&]() { headlightHandler->start(); }));
 }
+#endif
 
 //---------------------- Start/Stop Functions ----------------------//
 // Note: Only the start() and stop() functions have their own thread //
@@ -143,7 +149,9 @@ void Rover::start() {
 #if EXTENTION == EXTENTION_TYPE_SCI_TOOL
                 sciToolQueue->push({});
 #endif
+#if HEADLIGHTS_ENABLED
                 headlightQueue->push({});
+#endif
             }
 
             usleep(INACTIVE_SLEEP_US);
@@ -175,12 +183,14 @@ void Rover::start() {
             break;
         }
 #endif
+#if HEADLIGHTS_ENABLED
         case MESSAGE_FORMAT_HEADLIGHTS: {
             HeadlightMessage headlightMessage
                 = std::get<HeadlightMessage>(message.getPayload());
             headlightQueue->push(headlightMessage);
             break;
         }
+#endif
 
         default:
             break;

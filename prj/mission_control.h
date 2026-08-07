@@ -31,6 +31,9 @@
 // MQTT
 #define MQTT_ENABLED false
 
+// Headlights
+#define HEADLIGHTS_ENABLED false
+
 // System Update Rates
 #define ARM_UPDATE_INTERVAL_US 50 * 1000   // 50ms
 #define DRIVE_UPDATE_INTERVAL_US 50 * 1000 // 50ms
