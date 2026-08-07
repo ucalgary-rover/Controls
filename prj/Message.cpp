@@ -4,6 +4,10 @@
 #include <array>
 #include <cstring>
 
+#include "Logging.h"
+
+static const char* file = "Message";
+
 // Constructor
 Message::Message(MessagePayload payload) : m_payload(std::move(payload)) {
     // Set m_format based on the payload type
@@ -154,67 +158,76 @@ std::vector<std::byte> Message::serialize() const {
 // Extracts information received from a byte vector to a Payload
 // Performs a size check on received data against a Payload
 template <typename Payload>
-Payload parseMessage(const std::vector<std::byte> data, size_t size) {
+bool parseMessage(const std::vector<std::byte> data, size_t size,
+                  MessagePayload& out) {
     if (size - 4 != sizeof(Payload)) {
-        throw std::runtime_error(
-            "Serialized MessagePayload size does not match expected. Expected: "
-            + std::to_string(data.size())
-            + " Received: " + std::to_string(sizeof(Payload)));
+        Logging::logI(file,
+                      "Serialized MessagePayload size does not match expected. "
+                      "Expected: %lu Received: %lu",
+                      std::to_string(data.size()),
+                      std::to_string(sizeof(Payload)));
+        return false;
     }
 
     Payload payload;
     std::memcpy(&payload, data.data() + 4, size - 4);
-    return payload;
+    out = payload;
+    return true;
 }
 
 // Deserialize the received byte array to a Message object
 // Does not perform size checks (done in parseMessage)
-Message Message::deserialize(const std::vector<std::byte> data, size_t size) {
+bool Message::deserialize(const std::vector<std::byte> data, size_t size,
+                          Message& out) {
 
     MessageFormat format;
     std::memcpy(&format, data.data(), sizeof(format));
+
+    bool rtn = false;
 
     // Deserialize payload based on format
     MessagePayload payload;
     switch (format) {
     case MESSAGE_FORMAT_MOTOR_STATE: {
-        payload = parseMessage<MotorState>(data, size);
+        rtn = parseMessage<MotorState>(data, size, payload);
         break;
     }
     case MESSAGE_FORMAT_SCI_TOOL_DOOR: {
-        payload = parseMessage<SciToolDoorMessage>(data, size);
+        rtn = parseMessage<SciToolDoorMessage>(data, size, payload);
         break;
     }
     case MESSAGE_FORMAT_SCI_TOOL_HEIGHT: {
-        payload = parseMessage<SciToolHeightMessage>(data, size);
+        rtn = parseMessage<SciToolHeightMessage>(data, size, payload);
         break;
     }
     case MESSAGE_FORMAT_SCI_TOOL_BRUSH: {
-        payload = parseMessage<SciToolBrushMessage>(data, size);
+        rtn = parseMessage<SciToolBrushMessage>(data, size, payload);
         break;
     }
     case MESSAGE_FORMAT_CAMERA_SERVO: {
-        payload = parseMessage<CameraServoMessage>(data, size);
+        rtn = parseMessage<CameraServoMessage>(data, size, payload);
         break;
     }
     case MESSAGE_FORMAT_DRIVE_ZERO: {
-        payload = parseMessage<DriveZeroMessage>(data, size);
+        rtn = parseMessage<DriveZeroMessage>(data, size, payload);
         break;
     }
     case MESSAGE_FORMAT_HEADLIGHTS: {
-        payload = parseMessage<HeadlightMessage>(data, size);
+        rtn = parseMessage<HeadlightMessage>(data, size, payload);
         break;
     }
     case MESSAGE_FORMAT_GENERIC: { // Generic or unknown
-        payload = parseMessage<Generic>(data, size);
+        rtn = parseMessage<Generic>(data, size, payload);
         break;
     }
     default:
-        throw std::runtime_error("Unknown data type.");
+        rtn = false;
     }
 
-    Message msg;
-    msg.m_format = format;
-    msg.m_payload = payload;
-    return msg;
+    if (rtn == true) {
+        out.m_format = format;
+        out.m_payload = payload;
+    }
+
+    return rtn;
 }

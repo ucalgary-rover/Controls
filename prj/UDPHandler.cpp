@@ -24,16 +24,22 @@ void UDPHandler::run(std::shared_ptr<UDPQueue> queue) {
 Message UDPHandler::receive() {
 
     int bytesReceived;
+    udp::endpoint senderEndpoint;
 
     asio::mutable_buffer receiveBuffer
         = asio::buffer(received.data(), received.size());
 
-    bytesReceived = mySocket.receive_from(receiveBuffer, theirEndpoint);
+    while (true) {
+        bytesReceived = mySocket.receive_from(receiveBuffer, senderEndpoint);
 
-    // Deserialize the buffer into a Message object
-    Message msg = Message::deserialize(received, bytesReceived);
-    // msg.printMessage(); // Print message received
-    return msg;
+        // Deserialize the buffer into a Message object
+        Message msg;
+        if (!Message::deserialize(received, bytesReceived, msg)) {
+            continue;
+        }
+        // msg.printMessage(); // Print message received
+        return msg;
+    }
 }
 
 // Continuously send messages from the queue over UDP
@@ -49,8 +55,5 @@ void UDPHandler::handle_session(std::shared_ptr<UDPQueue> queue) {
 
         // Send the serialized message to the client
         size_t returned = mySocket.send_to(msgBuffer, theirEndpoint);
-
-        // Print the sent message
-        Message out = Message::deserialize(serializedMsg, returned);
     }
 }
