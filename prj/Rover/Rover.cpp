@@ -12,6 +12,8 @@
 
 #include "Rover/Systems/ArmHardware.h"
 #include "Rover/Systems/MockArm.h"
+#include "Rover/Systems/MockSciTool.h"
+#include "Rover/Systems/SciToolHardware.h"
 
 #include "Rover/Handlers/HeadlightHandler.h"
 
@@ -22,7 +24,7 @@ static const char* file = "Rover";
 
 #if EXTENTION == EXTENTION_TYPE_ARM
 std::shared_ptr<ArmHandler> Rover::armHandler;
-#elif EXTENTION == EXTENTION_TYPE_SCIENCE_TOOL
+#elif EXTENTION == EXTENTION_TYPE_SCI_TOOL
 std::shared_ptr<SciToolHandler> Rover::sciToolHandler;
 #endif
 std::shared_ptr<DriveHandler> Rover::driveHandler;
@@ -34,7 +36,7 @@ void Rover::initialize() {
 
 #if EXTENTION == EXTENTION_TYPE_ARM
     initializeArm();
-#elif EXTENTION == EXTENTION_TYPE_SCIENCE_TOOL
+#elif EXTENTION == EXTENTION_TYPE_SCI_TOOL
     initializeSciTool();
 #endif
     initializeDrive();
@@ -55,11 +57,16 @@ void Rover::initializeArm() {
     armHandler = std::make_shared<ArmHandler>(arm, armQueue);
     processes.push_back(std::thread([&]() { armHandler->start(); }));
 }
-#elif EXTENTION == EXTENTION_TYPE_SCIENCE_TOOL
+#elif EXTENTION == EXTENTION_TYPE_SCI_TOOL
 void Rover::initializeSciTool() {
     Logging::logI(file, "Instantiating Science Tool System");
-    sciToolHandler = std::make_shared<SciToolHandler>(sciToolQueue);
-    processes.push_back(std::thread([&]() { sciToolHandler.start(); }));
+#if SCI_TOOL_HARDWARE_TEST
+    auto sciTool = std::make_shared<MockSciTool>();
+#else
+    auto sciTool = std::make_shared<SciToolHardware>();
+#endif
+    sciToolHandler = std::make_shared<SciToolHandler>(sciTool, sciToolQueue);
+    processes.push_back(std::thread([&]() { sciToolHandler->start(); }));
 }
 #endif
 
@@ -94,7 +101,7 @@ void Rover::start() {
     // Receiving Thread
     processes.push_back(std::thread([&]() {
         while (true) {
-            Message received = client.receive().getPayload();
+            Message received = client.receive();
             receiveQueue->push(received);
         }
     }));
@@ -129,8 +136,14 @@ void Rover::start() {
                 Logging::logE(file,
                               "Connection to base timed out, halting motors.");
 
+#if EXTENTION == EXTENTION_TYPE_ARM
                 armQueue->push({});
+#endif
                 driveQueue->push({});
+#if EXTENTION == EXTENTION_TYPE_SCI_TOOL
+                sciToolQueue->push({});
+#endif
+                headlightQueue->push({});
             }
 
             usleep(INACTIVE_SLEEP_US);
@@ -142,7 +155,9 @@ void Rover::start() {
         switch (message.getFormat()) {
         case MESSAGE_FORMAT_MOTOR_STATE: {
             MotorState motorState = std::get<MotorState>(message.getPayload());
+#if EXTENTION == EXTENTION_TYPE_ARM
             armQueue->push(motorState.armMotorState);
+#endif
             driveQueue->push(motorState.driveMotorState);
             break;
         }
@@ -151,6 +166,14 @@ void Rover::start() {
             // currently setting zero
             driveHandler->setWheelZeroState();
         }
+#if EXTENTION == EXTENTION_TYPE_SCI_TOOL
+        case MESSAGE_FORMAT_SCI_TOOL_DOOR:
+        case MESSAGE_FORMAT_SCI_TOOL_HEIGHT:
+        case MESSAGE_FORMAT_SCI_TOOL_BRUSH: {
+            sciToolQueue->push(message);
+            break;
+        }
+#endif
         case MESSAGE_FORMAT_HEADLIGHTS: {
             HeadlightMessage headlightMessage
                 = std::get<HeadlightMessage>(message.getPayload());

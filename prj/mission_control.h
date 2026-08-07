@@ -25,6 +25,7 @@
 
 // Hardware Enabled
 #define ARM_HARDWARE_TEST true
+#define SCI_TOOL_HARDWARE_TEST true
 #define DRIVE_HARDWARE_TEST false
 
 // MQTT
@@ -83,6 +84,16 @@ const int ARM_ENCODER_PORT[6] = { 0, 0, 0, 0, 0, 0 };
 const int ARM_CLAW_SERIAL_NUMBER = 1000;
 const int ARM_CLAW_CHANNEL = 0;
 const int ARM_CLAW_PORT = 0;
+
+const int SCI_TOOL_SERVO_SERIAL_NUMBER[2] = { 1000, 1000 };
+const int SCI_TOOL_SERVO_CHANNEL[2] = { 0, 0 };
+const int SCI_TOOL_SERVO_PORT[2] = { 0, 0 };
+const int SCI_TOOL_DC_BRUSH_SERIAL_NUMBER = 1000;
+const int SCI_TOOL_DC_BRUSH_CHANNEL = 0;
+const int SCI_TOOL_DC_BRUSH_PORT = 0;
+const int SCI_TOOL_DC_LIFT_SERIAL_NUMBER = 1000;
+const int SCI_TOOL_DC_LIFT_CHANNEL = 0;
+const int SCI_TOOL_DC_LIFT_PORT = 0;
 
 // UDP Definitions
 const int ROVER_PORT = 8080; // For on the Nuc: 5995
