@@ -112,7 +112,8 @@ void DriveHandler::updateCurrentState() {
     for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT; index++) {
         WheelID wheelIndex = static_cast<WheelID>(index);
         // Get the current position of the wheel
-        currentState.steer[wheelIndex] = m_drive->getWheelAngle(wheelIndex);
+        currentState.steer[wheelIndex] = m_drive->getWheelAngle(wheelIndex)
+                                         - wheelZeroState.steer[wheelIndex];
         // Truncate since resolution here is
         // not too bad (degrees)
 
@@ -202,25 +203,26 @@ void DriveHandler::start() {
                     m_drive->setWheelSpeed(i, desiredState.drive[i]);
                 }
             } else {
-                if (zeroAngleSet) {
-                    for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT;
-                         index++) {
-                        WheelID i = static_cast<WheelID>(index);
-                        m_drive->setWheelAngle(i, wheelZeroState.steer[i]);
-                    }
-                }
+                //currently not in use <---------
+                // if (zeroAngleSet) {
+                //     for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT;
+                //          index++) {
+                //         WheelID i = static_cast<WheelID>(index);
+                //         m_drive->setWheelAngle(i, wheelZeroState.steer[i]);
+                //     }
+                // }
 
-                // Check if we are done getting the zero state
-                bool doneGettingZeroState = true;
-                for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT; index++) {
-                    WheelID i = static_cast<WheelID>(index);
-                    if (abs(m_drive->getWheelAngle(i)
-                            - wheelZeroState.steer[index])
-                        > STEER_THRESHOLD) {
-                        doneGettingZeroState = false;
-                    }
-                }
-                currentlyGettingZeroState = !doneGettingZeroState;
+                // // Check if we are done getting the zero state
+                // bool doneGettingZeroState = true;
+                // for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT; index++) {
+                //     WheelID i = static_cast<WheelID>(index);
+                //     if (abs(m_drive->getWheelAngle(i)
+                //             - wheelZeroState.steer[index])
+                //         > STEER_THRESHOLD) {
+                //         doneGettingZeroState = false;
+                //     }
+                // }
+                // currentlyGettingZeroState = !doneGettingZeroState;
             }
 
             for (int index = 0; index < DRIVE_INDEX_WHEEL_COUNT; index++) {

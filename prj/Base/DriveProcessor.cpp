@@ -168,6 +168,15 @@ void DriveProcessor::handleChanges() {
         // Compute Motor State
         state.motorState += motorVelocity * (elapsed_ms / MS_PER_SEC);
 
+        //ensure the motorState is within bounds
+        for (int wheel = 0; wheel < DRIVE_INDEX_WHEEL_COUNT; wheel++) {
+            if (state.motorState.steer[wheel] > 360) {
+                state.motorState.steer[wheel] -= 360;
+            } else if (state.motorState.steer[wheel] < 0) {
+                state.motorState.steer[wheel] += 360;
+            }
+        }
+
         // Invalidate Driver state
         state.driverState = {};
 

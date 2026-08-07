@@ -5,7 +5,7 @@ void DriveManualControllerLayout::leftTriggerResponse(int16_t axisValue) {
     if (axisValue <= INT16_MIN) {
         triggerTosetWheelAngleVelocity(axisValue, 0, &lastleftTriggerValue);
     } else {
-        triggerTosetWheelAngleVelocity(axisValue, -1.0, &lastleftTriggerValue);
+        triggerTosetWheelAngleVelocity(axisValue, -2.0, &lastleftTriggerValue);
     }
 }
 
@@ -14,7 +14,7 @@ void DriveManualControllerLayout::rightTriggerResponse(int16_t axisValue) {
         triggerTosetWheelAngleVelocity(axisValue, 0, &lastrightTriggerValue);
 
     } else {
-        triggerTosetWheelAngleVelocity(axisValue, 1.0, &lastrightTriggerValue);
+        triggerTosetWheelAngleVelocity(axisValue, 2.0, &lastrightTriggerValue);
     }
 }
 
@@ -31,7 +31,7 @@ void DriveManualControllerLayout::buttonResponse(uint8_t buttonID) {
 void DriveManualControllerLayout::incrementWheelAngle(float increment) {
     float val = 0;
     std::string logMessage = "wheel: " + std::to_string(wheel);
-    incrementVal(&val, increment, (float)0, (float)360, logMessage.c_str());
+    incrementVal(&val, increment, (float)-5, (float)5, logMessage.c_str());
     driveProcessor->incrementSteerPosition(wheel, val);
 }
 

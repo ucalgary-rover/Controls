@@ -114,8 +114,6 @@ struct HeadlightMessage {
     int brightnessPercentage; // 0% to 100%
 };
 
-struct DriveZeroMessage {
-    int set;
-};
+struct DriveZeroMessage { };
 
 #endif

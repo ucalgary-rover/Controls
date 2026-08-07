@@ -165,6 +165,7 @@ void Rover::start() {
         case MESSAGE_FORMAT_DRIVE_ZERO: {
             // currently setting zero
             driveHandler->setWheelZeroState();
+            break;
         }
 #if EXTENTION == EXTENTION_TYPE_SCI_TOOL
         case MESSAGE_FORMAT_SCI_TOOL_DOOR:
