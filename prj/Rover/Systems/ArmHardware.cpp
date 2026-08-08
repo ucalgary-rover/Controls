@@ -51,6 +51,8 @@ void ArmHardware::setJointAngle(MotorID joint, float angle) {
         break;
     case MotorID::MOTOR_ID_SHOULDER:
     case MotorID::MOTOR_ID_ELBOW:
+        motors[joint]->setTargetPosition(angle);
+        break;
     case MotorID::MOTOR_ID_CLAW_OPEN:
         motors[joint]->setTargetPosition(angle);
         break;
@@ -74,6 +76,7 @@ float ArmHardware::getJointAngle(MotorID joint) {
         return motors[joint]->getCurrentPosition();
     case MotorID::MOTOR_ID_SHOULDER:
     case MotorID::MOTOR_ID_ELBOW:
+        return motors[joint]->getCurrentPosition();
     case MotorID::MOTOR_ID_CLAW_OPEN:
         return motors[joint]->getCurrentPosition();
     case MotorID::MOTOR_ID_CLAW_ROLL:
