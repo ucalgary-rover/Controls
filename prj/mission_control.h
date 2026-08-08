@@ -34,6 +34,8 @@
 // Headlights
 #define HEADLIGHTS_ENABLED false
 
+#define DISABLE_DRIVE_SPEED true
+
 // System Update Rates
 #define ARM_UPDATE_INTERVAL_US 50 * 1000   // 50ms
 #define DRIVE_UPDATE_INTERVAL_US 50 * 1000 // 50ms
@@ -70,7 +72,7 @@
 // DriveMotorIndex in pub_rover.cpp -> FL, FR, BL, BR
 const int DRIVE_DC_SERIAL_NUMBER[4] = { 697178, 620000, 697178, 620000 };
 const int DRIVE_DC_CHANNEL[4] = { 0, 0, 0, 0 };
-const int DRIVE_DC_PORT[4] = { 3, 3, 1, 0 };
+const int DRIVE_DC_PORT[4] = { 3, 0, 1, 3 };
 const int DRIVE_STEPPER_SERIAL_NUMBER[4] = { 697178, 620000, 697178, 620000 };
 const int DRIVE_STEPPER_CHANNEL[4] = { 0, 0, 0, 0 };
 const int DRIVE_STEPPER_PORT[4] = { 4, 5, 0, 2 };

@@ -102,6 +102,10 @@ void DriveHardware::setWheelSpeed(WheelID wheel, float speed) {
     MotorHandlerReturn motorStuct;
     getDriveDCHandle(&motorStuct, wheel);
 
+#if DISABLE_DRIVE_SPEED
+    speed = 0;
+#endif
+
     // can make this async with PhidgetBLDCMotor_setTargetVelocity_async
     PhidgetBLDCMotor_setTargetVelocity_async(
         *motorStuct.handler.bldcMotor, speed, setTargetVelocityDone, nullptr);
