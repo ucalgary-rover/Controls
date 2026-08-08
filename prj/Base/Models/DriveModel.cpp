@@ -245,7 +245,7 @@ DriveMotorState DriveModel::process(const DriveState& state,
 DriveMotorState
 DriveModel::calculateMotorState(const DriveState& state,
                                 const DriveMotorState& currentMotorState) {
-    DriveMotorState ms = {};
+    static DriveMotorState ms = {};
 
     bool hasAngularVelocity = state.angularVelocity != 0;
     bool hasLinearVelocity = state.speed != 0;
@@ -255,6 +255,10 @@ DriveModel::calculateMotorState(const DriveState& state,
 
     // STOP
     if (!hasLinearVelocity && !hasAngularVelocity) {
+        // zero speed
+        for (int i = 0; i < 4; i++) {
+            ms.drive[i] = 0;
+        }
         return ms;
     }
 
