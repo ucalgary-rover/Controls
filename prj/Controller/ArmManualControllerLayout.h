@@ -16,6 +16,10 @@ public:
 
         // Initialize Layout API
         // clang-format off
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_A, setMin);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_B, setMax);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSTICK, printLimits);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSTICK, resetLimits);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_LEFTSHOULDER, decrementJointValueOnce);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, incrementJointValueOnce);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, decrementJointOnce);
@@ -46,6 +50,10 @@ private:
     void incrementJointValue(int increment);
 
     // Button Callbacks
+    void setMin(uint8_t buttonID);
+    void setMax(uint8_t buttonID);
+    void printLimits(uint8_t buttonID);
+    void resetLimits(uint8_t buttonID);
     void decrementJointValueOnce(uint8_t buttonID) { incrementJointValue(-1); }
     void incrementJointValueOnce(uint8_t buttonID) { incrementJointValue(1); }
     void decrementJointOnce(uint8_t buttonID) { incrementJoint(-1); }

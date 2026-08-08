@@ -8,7 +8,7 @@
 
 #if EXTENTION == EXTENTION_TYPE_ARM
 #include "Rover/Handlers/ArmHandler.h"
-#elif EXTENTION == EXTENTION_TYPE_SCIENCE_TOOL
+#elif EXTENTION == EXTENTION_TYPE_SCI_TOOL
 #include "Rover/Handlers/SciToolHandler.h"
 #endif
 #include "Rover/Handlers/DriveHandler.h"
@@ -38,7 +38,7 @@ private:
         = std::make_shared<ArmQueue>(1); // Out of date messages are irrelevant
     static std::shared_ptr<ArmHandler> armHandler;
     static void initializeArm();
-#elif EXTENTION == EXTENTION_TYPE_SCIENCE_TOOL
+#elif EXTENTION == EXTENTION_TYPE_SCI_TOOL
     inline static auto sciToolQueue = std::make_shared<SciToolQueue>(
         1); // Not sure what sci tool queue size should be yet
     static std::shared_ptr<SciToolHandler> sciToolHandler;
