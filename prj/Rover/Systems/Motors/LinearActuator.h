@@ -16,13 +16,17 @@ public:
         controler(
             MotorHandlerReturn { MOTOR_TYPE_DC_MOTOR, { .dcMotor = &dcMotor } },
             &encoder, Kp, Ki, Kd) {
+        PhidgetReturnCode res;
+
         // Add new DC Motor Handle
-        PhidgetDCMotor_create(&dcMotor);
+        res = PhidgetDCMotor_create(&dcMotor);
+        Logging::logD(file, "PhidgetDCMotor_create returned %d", res);
         setAddressProperties<PhidgetDCMotorHandle>(&dcMotor, DCSerialNumber,
                                                    DCChannel, DCPort);
 
         // Add new encoder
-        PhidgetEncoder_create(&encoder);
+        res = PhidgetEncoder_create(&encoder);
+        Logging::logD(file, "PhidgetEncoder_create returned %d", res);
         setAddressProperties<PhidgetEncoderHandle>(
             &encoder, encoderSerialNumber, encoderChannel, encoderPort);
     }
@@ -40,7 +44,11 @@ public:
 
     float getCurrentPosition() override { return controler.getAngle(); }
 
+    void setZeroPosition() override { PhidgetEncoder_setPosition(encoder, 0); }
+
 private:
+    inline static const char* file = "LinearActuator";
+
     PhidgetDCMotorHandle dcMotor = {};
     PhidgetEncoderHandle encoder = {};
     JointControlPID controler;
