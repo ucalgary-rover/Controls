@@ -31,19 +31,6 @@ DriveHardware::DriveHardware() {
                                         1.8 / (16 * GEAR_RATIO));
         PhidgetStepper_setEngaged(m_handlesStepper.at(stepper), 1);
     }
-
-    // initialise encoders for wheel zero tracking
-    Logging::logD(file, "Initialising DriveHardware Encoders");
-    for (int driveEncoder = 0; driveEncoder < DRIVE_INDEX_WHEEL_COUNT;
-         driveEncoder++) {
-        m_handlesDriveEncoder.push_back(PhidgetEncoderHandle());
-        PhidgetEncoder_create(&m_handlesDriveEncoder.at(driveEncoder));
-        setAddressProperties<PhidgetEncoderHandle>(
-            &m_handlesDriveEncoder.at(driveEncoder),
-            DRIVE_ENCODER_SERIAL_NUMBER[driveEncoder],
-            DRIVE_ENCODER_CHANNEL[driveEncoder],
-            DRIVE_ENCODER_PORT[driveEncoder]);
-    }
 }
 
 DriveHardware::~DriveHardware() {
@@ -59,14 +46,6 @@ DriveHardware::~DriveHardware() {
     for (int stepper = 0; stepper < DRIVE_INDEX_WHEEL_COUNT; stepper++) {
         Phidget_close((PhidgetHandle)m_handlesStepper.at(stepper));
         PhidgetStepper_delete(&m_handlesStepper.at(stepper));
-    }
-
-    // deinitialise drive encoders
-    Logging::logD(file, "Deinitialising DriveHardware Encoders");
-    for (int driveEncoder = 0; driveEncoder < DRIVE_INDEX_WHEEL_COUNT;
-         driveEncoder++) {
-        Phidget_close((PhidgetHandle)m_handlesDriveEncoder.at(driveEncoder));
-        PhidgetEncoder_delete(&m_handlesDriveEncoder.at(driveEncoder));
     }
 }
 
@@ -89,23 +68,6 @@ bool DriveHardware::getDriveStepperHandle(MotorHandlerReturn* retVal,
     }
     retVal->type = MOTOR_TYPE_INVALID;
     return false;
-}
-
-bool DriveHardware::getDriveEncoderHandle(MotorHandlerReturn* retVal,
-                                          int index) {
-    if (index >= 0 && index < DRIVE_INDEX_WHEEL_COUNT) {
-        retVal->type = MOTOR_TYPE_ENCODER;
-        retVal->handler.encoder = &m_handlesDriveEncoder.at(index);
-        return true;
-    }
-    retVal->type = MOTOR_TYPE_INVALID;
-    return false;
-}
-
-static void CCONV onButtonPressedHandler(PhidgetEncoderHandle pdih, void* ctx,
-                                         int state) {
-    // int* myIntPtr = (int*)ctx;
-    // *myIntPtr = 1;
 }
 
 static void CCONV onAngleReached(PhidgetHandle pdih, void* ctx,
