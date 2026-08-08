@@ -62,7 +62,7 @@ void DriveAutoControllerLayout::setVelocity(int X, int Y) {
 void DriveAutoControllerLayout::setAngularVelocity(int X, int Y) {
     int angularVelocity = 0;
     // get the angular velocity
-    setVal(&angularVelocity, (X * maxRadialSpeed) / 255, -maxRadialSpeed,
+    setVal(&angularVelocity, -(X * maxRadialSpeed) / 255, -maxRadialSpeed,
            maxRadialSpeed, NAMEOF(angularVelocity));
 
     driveProcessor->setAngularVelocity(angularVelocity);
