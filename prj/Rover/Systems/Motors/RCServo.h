@@ -9,11 +9,14 @@
 
 class RCServo : public Motor {
 public:
-    RCServo(int servoSerialNumber, int servoChannel, int servoPort) {
-        // Add new DC Motor Handle
+    RCServo(int servoSerialNumber, int servoChannel, int servoPort, double min,
+            double max) {
+        // Add new RC servo Motor Handle
         PhidgetRCServo_create(&servoMotor);
         setAddressProperties<PhidgetRCServoHandle>(
             &servoMotor, servoSerialNumber, servoChannel, servoPort);
+        PhidgetRCServo_setMinPosition(servoMotor, min);
+        PhidgetRCServo_setMinPosition(servoMotor, max);
     }
 
     ~RCServo() {

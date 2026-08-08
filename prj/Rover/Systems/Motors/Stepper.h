@@ -33,7 +33,7 @@ public:
         return static_cast<float>(position);
     }
 
-    void setZeroPosition() {
+    void setZeroPosition() override {
         float currentPos = getCurrentPosition();
         PhidgetStepper_addPositionOffset(stepperMotor, -currentPos);
     }
