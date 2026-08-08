@@ -21,9 +21,17 @@ public:
         PhidgetRCServo_delete(&servoMotor);
     }
 
-    void setTargetPosition(float target) override { this->target = target; }
+    void setTargetPosition(float target) override {
+        this->target = target;
+        PhidgetRCServo_setTargetPosition_async(servoMotor, target, nullptr,
+                                               nullptr);
+    }
 
-    float getCurrentPosition() override { return this->target; }
+    float getCurrentPosition() override {
+        double position;
+        PhidgetRCServo_getPosition(servoMotor, &(position));
+        return static_cast<float>(position);
+    }
 
 private:
     PhidgetRCServoHandle servoMotor = {};

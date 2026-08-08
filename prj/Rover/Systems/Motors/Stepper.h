@@ -10,7 +10,7 @@
 class Stepper : public Motor {
 public:
     Stepper(int stepperSerialNumber, int stepperChannel, int stepperPort) {
-        // Add new DC Motor Handle
+        // Add new stepper Handle
         PhidgetStepper_create(&stepperMotor);
         setAddressProperties<PhidgetStepperHandle>(
             &stepperMotor, stepperSerialNumber, stepperChannel, stepperPort);
@@ -21,9 +21,22 @@ public:
         PhidgetStepper_delete(&stepperMotor);
     }
 
-    void setTargetPosition(float target) override { this->target = target; }
+    void setTargetPosition(float target) override {
+        this->target = target;
+        PhidgetStepper_setTargetPosition_async(stepperMotor, target, nullptr,
+                                               nullptr);
+    }
 
-    float getCurrentPosition() override { return this->target; }
+    float getCurrentPosition() override {
+        double position;
+        PhidgetStepper_getPosition(stepperMotor, &(position));
+        return static_cast<float>(position);
+    }
+
+    void setZeroPosition() {
+        float currentPos = getCurrentPosition();
+        PhidgetStepper_addPositionOffset(stepperMotor, -currentPos);
+    }
 
 private:
     PhidgetStepperHandle stepperMotor = {};
