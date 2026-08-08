@@ -11,7 +11,9 @@ class Stepper : public Motor {
 public:
     Stepper(int stepperSerialNumber, int stepperChannel, int stepperPort) {
         // Add new stepper Handle
-        PhidgetStepper_create(&stepperMotor);
+        PhidgetReturnCode res;
+        res = PhidgetStepper_create(&stepperMotor);
+        Logging::logD(file, "PhidgetStepper_create %d", res);
         setAddressProperties<PhidgetStepperHandle>(
             &stepperMotor, stepperSerialNumber, stepperChannel, stepperPort);
     }
@@ -40,6 +42,7 @@ public:
 
 private:
     PhidgetStepperHandle stepperMotor = {};
+    inline static constexpr char* file = "Stepper";
 
     float target = 0; // DO SOMETHING WITH THIS
 };

@@ -12,7 +12,9 @@ public:
     RCServo(int servoSerialNumber, int servoChannel, int servoPort, double min,
             double max) {
         // Add new RC servo Motor Handle
-        PhidgetRCServo_create(&servoMotor);
+        PhidgetReturnCode res;
+        res = PhidgetRCServo_create(&servoMotor);
+        Logging::logD(file, "PhidgetRCServo_create %d", res);
         setAddressProperties<PhidgetRCServoHandle>(
             &servoMotor, servoSerialNumber, servoChannel, servoPort);
         PhidgetRCServo_setMinPosition(servoMotor, min);
@@ -38,6 +40,7 @@ public:
 
 private:
     PhidgetRCServoHandle servoMotor = {};
+    inline static constexpr char* file = "RCServo";
 
     float target = 0; // DO SOMETHING WITH THIS
 };
