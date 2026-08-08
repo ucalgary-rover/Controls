@@ -242,6 +242,35 @@ DriveMotorState DriveModel::process(const DriveState& state,
     return desiredDriveMotorState;
 }
 
+static bool isMoveForwards(int heading) {
+    return (heading <= 90 || heading >= 270);
+}
+
+static bool isMoveBackwards(int heading) {
+    return (heading > 90 && heading < 270);
+}
+
+static bool isStrafeLeft(int heading) {
+    return (heading > 45 && heading < 135);
+}
+
+static bool isStrafeRight(int heading) {
+    return (heading > 225 && heading < 315);
+}
+
+static bool inLeftHemisphere(int heading) { return (heading <= 180); }
+
+static int calculateCurrentHeading(const DriveMotorState& currentMotorState) {
+    int currentHeading = 0;
+    for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
+        currentHeading += currentMotorState.steer[i];
+    }
+
+    currentHeading = currentHeading / DRIVE_INDEX_WHEEL_COUNT;
+
+    return currentHeading;
+}
+
 DriveMotorState
 DriveModel::calculateMotorState(const DriveState& state,
                                 const DriveMotorState& currentMotorState) {
@@ -262,10 +291,15 @@ DriveModel::calculateMotorState(const DriveState& state,
         return ms;
     }
 
+    bool strafeLeft = isStrafeLeft(state.heading);
+    bool strafeRight = isStrafeRight(state.heading);
+
+    bool strafing = strafeLeft || strafeRight;
+
     // =====================
     // RADIAL TURN
     // =====================
-    if (longitudinalOnly && hasLinearVelocity) {
+    if (hasLinearVelocity && (hasAngularVelocity || !strafing)) {
 
         float headingAngle = radialTurnHeadingAngle(state.angularVelocity);
 
@@ -281,7 +315,7 @@ DriveModel::calculateMotorState(const DriveState& state,
         Logging::logV(file, "FL: %f FR: %f", ms.steer[DRIVE_INDEX_FRONT_LEFT],
                       ms.steer[DRIVE_INDEX_FRONT_RIGHT]);
 
-        int direction = (state.heading <= 90 || state.heading >= 270) ? 1 : -1;
+        int direction = isMoveForwards(state.heading) ? 1 : -1;
         float speed
             = (float)state.speed * direction * RADIAL_SPEED_MAX / 100.0f;
 
@@ -316,21 +350,32 @@ DriveModel::calculateMotorState(const DriveState& state,
     // =====================
     // STRAFE
     // =====================
-    if (hasLinearVelocity && lateralOnly && !hasAngularVelocity) {
-        float currentHeading = 0;
+    if (!hasAngularVelocity && hasLinearVelocity) {
+        float wheelAngle = 0;
+        float direction = 1;
 
-        for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
-            currentHeading += currentMotorState.steer[i];
-        }
-
-        currentHeading = currentHeading / DRIVE_INDEX_WHEEL_COUNT;
-        float wheelAngle = strafeAngleAdjust(state.heading, currentHeading);
-
-        int direction;
-        if (wheelAngle == 0) {
-            direction = state.heading == 180 ? -1 : 1;
+        int currentHeading = calculateCurrentHeading(currentMotorState);
+        bool closerToLeft = inLeftHemisphere(currentHeading);
+        if (strafeLeft) {
+            if (closerToLeft) {
+                // Set Speeds Positive
+                wheelAngle = 90;
+                direction = 1;
+            } else {
+                // Set Speeds Negative
+                wheelAngle = 270;
+                direction = -1;
+            }
         } else {
-            direction = state.heading == wheelAngle ? 1 : -1;
+            if (!closerToLeft) {
+                // Set Speeds Positive
+                wheelAngle = 270;
+                direction = 1;
+            } else {
+                // Set Speeds Negative
+                wheelAngle = 90;
+                direction = -1;
+            }
         }
 
         float speed
@@ -394,6 +439,7 @@ float DriveModel::spotTurnSpeed(int angularVelocity) {
 }
 
 int DriveModel::strafeAngleAdjust(int heading, float currentHeading) {
+
     if (heading == 360 || heading == 180 || heading == 0) {
         return 0;
     } else if (currentHeading >= 180) {
