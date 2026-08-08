@@ -44,7 +44,8 @@ void Base::initialize() {
         driveProcessor, sendHeadlightsMessage, sendZeroMessage,
         sendCameraServoMessage));
 #if EXTENSION == EXTENSION_TYPE_ARM
-    controllers.push_back(std::make_shared<ArmControllerLayout>(armProcessor));
+    controllers.push_back(std::make_shared<ArmControllerLayout>(
+        armProcessor, sendArmZeroMessage));
 #elif EXTENSION == EXTENSION_TYPE_SCI_TOOL
     controllers.push_back(
         std::make_shared<SciToolControllerLayout>(sendSciToolMessage));
@@ -127,6 +128,13 @@ void Base::sendZeroMessage(int setVal) {
     sendQueue->push(message);
 
     Logging::logV(file, "zeroMessage queued. Set");
+}
+
+void Base::sendArmZeroMessage(int setVal) {
+    Message message(ArmZeroMessage {});
+    sendQueue->push(message);
+
+    Logging::logV(file, "armZeroMessage queued. Set");
 }
 
 void Base::sendHeadlightsMessage(int brightnessVal) {

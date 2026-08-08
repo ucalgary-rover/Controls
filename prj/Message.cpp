@@ -27,6 +27,8 @@ Message::Message(MessagePayload payload) : m_payload(std::move(payload)) {
                 m_format = MESSAGE_FORMAT_CAMERA_SERVO;
             else if constexpr (std::is_same_v<T, DriveZeroMessage>)
                 m_format = MESSAGE_FORMAT_DRIVE_ZERO;
+            else if constexpr (std::is_same_v<T, ArmZeroMessage>)
+                m_format = MESSAGE_FORMAT_ARM_ZERO;
             else if constexpr (std::is_same_v<T, HeadlightMessage>)
                 m_format = MESSAGE_FORMAT_HEADLIGHTS;
             else
@@ -105,6 +107,9 @@ void Message::printMessage() const {
             } else if constexpr (std::is_same_v<T, DriveZeroMessage>) {
                 std::cout << "DriveZeroMessage - set";
 
+            } else if constexpr (std::is_same_v<T, ArmZeroMessage>) {
+                std::cout << "ArmZeroMessage - set";
+
             } else if constexpr (std::is_same_v<T, HeadlightMessage>) {
                 std::cout << "HeadlightMessage - brightness: "
                           << payload.brightnessPercentage;
@@ -140,6 +145,10 @@ std::vector<std::byte> Message::serialize() const {
     }
     case MESSAGE_FORMAT_DRIVE_ZERO: {
         payloadLength += sizeof(DriveZeroMessage);
+        break;
+    }
+    case MESSAGE_FORMAT_ARM_ZERO: {
+        payloadLength += sizeof(ArmZeroMessage);
         break;
     }
     case MESSAGE_FORMAT_HEADLIGHTS: {
@@ -210,6 +219,10 @@ bool Message::deserialize(const std::vector<std::byte> data, size_t size,
     }
     case MESSAGE_FORMAT_DRIVE_ZERO: {
         rtn = parseMessage<DriveZeroMessage>(data, size, payload);
+        break;
+    }
+    case MESSAGE_FORMAT_ARM_ZERO: {
+        rtn = parseMessage<ArmZeroMessage>(data, size, payload);
         break;
     }
     case MESSAGE_FORMAT_HEADLIGHTS: {

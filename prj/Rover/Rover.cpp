@@ -175,6 +175,14 @@ void Rover::start() {
             driveHandler->setWheelZeroState();
             break;
         }
+
+#if EXTENTION == EXTENTION_TYPE_ARM
+        case MESSAGE_FORMAT_ARM_ZERO: {
+            // armHandler->setArmZeroState();
+            break;
+        }
+#endif
+
 #if EXTENTION == EXTENTION_TYPE_SCI_TOOL
         case MESSAGE_FORMAT_SCI_TOOL_DOOR:
         case MESSAGE_FORMAT_SCI_TOOL_HEIGHT:

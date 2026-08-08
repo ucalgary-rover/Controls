@@ -14,12 +14,13 @@ enum ArmLayout {
 
 class ArmControllerLayout : public ControllerLayout {
 public:
-    ArmControllerLayout(std::shared_ptr<ArmProcessor> armProcessor) :
+    ArmControllerLayout(std::shared_ptr<ArmProcessor> armProcessor,
+                        messageFunc sendStepperZeroMessage) :
         ControllerLayout("ArmController") {
 
         layouts[ARM_IK] = std::make_shared<ArmIKControllerLayout>(armProcessor);
-        layouts[ARM_MANUAL]
-            = std::make_shared<ArmManualControllerLayout>(armProcessor);
+        layouts[ARM_MANUAL] = std::make_shared<ArmManualControllerLayout>(
+            armProcessor, sendStepperZeroMessage);
 
         // Initialize button callbacks
         // clang-format off

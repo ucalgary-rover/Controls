@@ -13,4 +13,5 @@ public:
      */
     virtual void setJointAngle(MotorID joint, float angle) = 0;
     virtual float getJointAngle(MotorID joint) = 0;
+    virtual void setZero() = 0;
 };

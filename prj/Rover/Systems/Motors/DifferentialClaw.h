@@ -52,6 +52,11 @@ public:
 
     float getCurrentRoll() { return roll; }
 
+    void setZero() {
+        stepper1->setZeroPosition();
+        stepper2->setZeroPosition();
+    };
+
 private:
     std::shared_ptr<Stepper> stepper1;
     std::shared_ptr<Stepper> stepper2;

@@ -14,6 +14,7 @@ enum MessageFormat : int {
     MESSAGE_FORMAT_SCI_TOOL_BRUSH,
     MESSAGE_FORMAT_CAMERA_SERVO,
     MESSAGE_FORMAT_DRIVE_ZERO,
+    MESSAGE_FORMAT_ARM_ZERO,
     MESSAGE_FORMAT_HEADLIGHTS,
     MESSAGE_FORMAT_GENERIC
 };
@@ -115,5 +116,6 @@ struct HeadlightMessage {
 };
 
 struct DriveZeroMessage { };
+struct ArmZeroMessage { };
 
 #endif

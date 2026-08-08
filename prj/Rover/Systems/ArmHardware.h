@@ -31,6 +31,7 @@ public:
 
     void setJointAngle(MotorID joint, float angle) override;
     float getJointAngle(MotorID joint) override;
+    void setZero();
 
 private:
     std::unordered_map<MotorID, std::shared_ptr<Motor>> motors = {};

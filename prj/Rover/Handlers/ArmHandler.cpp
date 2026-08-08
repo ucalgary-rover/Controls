@@ -68,6 +68,8 @@ void ArmHandler::start() {
     }
 }
 
+void ArmHandler::setZero() { m_arm->setZero(); }
+
 // void ArmHandler::calibrateStepper(int joint_num) {
 //     // This function should be called before the arm is used to ensure
 //     // the steppers are at the correct orientation
