@@ -56,9 +56,8 @@ private:
 
     // Button Callbacks
     void setStepperZero(uint8_t buttonID) {
-        for (int wheel = 0; wheel < DRIVE_INDEX_WHEEL_COUNT; wheel++) {
-            armProcessor->setJointSpaceState(ArmMotorState{});
-        }
+        armProcessor->setJointSpaceState(ArmMotorState{});
+    
         sendStepperZeroMessage(1);
     };
     void setMin(uint8_t buttonID);
