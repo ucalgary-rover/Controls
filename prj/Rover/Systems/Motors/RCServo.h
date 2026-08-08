@@ -40,7 +40,7 @@ public:
 
 private:
     PhidgetRCServoHandle servoMotor = {};
-    inline static constexpr char* file = "RCServo";
+    inline static const char* file = "RCServo";
 
     float target = 0; // DO SOMETHING WITH THIS
 };

@@ -7,6 +7,8 @@
 
 #include "Motor.h"
 
+class DifferentialClaw;
+
 class Stepper : public Motor {
 public:
     Stepper(int stepperSerialNumber, int stepperChannel, int stepperPort) {
@@ -42,7 +44,9 @@ public:
 
 private:
     PhidgetStepperHandle stepperMotor = {};
-    inline static constexpr char* file = "Stepper";
+    inline static const char* file = "Stepper";
 
     float target = 0; // DO SOMETHING WITH THIS
+
+    friend class DifferentialClaw;
 };

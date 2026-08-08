@@ -4,14 +4,17 @@
 #pragma once
 
 #include "Arm.h"
+#include "Motors/DifferentialClaw.h"
 #include "Motors/Motor.h"
 #include "Rover/Systems/pub_systems.h"
 #include "Rover/pub_rover.h"
 #include "mission_control.h"
 #include "phidget22.h"
+
 #include <iostream>
 #include <memory>
 #include <unordered_map>
+
 class ArmHardware : public Arm {
 public:
     /**
@@ -31,10 +34,7 @@ public:
 
 private:
     std::unordered_map<MotorID, std::shared_ptr<Motor>> motors = {};
-
-    bool clawInUse = false;
-
-    void setClawFree() { clawInUse = false; }
+    std::shared_ptr<DifferentialClaw> mrMoraleAndTheBigSteppers;
 };
 
 #endif
