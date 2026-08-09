@@ -72,6 +72,16 @@ void HeadlightHandler::start() {
                 brightness = 0;
             }
 
+            if (brightness <= 25) {
+                brightness = 0;
+            } else if (brightness <= 50) {
+                brightness = 1;
+            } else if (brightness <= 75) {
+                brightness = 2;
+            } else {
+                brightness = 3;
+            }
+
             char msg[256];
             sprintf(msg, "Light level: %d\n", brightness);
             write(serial_port, msg, strlen(msg));

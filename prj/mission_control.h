@@ -20,7 +20,7 @@
 #ifndef SIDE_TO_BUILD
 #define SIDE_TO_BUILD BUILD_SIDE_BASE
 #endif // SIDE_TO_BUILD
-#define EXTENTION EXTENTION_TYPE_ARM
+#define EXTENTION EXTENTION_TYPE_SCI_TOOL
 #define LOGGING_LEVEL LOG_LEVEL_INFO
 
 // Hardware Enabled
@@ -32,9 +32,9 @@
 #define MQTT_ENABLED false
 
 // Headlights
-#define HEADLIGHTS_ENABLED false
+#define HEADLIGHTS_ENABLED true
 
-#define DISABLE_DRIVE_SPEED true
+#define DISABLE_DRIVE_SPEED false
 
 // System Update Rates
 #define ARM_UPDATE_INTERVAL_US 50 * 1000   // 50ms
@@ -63,9 +63,11 @@
 #define STEER_THRESHOLD 1.0 // TODO: configure
 
 // Teporary value, must be swaped to actual ID
-#define HEADLIGHT_ARDUINO                                                      \
-    "usb-Arduino__www.arduino.cc__0042_44231313330351E05291-if00"
-
+// clang-format off
+#define ARDUINO_MEGA "usb-Arduino__www.arduino.cc__0042_75735303231351714152-if00"
+#define ARDUINO_ROVER "usb-Arduino__www.arduino.cc__0042_44231313330351E05291-if00"
+#define HEADLIGHT_ARDUINO ARDUINO_MEGA
+// clang-format on
 // Configuration file to set serial numbers and channels for each of the motors
 
 // Following consts should follow the order of
