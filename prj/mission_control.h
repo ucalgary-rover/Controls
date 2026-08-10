@@ -24,7 +24,7 @@
 #define LOGGING_LEVEL LOG_LEVEL_INFO
 
 // Hardware Enabled
-#define ARM_HARDWARE_TEST true
+#define ARM_HARDWARE_TEST false
 #define SCI_TOOL_HARDWARE_TEST true
 #define DRIVE_HARDWARE_TEST true
 

@@ -20,18 +20,18 @@ ArmHardware::ArmHardware() {
     // initialise motors in the ArmHardware
     Logging::logD(file, "Initialising ArmHardware Motors");
 
-    auto stepper1 = std::make_shared<Stepper>(0, 0, 0);
-    auto stepper2 = std::make_shared<Stepper>(0, 0, 0);
+    auto stepper1 = std::make_shared<Stepper>(666663, 0, 0);
+    auto stepper2 = std::make_shared<Stepper>(666663, 0, 0);
 
-    motors[MOTOR_ID_BASE] = std::make_shared<Stepper>(0, 0, 0);
+    motors[MOTOR_ID_BASE] = std::make_shared<Stepper>(666664, 0, 5);
     motors[MOTOR_ID_SHOULDER] = std::make_shared<LinearActuator>(
-        0, 0, 0, 0, 0, 0, SHOULDER_KP, SHOULDER_KI, SHOULDER_KD);
+        666664, 0, 0, 666664, 0, 3, SHOULDER_KP, SHOULDER_KI, SHOULDER_KD);
     motors[MOTOR_ID_ELBOW] = std::make_shared<LinearActuator>(
-        0, 0, 0, 0, 0, 0, ELBOW_KP, ELBOW_KI, ELBOW_KD);
+        666664, 0, 1, 666664, 0, 4, ELBOW_KP, ELBOW_KI, ELBOW_KD);
     motors[MOTOR_ID_CLAW_ROLL] = stepper1;
     motors[MOTOR_ID_CLAW_PITCH] = stepper2;
     motors[MOTOR_ID_CLAW_OPEN]
-        = std::make_shared<RCServo>(0, 0, 0, -124234, 234235);
+        = std::make_shared<RCServo>(666663, 0, 2, -124234, 234235);
 
     mrMoraleAndTheBigSteppers
         = std::make_shared<DifferentialClaw>(stepper1, stepper2);
