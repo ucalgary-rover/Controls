@@ -36,7 +36,7 @@ CMPL_PHIDETS = -lphidget22
 CMPL_JSON = -ljsoncpp
 CMPL_PTHREAD = -lpthread
 CMPL_IK = -I$(IK_root)/include
-CMPL_MQTT = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lpaho-mqttpp3 -lpaho-mqtt3a
+CMPL_MQTT = -L/usr/local/lib -Wl,-rpath,/usr/local/lib #-lpaho-mqttpp3 -lpaho-mqtt3a
 
 NULL_DEVICE := $(if $(filter Windows_NT,$(OS)),NUL,/dev/null)
 

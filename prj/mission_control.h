@@ -23,6 +23,9 @@
 #define EXTENTION EXTENTION_TYPE_ARM
 #define LOGGING_LEVEL LOG_LEVEL_INFO
 
+// Module Logs
+#define ARM_LOGS_ENABLED true
+
 // Hardware Enabled
 #define ARM_HARDWARE_TEST true
 #define SCI_TOOL_HARDWARE_TEST true

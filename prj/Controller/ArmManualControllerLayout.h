@@ -48,8 +48,6 @@ private:
     MotorID joint = MOTOR_ID_BASE;
 
     // helper functions
-    void triggerToDeltaJointValue(int triggerVal);
-
     void incrementJoint(int change);
 
     void incrementJointValue(int increment);
