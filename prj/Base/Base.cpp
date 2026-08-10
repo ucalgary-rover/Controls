@@ -63,7 +63,10 @@ void Base::quit() { exitLoop = true; }
 void Base::receive(UDPHandler& receiver) {
     while (true) {
         Message reply = receiver.receive();
+
+#if ROVER_STATUS_LOGS_ENABLED
         reply.printMessage(); // Print the received message
+#endif
 
         MotorState newState = std::get<MotorState>(reply.getPayload());
 

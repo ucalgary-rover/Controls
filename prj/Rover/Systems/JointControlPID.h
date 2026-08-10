@@ -36,8 +36,8 @@ private:
     double m_errorIntegral = 0;
     double m_previousError = 0;
 
-    double m_maxSpeed = 0.0;
-    uint32_t m_dataInterval;
+    double m_maxSpeed = 1.0;
+    uint32_t m_dataInterval = 1000;
 
     inline static auto processes
         = std::vector<std::thread>(); // Track instantiated processes

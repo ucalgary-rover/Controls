@@ -25,6 +25,8 @@
 
 // Module Logs
 #define ARM_LOGS_ENABLED true
+#define DRIVE_LOGS_ENABLED false
+#define ROVER_STATUS_LOGS_ENABLED false
 
 // Hardware Enabled
 #define ARM_HARDWARE_TEST false

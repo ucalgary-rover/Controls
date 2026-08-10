@@ -202,12 +202,14 @@ void DriveProcessor::handleChanges() {
     }
 
     if (stateChanged) {
+#if DRIVE_LOGS_ENABLED
         auto& drive = state.motorState.drive;
         Logging::logI(file, "drive: %.3f %.3f %.3f %.3f", drive[0], drive[1],
                       drive[2], drive[3]);
         auto& steer = state.motorState.drive;
         Logging::logI(file, "steer: %.3f %.3f %.3f %.3f", steer[0], steer[1],
                       steer[2], steer[3]);
+#endif
     }
 
     changesMade = false;
