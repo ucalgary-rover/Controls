@@ -20,13 +20,11 @@ public:
 
         // Add new DC Motor Handle
         res = PhidgetDCMotor_create(&dcMotor);
-        Logging::logD(file, "PhidgetDCMotor_create returned %d", res);
         setAddressProperties<PhidgetDCMotorHandle>(&dcMotor, DCSerialNumber,
                                                    DCChannel, DCPort);
 
         // Add new encoder
         res = PhidgetEncoder_create(&encoder);
-        Logging::logD(file, "PhidgetEncoder_create returned %d", res);
         setAddressProperties<PhidgetEncoderHandle>(
             &encoder, encoderSerialNumber, encoderChannel, encoderPort);
     }
