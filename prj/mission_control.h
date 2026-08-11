@@ -39,7 +39,7 @@
 // Headlights
 #define HEADLIGHTS_ENABLED false
 
-#define DISABLE_DRIVE_SPEED true
+#define DISABLE_DRIVE_SPEED false
 
 // System Update Rates
 #define ARM_UPDATE_INTERVAL_US 50 * 1000   // 50ms
@@ -64,8 +64,8 @@
 #define STATIC_DEADZONE 5000
 
 // Allow inaccuracy in sensor data for drive systems to still be parsed correctly
-#define DRIVE_THRESHOLD 0.1 // TODO: configure
-#define STEER_THRESHOLD 1.0 // TODO: configure
+#define DRIVE_THRESHOLD 0.1  // TODO: configure
+#define STEER_THRESHOLD 10.0 // TODO: configure
 
 // Teporary value, must be swaped to actual ID
 #define HEADLIGHT_ARDUINO                                                      \

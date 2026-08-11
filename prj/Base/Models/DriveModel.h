@@ -37,7 +37,8 @@ private:
 
     static DriveMotorState
     calculateMotorState(const DriveState& state,
-                        const DriveMotorState& currentMotorState);
+                        const DriveMotorState& currentMotorState,
+                        DriveStateType* desiredDriveStateType);
 
     static float spotTurnSpeed(int angularVelocity);
     // Assuming heading is 0, 90, 180, 270 or 360
