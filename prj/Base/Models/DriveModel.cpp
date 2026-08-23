@@ -149,8 +149,7 @@ DriveMotorState DriveModel::process(const DriveState& state,
         stoppedMotorState.drive[i] = 0;        // Stop drive
     }
 
-    DriveStateType currentType
-        = DriveModel::getDriveStateType(currentMotorState);
+    currentType = DriveModel::getDriveStateType(currentMotorState);
     bool desiredIsSpotTurning
         = desiredDriveStateType == DRIVE_STATE_TYPE_SPOT_TURN;
     bool currentIsSpotTurning = currentType == DRIVE_STATE_TYPE_SPOT_TURN;

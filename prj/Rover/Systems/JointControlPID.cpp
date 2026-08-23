@@ -25,15 +25,19 @@ JointControlPID::JointControlPID(MotorHandlerReturn handlerReturn,
         break;
     }
 
+    m_isInitiated = true;
+
     Logging::logI(file,
                   "JointControlPID initialized with Kp: %f, Ki: %f, Kd: %f", Kp,
                   Ki, Kd);
 }
 
+JointControlPID::JointControlPID() { }
+
 void JointControlPID::setAngle(float angle) {
     m_targetAngle.store(angle);
     Logging::logI(file, "Setting target to %.3f", angle);
-    if (!m_hasStarted) {
+    if (!m_hasStarted && m_isInitiated) {
         // If the PID has not started, start it on first angle set.
         processes.push_back(std::thread([&]() { startPID(); }));
         m_hasStarted = true;
@@ -49,8 +53,12 @@ void JointControlPID::startPID() {
         Logging::logI(file, "target_angle = %.5f", targetAngle);
 
         int64_t currentPosition;
-        PhidgetEncoder_getPosition(*m_encoderHandle, &currentPosition);
-        m_targetAngle.store(encoderPositionToAngle(currentPosition));
+        PhidgetReturnCode res;
+        res = PhidgetEncoder_getPosition(*m_encoderHandle, &currentPosition);
+        Logging::logV(file, "encoder read res -> %d \nread value %d", res,
+                      currentPosition);
+
+        m_currentAngle.store(encoderPositionToAngle(currentPosition));
         double error = targetAngle - m_currentAngle.load();
 
         Logging::logI(file, "error = %.5f", error);

@@ -9,7 +9,7 @@
 static const char* file = "ArmHardware";
 
 #define SHOULDER_KP 0.1
-#define SHOULDER_KI 0
+#define SHOULDER_KI 0.0
 #define SHOULDER_KD 0
 
 #define ELBOW_KP 0.1
