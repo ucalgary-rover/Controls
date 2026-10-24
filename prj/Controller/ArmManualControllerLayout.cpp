@@ -2,12 +2,26 @@
 
 #include <string>
 
+int motorVelocity = 10; // 5 degrees/sec
+
+int mapTriggerToVelocity(int16_t axisValue) {
+    return (((int)axisValue * motorVelocity / INT16_MAX) + motorVelocity) / 2;
+}
+
 void ArmManualControllerLayout::leftTriggerResponse(int16_t axisValue) {
-    triggerToDeltaJointValue(axisValue);
+    ArmMotorState armVelocity = {};
+    int vel = -mapTriggerToVelocity(axisValue);
+    armVelocity.motorValues[joint] = vel;
+    Logging::logI("manual", "%d", vel);
+    armProcessor->setJointSpaceVelocity(armVelocity);
 }
 
 void ArmManualControllerLayout::rightTriggerResponse(int16_t axisValue) {
-    triggerToDeltaJointValue(axisValue);
+    ArmMotorState armVelocity = {};
+    int vel = mapTriggerToVelocity(axisValue);
+    armVelocity.motorValues[joint] = vel;
+    Logging::logI("manual", "%d", vel);
+    armProcessor->setJointSpaceVelocity(armVelocity);
 }
 
 void ArmManualControllerLayout::buttonResponse(uint8_t buttonID) {
@@ -18,14 +32,6 @@ void ArmManualControllerLayout::buttonResponse(uint8_t buttonID) {
     }
 
     buttonCallbacks[buttonID](buttonID);
-}
-
-void ArmManualControllerLayout::triggerToDeltaJointValue(int triggerVal) {
-    ArmMotorState armVelocity = {};
-    std::string logMessage = "motor: " + std::to_string(joint);
-    setVal(&armVelocity.motorValues[joint], triggerVal, -20, 20,
-           logMessage.c_str());
-    armProcessor->setJointSpaceVelocity(armVelocity);
 }
 
 void ArmManualControllerLayout::incrementJoint(int change) {

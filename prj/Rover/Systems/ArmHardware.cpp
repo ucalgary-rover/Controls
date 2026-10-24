@@ -8,11 +8,11 @@
 
 static const char* file = "ArmHardware";
 
-#define SHOULDER_KP 0
-#define SHOULDER_KI 0
+#define SHOULDER_KP 0.1
+#define SHOULDER_KI 0.0
 #define SHOULDER_KD 0
 
-#define ELBOW_KP 0
+#define ELBOW_KP 0.1
 #define ELBOW_KI 0
 #define ELBOW_KD 0
 
@@ -20,14 +20,21 @@ ArmHardware::ArmHardware() {
     // initialise motors in the ArmHardware
     Logging::logD(file, "Initialising ArmHardware Motors");
 
-    motors[MOTOR_ID_BASE] = std::make_shared<Stepper>(0, 0, 0);
+    auto stepper1 = std::make_shared<Stepper>(666663, 0, 0);
+    auto stepper2 = std::make_shared<Stepper>(666663, 0, 0);
+
+    motors[MOTOR_ID_BASE] = std::make_shared<Stepper>(666664, 0, 5);
     motors[MOTOR_ID_SHOULDER] = std::make_shared<LinearActuator>(
-        0, 0, 0, 0, 0, 0, SHOULDER_KP, SHOULDER_KI, SHOULDER_KD);
+        666664, 0, 0, 666664, 0, 3, SHOULDER_KP, SHOULDER_KI, SHOULDER_KD);
     motors[MOTOR_ID_ELBOW] = std::make_shared<LinearActuator>(
-        0, 0, 0, 0, 0, 0, ELBOW_KP, ELBOW_KI, ELBOW_KD);
-    motors[MOTOR_ID_CLAW_ROLL] = std::make_shared<Stepper>(0, 0, 0);
-    motors[MOTOR_ID_CLAW_PITCH] = std::make_shared<Stepper>(0, 0, 0);
-    motors[MOTOR_ID_CLAW_OPEN] = std::make_shared<RCServo>(0, 0, 0);
+        666664, 0, 1, 666664, 0, 4, ELBOW_KP, ELBOW_KI, ELBOW_KD);
+    motors[MOTOR_ID_CLAW_ROLL] = stepper1;
+    motors[MOTOR_ID_CLAW_PITCH] = stepper2;
+    motors[MOTOR_ID_CLAW_OPEN]
+        = std::make_shared<RCServo>(666663, 0, 2, -124234, 234235);
+
+    mrMoraleAndTheBigSteppers
+        = std::make_shared<DifferentialClaw>(stepper1, stepper2);
 }
 
 ArmHardware::~ArmHardware() {
@@ -40,32 +47,23 @@ ArmHardware::~ArmHardware() {
 void ArmHardware::setJointAngle(MotorID joint, float angle) {
     switch (joint) {
     case MotorID::MOTOR_ID_BASE:
+        motors[joint]->setTargetPosition(angle);
+        break;
     case MotorID::MOTOR_ID_SHOULDER:
     case MotorID::MOTOR_ID_ELBOW:
+        motors[joint]->setTargetPosition(angle);
+        break;
     case MotorID::MOTOR_ID_CLAW_OPEN:
         motors[joint]->setTargetPosition(angle);
         break;
 
     case MotorID::MOTOR_ID_CLAW_ROLL:
-        while (clawInUse) {
-            usleep(0.001);
-        }
-
-        clawInUse = true;
-
         // Actuate Claw
-        motors[joint]->setTargetPosition(angle);
+        mrMoraleAndTheBigSteppers->setTargetPitch(angle);
         break;
 
     case MotorID::MOTOR_ID_CLAW_PITCH:
-        while (clawInUse) {
-            usleep(0.001);
-        }
-
-        clawInUse = true;
-
-        // Actuate Claw
-        motors[joint]->setTargetPosition(angle);
+        mrMoraleAndTheBigSteppers->setTargetRoll(angle);
         break;
     default:
         break;
@@ -75,13 +73,22 @@ void ArmHardware::setJointAngle(MotorID joint, float angle) {
 float ArmHardware::getJointAngle(MotorID joint) {
     switch (joint) {
     case MotorID::MOTOR_ID_BASE:
+        return motors[joint]->getCurrentPosition();
     case MotorID::MOTOR_ID_SHOULDER:
     case MotorID::MOTOR_ID_ELBOW:
-    case MotorID::MOTOR_ID_CLAW_OPEN:
-    case MotorID::MOTOR_ID_CLAW_ROLL:
-    case MotorID::MOTOR_ID_CLAW_PITCH:
         return motors[joint]->getCurrentPosition();
+    case MotorID::MOTOR_ID_CLAW_OPEN:
+        return motors[joint]->getCurrentPosition();
+    case MotorID::MOTOR_ID_CLAW_ROLL:
+        return mrMoraleAndTheBigSteppers->getCurrentPitch();
+    case MotorID::MOTOR_ID_CLAW_PITCH:
+        return mrMoraleAndTheBigSteppers->getCurrentRoll();
     default:
         return 0;
     }
 }
+
+void ArmHardware::setZero() {
+    motors[MOTOR_ID_BASE]->setZeroPosition();
+    mrMoraleAndTheBigSteppers->setZero();
+};

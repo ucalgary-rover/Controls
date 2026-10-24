@@ -17,10 +17,10 @@
 // Generic message format for default constructor
 
 // Allows for different message formats
-using MessagePayload
-    = std::variant<Generic, MotorState, SciToolDoorMessage,
-                   SciToolHeightMessage, SciToolBrushMessage,
-                   CameraServoMessage, HeadlightMessage, DriveZeroMessage>;
+using MessagePayload = std::variant<Generic, MotorState, SciToolDoorMessage,
+                                    SciToolHeightMessage, SciToolBrushMessage,
+                                    CameraServoMessage, HeadlightMessage,
+                                    DriveZeroMessage, ArmZeroMessage>;
 
 class Message {
 public:
@@ -72,7 +72,8 @@ public:
      * @return
      *  Message - The deserialized Message object
      */
-    static Message deserialize(const std::vector<std::byte> data, size_t size);
+    static bool deserialize(const std::vector<std::byte> data, size_t size,
+                            Message& out);
 
 private:
     MessageFormat m_format;

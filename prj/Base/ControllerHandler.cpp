@@ -186,8 +186,8 @@ void ControllerHandler::buttonResponse(uint8_t buttonID, int controllerID) {
         return;
     }
 
-    Logging::logI(file, "ControllerID: %d", controllerID);
-    Logging::logI(file, "VectorIndex: %d", index);
+    Logging::logV(file, "ControllerID: %d", controllerID);
+    Logging::logV(file, "VectorIndex: %d", index);
 
     controllers[index].buttonUpdate(buttonID);
 }
@@ -258,6 +258,16 @@ void ControllerHandler::controllerRemovedResponse(int controllerID) {
             for (int j = 0; j < 4; j++) {
                 stickResponse(0, j, controllerID);
             };
+
+            //releases triggers
+            GameControllerAxis leftTrigger = covert_stl_axis_to_game_controller(
+                SDL_CONTROLLER_AXIS_TRIGGERLEFT);
+            GameControllerAxis rightTrigger
+                = covert_stl_axis_to_game_controller(
+                    SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+
+            triggerResponse(INT16_MIN, leftTrigger, controllerID);
+            triggerResponse(INT16_MIN, rightTrigger, controllerID);
 
             controllerAssignment[i] = -1;
 
@@ -392,8 +402,12 @@ void ControllerHandler::eventLoop() {
                 switch (button) {
 
                 case SDL_CONTROLLER_BUTTON_START:
-                    Logging::logI(file, "Switch from controllerID %d",
-                                  event.cdevice.which);
+                    int activeControllerIndex
+                        = vectorIndexFromID(event.cdevice.which);
+                    Logging::logI(file, "Switch from %s",
+                                  controllers[activeControllerIndex]
+                                      .getLayoutName()
+                                      .c_str());
 
                     // switching logic here
                     vectorIndexHolder = controllerAssignment[0];

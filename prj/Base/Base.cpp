@@ -1,5 +1,5 @@
 // Schulich Space Program Controls Software Division (2025)
-// Written by Gavin Grubert
+// Written by Controls Software Team
 
 #include "Base.h"
 
@@ -44,7 +44,8 @@ void Base::initialize() {
         driveProcessor, sendHeadlightsMessage, sendZeroMessage,
         sendCameraServoMessage));
 #if EXTENSION == EXTENSION_TYPE_ARM
-    controllers.push_back(std::make_shared<ArmControllerLayout>(armProcessor));
+    controllers.push_back(std::make_shared<ArmControllerLayout>(
+        armProcessor, sendArmZeroMessage));
 #elif EXTENSION == EXTENSION_TYPE_SCI_TOOL
     controllers.push_back(
         std::make_shared<SciToolControllerLayout>(sendSciToolMessage));
@@ -62,7 +63,10 @@ void Base::quit() { exitLoop = true; }
 void Base::receive(UDPHandler& receiver) {
     while (true) {
         Message reply = receiver.receive();
+
+#if ROVER_STATUS_LOGS_ENABLED
         reply.printMessage(); // Print the received message
+#endif
 
         MotorState newState = std::get<MotorState>(reply.getPayload());
 
@@ -73,7 +77,7 @@ void Base::receive(UDPHandler& receiver) {
 
 void Base::start() {
     Logging::logI(file, "Starting Base");
-    UDPHandler server(BASE_PORT, ROVER_PORT);
+    UDPHandler server(BASE_PORT, ROVER_PORT, ROVER_IP);
 
 #if MQTT_ENABLED
     // MQTT setup: load config and connect the (singleton) publisher.
@@ -127,6 +131,13 @@ void Base::sendZeroMessage(int setVal) {
     sendQueue->push(message);
 
     Logging::logV(file, "zeroMessage queued. Set");
+}
+
+void Base::sendArmZeroMessage(int setVal) {
+    Message message(ArmZeroMessage {});
+    sendQueue->push(message);
+
+    Logging::logV(file, "armZeroMessage queued. Set");
 }
 
 void Base::sendHeadlightsMessage(int brightnessVal) {

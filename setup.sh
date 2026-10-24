@@ -25,6 +25,18 @@ sudo apt install -y curl cmake make
 echo "Finished installing curl, cmake, & make..."
 
 curl -fsSL https://www.phidgets.com/downloads/setup_linux | sudo -E bash -
-sudo apt install -y g++ libboost-all-dev libphidget22 libphidget22-dev libsdl2-dev libjsoncpp-dev 
+
+echo "Installing project dependencies..."
+sudo apt install -y \
+    g++ \
+    libboost-all-dev \
+    libphidget22 \
+    libphidget22-dev \
+    libsdl2-dev \
+    libjsoncpp-dev \
+    libpaho-mqttpp-dev \
+    libpaho-mqtt-dev
+
+echo "Finished installing project dependencies..."
 
 echo "Have a nice day :)"

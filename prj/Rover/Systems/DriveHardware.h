@@ -53,7 +53,6 @@ public:
 private:
     std::vector<PhidgetBLDCMotorHandle> m_handlesDC = {};
     std::vector<PhidgetStepperHandle> m_handlesStepper = {};
-    std::vector<PhidgetEncoderHandle> m_handlesDriveEncoder = {};
 
     /**
      * @brief Edits retVal to contain the motor type (in this case DC) and the
@@ -76,15 +75,4 @@ private:
      * @return True is successful, false otherwise.
      */
     bool getDriveStepperHandle(MotorHandlerReturn* retVal, int index);
-
-    /**
-     * @brief Edits retVal to contain the motor type (in this case encoder
-     * and the phidgets handler for that motor.
-     * @param retVal Pointer to a stuct that will get updated with the motor
-     * handler and motor type.
-     * @param index Valid value from DriveMotorIndex to specify what wheel you
-     * want the encoder handler for.
-     * @return True is successful, false otherwise.
-     */
-    bool getDriveEncoderHandle(MotorHandlerReturn* retVal, int index);
 };

@@ -11,3 +11,5 @@ void MockArm::setJointAngle(MotorID joint, float value) {
 }
 
 float MockArm::getJointAngle(MotorID joint) { return joints[joint]; }
+
+void MockArm::setZero() { };

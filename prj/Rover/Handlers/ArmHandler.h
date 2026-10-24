@@ -15,6 +15,7 @@ public:
     ~ArmHandler() { };
 
     void start() override;
+    void setZero();
 
     // Don't know how to do this yet
     // /**

@@ -23,13 +23,23 @@
 #define EXTENTION EXTENTION_TYPE_ARM
 #define LOGGING_LEVEL LOG_LEVEL_VERBOSE
 
+// Module Logs
+#define ARM_LOGS_ENABLED true
+#define DRIVE_LOGS_ENABLED false
+#define ROVER_STATUS_LOGS_ENABLED false
+
 // Hardware Enabled
-#define ARM_HARDWARE_TEST true
+#define ARM_HARDWARE_TEST false
 #define SCI_TOOL_HARDWARE_TEST true
-#define DRIVE_HARDWARE_TEST false
+#define DRIVE_HARDWARE_TEST true
 
 // MQTT
 #define MQTT_ENABLED false
+
+// Headlights
+#define HEADLIGHTS_ENABLED false
+
+#define DISABLE_DRIVE_SPEED false
 
 // System Update Rates
 #define ARM_UPDATE_INTERVAL_US 50 * 1000   // 50ms
@@ -54,8 +64,8 @@
 #define STATIC_DEADZONE 5000
 
 // Allow inaccuracy in sensor data for drive systems to still be parsed correctly
-#define DRIVE_THRESHOLD 0.1 // TODO: configure
-#define STEER_THRESHOLD 1.0 // TODO: configure
+#define DRIVE_THRESHOLD 0.1  // TODO: configure
+#define STEER_THRESHOLD 10.0 // TODO: configure
 
 // Teporary value, must be swaped to actual ID
 #define HEADLIGHT_ARDUINO                                                      \
@@ -67,13 +77,10 @@
 // DriveMotorIndex in pub_rover.cpp -> FL, FR, BL, BR
 const int DRIVE_DC_SERIAL_NUMBER[4] = { 697178, 620000, 697178, 620000 };
 const int DRIVE_DC_CHANNEL[4] = { 0, 0, 0, 0 };
-const int DRIVE_DC_PORT[4] = { 3, 3, 1, 0 };
+const int DRIVE_DC_PORT[4] = { 3, 0, 1, 3 };
 const int DRIVE_STEPPER_SERIAL_NUMBER[4] = { 697178, 620000, 697178, 620000 };
 const int DRIVE_STEPPER_CHANNEL[4] = { 0, 0, 0, 0 };
 const int DRIVE_STEPPER_PORT[4] = { 4, 5, 0, 2 };
-const int DRIVE_ENCODER_SERIAL_NUMBER[4] = { 697178, 697178, 697270, 697270 };
-const int DRIVE_ENCODER_CHANNEL[4] = { 0, 0, 0, 0 };
-const int DRIVE_ENCODER_PORT[4] = { 3, 0, 3, 0 };
 
 const int ARM_MOTOR_SERIAL_NUMBER[6] = { 1000, 1000, 1000, 1000, 1000, 1000 };
 const int ARM_MOTOR_CHANNEL[6] = { 0, 0, 0, 0, 0, 0 };
@@ -96,7 +103,18 @@ const int SCI_TOOL_DC_LIFT_CHANNEL = 0;
 const int SCI_TOOL_DC_LIFT_PORT = 0;
 
 // UDP Definitions
+#define REMOTE_CONNECTION false
+
+#if REMOTE_CONNECTION == true
+#define BASE_IP "192.168.1.50"
+#define ROVER_IP "192.168.1.100"
+const int ROVER_PORT = 5995; // For on the Nuc: 5995
+const int BASE_PORT = 8008;
+#else
+#define BASE_IP "127.0.0.1"
+#define ROVER_IP "127.0.0.1"
 const int ROVER_PORT = 8080; // For on the Nuc: 5995
 const int BASE_PORT = 8008;
+#endif
 
 #endif // MISSION_CONTROL_H

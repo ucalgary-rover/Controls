@@ -19,6 +19,7 @@ public:
      */
     void setJointAngle(MotorID joint, float angle) override;
     float getJointAngle(MotorID joint) override;
+    void setZero() override;
 
 private:
     float joints[MotorID::MOTOR_ID_END] = {};

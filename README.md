@@ -51,22 +51,3 @@ git config commit.template .gitmessage
 
 "make" is required to run the make file to simplefy compelation of the program. These instructions include installing choco, as its is one way to install make in a simple manor
 
-## Installing choco
-
-Run the following command in a Admin PowerShell terminal
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-```
-Close all terminals to make sure the new ones are able to run choco. if done successfully, running:
-```bash
-choco
-```
-should give the version
-
-## Installing "make"
-
-In any terminal, run
-
-```bash
-choco install make
-```

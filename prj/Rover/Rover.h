@@ -49,8 +49,10 @@ private:
     static std::shared_ptr<DriveHandler> driveHandler;
     static void initializeDrive();
 
+#if HEADLIGHTS_ENABLED
     inline static auto headlightQueue = std::make_shared<HeadlightQueue>(
         5); // Headlight commands may come sequentially but should be fast
     static std::shared_ptr<HeadlightHandler> headlightHandler;
     static void initializeHeadlights();
+#endif
 };

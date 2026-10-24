@@ -9,10 +9,12 @@
 
 class ArmManualControllerLayout : public ControllerLayout {
 public:
-    ArmManualControllerLayout(std::shared_ptr<ArmProcessor> armProcessor) :
+    ArmManualControllerLayout(std::shared_ptr<ArmProcessor> armProcessor,
+                              messageFunc sendStepperZeroMessage) :
         ControllerLayout("ArmManualController") {
 
         this->armProcessor = armProcessor;
+        this->sendStepperZeroMessage = sendStepperZeroMessage;
 
         // Initialize Layout API
         // clang-format off
@@ -24,6 +26,8 @@ public:
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, incrementJointValueOnce);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_LEFT, decrementJointOnce);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, incrementJointOnce);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_DPAD_DOWN, setStepperZero);
+
         // clang-format off
     }
 
@@ -35,6 +39,7 @@ public:
 
 private:
     std::shared_ptr<ArmProcessor> armProcessor;
+    messageFunc sendStepperZeroMessage;
 
     int lastleftTriggerValue = 0;
     int lastrightTriggerValue = 0;
@@ -43,13 +48,16 @@ private:
     MotorID joint = MOTOR_ID_BASE;
 
     // helper functions
-    void triggerToDeltaJointValue(int triggerVal);
-
     void incrementJoint(int change);
 
     void incrementJointValue(int increment);
 
     // Button Callbacks
+    void setStepperZero(uint8_t buttonID) {
+        armProcessor->setJointSpaceState(ArmMotorState{});
+    
+        sendStepperZeroMessage(1);
+    };
     void setMin(uint8_t buttonID);
     void setMax(uint8_t buttonID);
     void printLimits(uint8_t buttonID);

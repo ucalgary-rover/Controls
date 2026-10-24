@@ -16,6 +16,8 @@ public:
                     PhidgetEncoderHandle* encoderHandle, float Kp, float Ki,
                     float Kd);
 
+    JointControlPID();
+
     void setAngle(float angle);
     float getAngle();
 
@@ -23,6 +25,7 @@ public:
 
 private:
     bool m_hasStarted = false;
+    bool m_isInitiated = false;
 
     MotorHandlerReturn m_motorHandle;
     PhidgetEncoderHandle* m_encoderHandle;
@@ -30,14 +33,14 @@ private:
     float m_Ki;
     float m_Kd;
 
-    std::atomic<double> m_targetAngle;
-    std::atomic<double> m_currentAngle;
+    std::atomic<double> m_targetAngle { 0.0 };
+    std::atomic<double> m_currentAngle { 0.0 };
 
     double m_errorIntegral = 0;
     double m_previousError = 0;
 
-    double m_maxSpeed = 0.0;
-    uint32_t m_dataInterval;
+    double m_maxSpeed = 1.0;
+    uint32_t m_dataInterval = 1000;
 
     inline static auto processes
         = std::vector<std::thread>(); // Track instantiated processes

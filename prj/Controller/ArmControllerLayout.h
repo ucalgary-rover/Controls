@@ -14,17 +14,19 @@ enum ArmLayout {
 
 class ArmControllerLayout : public ControllerLayout {
 public:
-    ArmControllerLayout(std::shared_ptr<ArmProcessor> armProcessor) :
+    ArmControllerLayout(std::shared_ptr<ArmProcessor> armProcessor,
+                        messageFunc sendStepperZeroMessage) :
         ControllerLayout("ArmController") {
 
         layouts[ARM_IK] = std::make_shared<ArmIKControllerLayout>(armProcessor);
-        layouts[ARM_MANUAL]
-            = std::make_shared<ArmManualControllerLayout>(armProcessor);
+        layouts[ARM_MANUAL] = std::make_shared<ArmManualControllerLayout>(
+            armProcessor, sendStepperZeroMessage);
 
         // Initialize button callbacks
         // clang-format off
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_X, switchLayoutIK);
         REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_Y, switchLayoutManual);
+        REGISTER_BUTTON(buttonCallbacks, SDL_CONTROLLER_BUTTON_START, logActive);
         // clang-format on
     }
 
@@ -42,7 +44,7 @@ public:
 
 private:
     ArmLayout currentLayout = ArmLayout::ARM_IK;
-    std::shared_ptr<ControllerLayout> layouts[3];
+    std::shared_ptr<ControllerLayout> layouts[2];
 
     // helper function
     void switchLayout(ArmLayout layout);
@@ -50,4 +52,8 @@ private:
     // button callbacks
     void switchLayoutManual(uint8_t buttonID) { switchLayout(ARM_MANUAL); }
     void switchLayoutIK(uint8_t buttonID) { switchLayout(ARM_IK); }
+
+    void logActive(uint8_t buttonID) {
+        Logging::logI(getName().c_str(), "Active");
+    }
 };

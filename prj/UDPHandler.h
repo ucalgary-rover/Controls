@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <iostream>
 #include <memory>
+#include <string>
 
 #define RECEIVE_BUFFER_SIZE 100
 
@@ -21,7 +22,8 @@ public:
      * Example Usage:
      *   UDPReceiver client(8080, 8008);
      */
-    UDPHandler(unsigned short myPort, unsigned short theirPort);
+    UDPHandler(unsigned short myPort, unsigned short theirPort,
+               std::string theirIP);
 
     /** Prepares the UDP handler
      *

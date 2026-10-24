@@ -22,4 +22,7 @@ void setAddressProperties(T* handler, int serialNum, int channel, int hubPort) {
     res = Phidget_setOnAttachHandler((PhidgetHandle)*handler, onAttachHandler,
                                      NULL);
     res = Phidget_openWaitForAttachment((PhidgetHandle)*handler, 5000);
+    Logging::logI("setAddressProperties",
+                  "serialNum: %d channel %d: hubPort %d res: %d", serialNum,
+                  channel, hubPort, res);
 };
