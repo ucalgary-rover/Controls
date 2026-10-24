@@ -146,9 +146,7 @@ ArmMotorState
 ArmProcessor::armInverseKinematics(const ArmStateCylindrical& armState) const {
     ArmMotorState armMotorState;
     if (!ArmModelCylindrical::inverseKinematics(armState, armMotorState)) {
-#if ARM_LOGS_ENABLED
         Logging::logI(file, "Inverse Kinematics Failed");
-#endif
         armMotorState = state.jointSpaceState;
     }
 
@@ -159,9 +157,7 @@ ArmStateCylindrical
 ArmProcessor::armForwardsKinematics(const ArmMotorState& armMotorState) const {
     ArmStateCylindrical armState;
     if (!ArmModelCylindrical::forwardsKinematics(armMotorState, armState)) {
-#if ARM_LOGS_ENABLED
         Logging::logI(file, "Forwards Kinematics Failed");
-#endif
         armState = state.taskSpaceState;
     }
 
@@ -245,7 +241,7 @@ void ArmProcessor::handleChanges() {
     }
 
     if (stateChanged) {
-#if ARM_LOGS_ENABLED
+
         Logging::logI(
             file, "theta: %.2f r: %.2f z: %.2f pitch: %d roll: %d clawOpen: %d",
             state.taskSpaceState.theta, state.taskSpaceState.r,
@@ -255,7 +251,6 @@ void ArmProcessor::handleChanges() {
         auto& vals = state.jointSpaceState.motorValues;
         Logging::logI(file, "motors: %d %d %d %d %d %d", vals[0], vals[1],
                       vals[2], vals[3], vals[4], vals[5]);
-#endif
     }
 
     changesMade = false;

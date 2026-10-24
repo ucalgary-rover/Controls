@@ -36,7 +36,7 @@ CMPL_PHIDETS = -lphidget22
 CMPL_JSON = -ljsoncpp
 CMPL_PTHREAD = -lpthread
 CMPL_IK = -I$(IK_root)/include
-CMPL_MQTT = -L/usr/local/lib -Wl,-rpath,/usr/local/lib #-lpaho-mqttpp3 -lpaho-mqtt3a
+CMPL_MQTT = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lpaho-mqttpp3 -lpaho-mqtt3a
 
 NULL_DEVICE := $(if $(filter Windows_NT,$(OS)),NUL,/dev/null)
 
@@ -47,7 +47,7 @@ run_test:
 
 controller_test:
 > g++ $(CPP_STD) $(CMPL_SDL) test/controllerTest.cpp -o out/ControllerTest
-> ./ControllerTest
+> ./out/ControllerTest
 
 build_dir:
 > mkdir -p out
@@ -60,10 +60,10 @@ rover: build_dir
 > g++ $(CPP_STD) -DSIDE_TO_BUILD=2 -I"prj" $(CMPL_IK) $(ROVER_SRC_FILES) $(ROVER_INC_FILES) $(CMPL_BOOST) $(CMPL_SDL) $(CMPL_PHIDETS) $(CMPL_JSON) $(CMPL_PTHREAD) -o out/rover
 
 run_base: base
-> ./base 
+> ./out/base 
 
 run_rover: rover
-> ./rover 
+> ./out/rover 
 
 clean:
 > rm -f out/ -r

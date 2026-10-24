@@ -1,5 +1,5 @@
 // Schulich Space Program Controls Software Division (2025)
-// Written by Gavin Grubert
+// Written by Controls Software Team
 
 #include "Base.h"
 
