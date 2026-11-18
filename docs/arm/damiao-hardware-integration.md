@@ -10,8 +10,10 @@ Rover computer USB -> USB-to-CAN adapter -> CAN_H/CAN_L bus -> arm motors
                                       -> separate motor power wiring
 ```
 
-Use one 1 Mb/s classic-CAN bus initially. Assign every motor a unique command
-ID (`ESC_ID`) and feedback ID (`MST_ID`), and fit 120 ohm termination at both
+Use one 1 Mb/s classic-CAN bus initially. This is the common protocol among
+the selected shoulder, elbow, and wrist motors even though the shoulder motor
+also advertises CAN-FD capability. Assign every motor a unique command ID
+(`ESC_ID`) and feedback ID (`MST_ID`), and fit 120 ohm termination at both
 physical ends of the bus. The rover computer's USB port provides the data
 connection only; motor power still comes from the rover's motor power system.
 
@@ -28,6 +30,35 @@ Both methods need the same USB-to-CAN adapter. The Technoculture C++ SDK is a
 possible third option, but only with a serial USB-CAN bridge that implements
 its adapter-specific 30-byte frame format. It is not a drop-in driver for a
 generic SocketCAN, SLCAN, or CANable device.
+
+## Selected motor set
+
+The currently documented joints are:
+
+| Joint | Listed motor | Relevant interface | OpenArm C++ preset |
+| --- | --- | --- | --- |
+| Shoulder | `DM-J10422P` | CAN standard frames; default 1 Mb/s. Hardware supports CAN-FD up to 5 Mb/s. | No matching preset |
+| Elbow | `DM-J10010L` | Standard CAN, 1 Mb/s | `DM10010L` |
+| Wrist | `DM-J4340P` | Standard CAN, 1 Mb/s | No separate P entry; `DM4340` is the closest available preset |
+
+The trailing suffix, encoder option, firmware revision, and voltage version
+must be recorded from the physical nameplate/configuration tool. For example,
+the references inspected for this note describe `-2EC` CAN motors with dual
+encoders, but the shortened names in the task list do not distinguish `-1EC`
+from `-2EC` or a 24 V from a 48 V `DM-J4340P`.
+
+For the shared bus, configure all motors to classic CAN at 1 Mb/s. CAN-FD is
+not useful until every motor on that bus and the adapter support it, and the
+documented 8-byte Damiao command protocol does not require FD. The shoulder's
+5 Mb/s capability should not cause the entire mixed bus to be run at 5 Mb/s.
+
+The motors are not guaranteed to accept a common supply voltage merely because
+they share CAN. The inspected `DM-J10422P` reference is rated for 48 V;
+`DM-J10010L` is listed as supporting 24-48 V; `DM-J4340P` has separate 24 V
+and 48 V variants. Confirm the exact wrist variant before committing to a
+single high-current 48 V rail. A 24 V wrist must receive an appropriate
+converter and branch protection rather than being connected directly to a
+48 V shoulder/elbow supply.
 
 ## Protocol constraints that affect the design
 
@@ -47,14 +78,13 @@ velocity, torque, MOS temperature, and rotor temperature. Register requests
 use ID `0x7FF`, including reading and writing `ESC_ID`, `MST_ID`, control
 mode, bitrate, limits, and timeout settings.
 
-For a four-motor arm, example assignments could be:
+For the current three-motor arm, example assignments could be:
 
 | Motor | `ESC_ID` | `MST_ID` |
 | --- | --- | --- |
-| base | `0x01` | `0x11` |
-| shoulder | `0x02` | `0x12` |
-| elbow | `0x03` | `0x13` |
-| wrist | `0x04` | `0x14` |
+| shoulder | `0x01` | `0x11` |
+| elbow | `0x02` | `0x12` |
+| wrist | `0x03` | `0x13` |
 
 These IDs are configuration choices, not the IDs currently stored in
 unopened motors. Verify all IDs one motor at a time before connecting several
@@ -127,12 +157,14 @@ compatibility; both expose the same `can0` abstraction.
   A configured Damiao communication timeout provides an additional hardware
   safeguard.
 
-For a first four-motor build, one USB-to-CAN channel is sufficient at 1 Mb/s:
-each 8-byte command/feedback pair is small compared with available bus
-bandwidth. Multiple CAN channels are an optimization for fault isolation or
-different arm/control groups, not a prerequisite. If bench testing shows
-latency, queueing, or wiring-fault isolation problems, use a two-channel
-isolated adapter or two independent adapters.
+For the current three-motor build, one USB-to-CAN channel is sufficient at
+1 Mb/s: each 8-byte command/feedback pair is small compared with available bus
+bandwidth. A fourth motor can be added later without needing another channel,
+provided the total control rate remains within the measured bus margin.
+Multiple CAN channels are an optimization for fault isolation or different
+arm/control groups, not a prerequisite. If bench testing shows latency,
+queueing, or wiring-fault isolation problems, use a two-channel isolated
+adapter or two independent adapters.
 
 ## Software method 1: OpenArm CAN over SocketCAN
 
@@ -179,10 +211,13 @@ The new adapter would own:
 ### Limitations
 
 The OpenArm source currently has presets for a fixed list of Damiao motor
-models. Before adoption, confirm that the actual selected arm motors are in
-that list or add correct `PMAX`/`VMAX`/`TMAX` values after checking the
-individual motor datasheet and firmware. It is unsafe to substitute
-parameters from a different model.
+models. It has a `DM10010L` entry for the elbow, but not an entry for
+`DM-J10422P`. It has `DM4340`, while the wrist is a `DM-J4340P`; the published
+protocol defaults currently show the same `PMAX`/`VMAX`/`TMAX` values for 4340
+and 4340P, but the exact motor-register values still need to be read and
+matched before command. The shoulder requires a custom motor type table entry
+using its real registers and datasheet/firmware values. It is unsafe to
+substitute parameters from a different model.
 
 The Python bindings in OpenArm are explicitly experimental. Controls should
 use the C++ library.
@@ -290,21 +325,25 @@ CANable in serial mode, or SLCAN adapter should not be assumed compatible.
    isolated, that is tested at 1 Mb/s and has reliable termination/control
    wiring. Keep a second unit as the bring-up spare or use the second interface
    if the final arm is split across buses.
-2. Put the first motor on a bench power supply with a current limit, emergency
+2. Record each physical motor's full suffix, 24/48 V variant, serial number,
+   firmware revision, `ESC_ID`, `MST_ID`, and registers 21-23 (`PMAX`,
+   `VMAX`, `TMAX`). Resolve the shoulder's unsupported OpenArm preset before
+   issuing MIT commands.
+3. Put the first motor on a bench power supply with a current limit, emergency
    stop, and the bus terminated at both ends.
-3. Run `candump can0` and `openarm-can-cli discover`/`monitor` to verify the
+4. Run `candump can0` and `openarm-can-cli discover`/`monitor` to verify the
    motor's model, command ID, feedback ID, control mode, bitrate, and feedback
    health before integrating with the rover.
-4. Confirm the selected Damiao motor model limits from its datasheet and
+5. Confirm the selected Damiao motor model limits from its datasheet and
    compare them with the OpenArm model table. Never drive from guessed torque
    or position ranges.
-5. Implement the smallest SocketCAN/OpenArm-backed adapter against the current
+6. Implement the smallest SocketCAN/OpenArm-backed adapter against the current
    arm motor interface and prove one axis first.
-6. Run all four motors on the bench at reduced gains and velocity/torque
+7. Run all three known motors on the bench at reduced gains and velocity/torque
    limits. Verify shutdown at the configured feedback watchdog interval,
    plus safe handling of USB unplug, bus-off, and process restart without
    motion.
-7. After the adapter works, decide between retaining OpenArm or replacing
+8. After the adapter works, decide between retaining OpenArm or replacing
    only its internal transport/protocol layer with the in-repository driver.
    Keeping SocketCAN as the boundary makes either choice possible without
    changing hardware.
@@ -316,4 +355,7 @@ CANable in serial mode, or SLCAN adapter should not be assumed compatible.
 - [Technoculture Damiao C++ SDK](https://github.com/Technoculture/Damiao-Cpp-SDK)
 - [OpenArm CAN library](https://github.com/enactic/openarm_can)
 - [OpenArm CAN documentation](https://docs.openarm.dev/software/can/)
+- [DM-J10422P-2EC V1.1 manual](https://wiki.aifitlab.com/damiao-docs/dm-j10422p-2ec-v11-motor-instruction-manual)
+- [DM-J10010L-2EC V1.1 manual](https://wiki.aifitlab.com/damiao-docs/dm-j10010l-2ec-v11-motor-instruction-manual)
+- [DM-J4340P-2EC V1.1 manual](https://wiki.aifitlab.com/damiao-docs/dm-j4340p-2ec-v11-motor-instruction-manual)
 
