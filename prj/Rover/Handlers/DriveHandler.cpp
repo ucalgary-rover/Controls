@@ -144,7 +144,12 @@ void DriveHandler::translateSpeedAndAngle(
                     desiredState->drive[wheelIndex] = speed;
                 }
             }
-        } else { // DRIVE_INDEX_FRONT_RIGHT/DRIVE_INDEX_BACK_RIGHT (mounted to m_drive bkwds)
+
+        }
+
+        else { // DRIVE_INDEX_FRONT_RIGHT/DRIVE_INDEX_BACK_RIGHT (mounted to m_drive bkwds)
+            if ((wheelIndex == DRIVE_INDEX_BACK_RIGHT)) { }
+
             if (angle <= 90) { // Wheel should be backwards
                 desiredState->drive[wheelIndex] = -speed;
             } else if (angle <= 180) { // Wheel should be forwards
@@ -155,6 +160,20 @@ void DriveHandler::translateSpeedAndAngle(
                 desiredState->steer[wheelIndex] = -360 + angle;
                 desiredState->drive[wheelIndex] = -speed;
             }
+        }
+
+        // Special cases for the front left wheel and the right back wheel
+        // Both wheels must be at -90
+        // the speed must be flipped
+        // 90 and 270 are both strafing angles after convertions the 270 may become a 90 so we need to address this here
+        if ((wheelIndex == DRIVE_INDEX_FRONT_LEFT
+             || wheelIndex == DRIVE_INDEX_BACK_RIGHT)
+            && (angle == 90 || angle == 270)) {
+            desiredState->steer[wheelIndex]
+                = -90; // convert the angle to -90 for both wheels
+            desiredState->drive[wheelIndex]
+                = -desiredState->drive
+                       [wheelIndex]; // flip the speed as we make a 180 degree change.
         }
 
         //apply offset from the zeroState
