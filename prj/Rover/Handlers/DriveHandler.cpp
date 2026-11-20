@@ -148,7 +148,6 @@ void DriveHandler::translateSpeedAndAngle(
         }
 
         else { // DRIVE_INDEX_FRONT_RIGHT/DRIVE_INDEX_BACK_RIGHT (mounted to m_drive bkwds)
-            if ((wheelIndex == DRIVE_INDEX_BACK_RIGHT)) { }
 
             if (angle <= 90) { // Wheel should be backwards
                 desiredState->drive[wheelIndex] = -speed;

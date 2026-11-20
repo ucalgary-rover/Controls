@@ -47,7 +47,3 @@ git config commit.template .gitmessage
 ```
 
 
-# Setting up "make"
-
-"make" is required to run the make file to simplefy compelation of the program. These instructions include installing choco, as its is one way to install make in a simple manor
-
