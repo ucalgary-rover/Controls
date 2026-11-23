@@ -306,39 +306,26 @@ DriveModel::calculateMotorState(const DriveState& state,
     // STRAFE
     // =====================
     if (!hasAngularVelocity && hasLinearVelocity) {
-        float wheelAngle = 0;
-        float direction = 1;
 
-        int currentHeading = calculateCurrentHeading(currentMotorState);
-        bool closerToLeft = inLeftHemisphere(currentHeading);
-        if (strafeLeft) {
-            if (closerToLeft) {
-                // Set Speeds Positive
-                wheelAngle = 90;
-                direction = 1;
-            } else {
-                // Set Speeds Negative
-                wheelAngle = 270;
-                direction = -1;
-            }
-        } else {
-            if (!closerToLeft) {
-                // Set Speeds Positive
-                wheelAngle = 270;
-                direction = 1;
-            } else {
-                // Set Speeds Negative
-                wheelAngle = 90;
-                direction = -1;
-            }
-        }
+        // hard coded strafe angles which depend on the wheel number
+        const float strafeAngles[DRIVE_INDEX_WHEEL_COUNT]
+            = { -90, 90, 90, -90 };
+        float direction
+            = strafeLeft
+                  ? 1
+                  : -1; // set direction according to which way we want to straft
+        // straft left is positive while right is negative
+        // flip the speed if we are going opposite to where the angle to pointing
 
         float speed
             = (float)state.speed / 100.0f * direction * STRAFE_SPEED_MAX;
 
         for (int i = 0; i < DRIVE_INDEX_WHEEL_COUNT; i++) {
-            ms.steer[i] = wheelAngle;
+            ms.steer[i] = strafeAngles[i];
             ms.drive[i] = speed;
+            if (i == DRIVE_INDEX_FRONT_LEFT || i == DRIVE_INDEX_BACK_RIGHT) {
+                ms.drive[i] = -ms.drive[i];
+            }
         }
 
         *desiredDriveStateType = DRIVE_STATE_TYPE_STRAFE;

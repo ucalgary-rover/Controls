@@ -46,3 +46,4 @@ git commit template gives a format to fill out when writting a commit message. R
 git config commit.template .gitmessage
 ```
 
+
